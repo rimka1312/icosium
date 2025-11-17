@@ -41,10 +41,13 @@ async function getProducts() {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card'); 
 
-        productCard.innerHTML = `
-            <h3>${product.name}</h3>
-            <p>${product.price} DZD</p>
-        `;
+       productCard.innerHTML = `
+    <img src="${product.image_url}" alt="${product.name}">
+    <div class="product-details">
+        <h3 class="product-name">${product.name}</h3>
+        <p class="product-price">${product.price} DZD</p>
+    </div>
+`;
         
         productsGrid.appendChild(productCard);
     }

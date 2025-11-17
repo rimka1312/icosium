@@ -1,0 +1,73 @@
+/* --- الألوان الأساسية للموقع --- */
+:root {
+    --color-primary: #00bfa5; /* الأزرق المخضر (Bleu-vert) */
+    --color-dark: #212121;     /* الأسود (Noir) */
+    --color-light: #ffffff;    /* الأبيض (Blanc) */
+    --color-grey: #f4f4f4;
+}
+
+/* --- تنسيق الجسم الأساسي --- */
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--color-light);
+    color: var(--color-dark);
+    margin: 0;
+    padding: 20px;
+    direction: rtl; /* للغة العربية */
+}
+
+h1 {
+    text-align: center;
+    color: var(--color-primary);
+}
+
+/* --- شبكة المنتجات (التي طلبتها) --- */
+#products-grid {
+    display: grid;
+    /* إنشاء أعمدة متساوية تتكيف مع حجم الشاشة */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px; /* مسافة بين البطاقات */
+    margin-top: 30px;
+}
+
+/* --- تصميم بطاقة المنتج المربعة (الأهم) --- */
+.product-card {
+    background-color: var(--color-light);
+    border: 1px solid var(--color-grey);
+    border-radius: 8px; /* حواف دائرية بسيطة */
+    overflow: hidden; /* لإخفاء أي شيء يخرج عن الإطار المربع */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* ظل خفيف */
+    
+    /* الحركة (Animation) التي طلبتها */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px); /* تحريك البطاقة للأعلى عند التمرير */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* --- تصميم صورة المنتج --- */
+.product-card img {
+    width: 100%; /* الصورة تملأ عرض البطاقة */
+    height: 250px; /* ارتفاع ثابت لتبدو مربعة */
+    object-fit: cover; /* لضمان عدم تشوه الصورة */
+}
+
+/* --- تنسيق التفاصيل داخل البطاقة --- */
+.product-details {
+    padding: 15px;
+}
+
+.product-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--color-dark);
+    margin: 10px 0;
+}
+
+.product-price {
+    font-size: 1.1rem;
+    color: var(--color-primary); /* السعر باللون المميز */
+    font-weight: bold;
+}
