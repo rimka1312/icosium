@@ -41,11 +41,51 @@ async function getProducts() {
         const productCard = document.createElement('div');
         productCard.classList.add('product-card'); 
 
-       productCard.innerHTML = `
+      // ... (داخل دالة getProducts، داخل حلقة 'for') ...
+
+// --- دوال مساعدة لإنشاء الخيارات ---
+
+// دالة لإنشاء دوائر الألوان
+function createColorOptions(colors) {
+    if (!colors || colors.length === 0) return ''; // إذا لم تكن هناك ألوان، لا ترجع شيئاً
+
+    let colorHtml = '<label class="options-label">الألوان:</label><div class="product-colors">';
+    for (const color of colors) {
+        // نستخدم "style" لوضع اللون مباشرة من قاعدة البيانات
+        colorHtml += `<span class="color-dot" style="background-color: ${color};" title="${color}"></span>`;
+    }
+    colorHtml += '</div>';
+    return colorHtml;
+}
+
+// دالة لإنشاء أزرار المقاسات
+function createSizeOptions(sizes) {
+    if (!sizes || sizes.length === 0) return ''; // إذا لم تكن هناك مقاسات
+
+    let sizeHtml = '<label class="options-label">المقاسات:</label><div class="product-sizes">';
+    for (const size of sizes) {
+        sizeHtml += `<span class="size-box">${size}</span>`;
+    }
+    sizeHtml += '</div>';
+    return sizeHtml;
+}
+
+// --- نهاية الدوال المساعدة ---
+
+
+// ✅ الكود الجديد لـ innerHTML (يستخدم الدوال أعلاه)
+productCard.innerHTML = `
     <img src="${product.image_url}" alt="${product.name}">
     <div class="product-details">
         <h3 class="product-name">${product.name}</h3>
         <p class="product-price">${product.price} DZD</p>
+
+        <div class="product-options">
+            ${createColorOptions(product.colors)}
+            ${createSizeOptions(product.sizes)}
+        </div>
+
+        <button class="add-to-cart-btn">أضف إلى السلة</button>
     </div>
 `;
         
