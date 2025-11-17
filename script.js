@@ -23,7 +23,7 @@ async function getProducts() {
     
     // الخطوة 4: استخدام اسم العميل الجديد "supabaseClient" هنا
     let { data: products, error } = await supabaseClient
-        .from('Products')
+        .from('products')
         .select('*');
 
     if (error) {
