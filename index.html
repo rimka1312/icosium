@@ -4,18 +4,286 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ICOSIUM STORE</title>
-
     <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="light-mode"> <header class="main-header">
+        <div class="header-container">
+            
+           
 
-    <h1>أهلاً بكم في متجر إيكوزيوم</h1>
+            <div class="logo">ICOSIUM</div>
+             <button id="burger-menu-btn" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav class="main-nav" id="main-nav">
+                <span id="close-nav-btn">&times;</span>
+                
+                <a href="#products-section" data-key="nav_home">الرئيسية</a>
+                <a href="#about-section" data-key="nav_about">من نحن</a>
+                <a href="#contact-section" data-key="nav_contact">اتصل بنا</a>
+            </nav>
 
-    <div id="products-grid">
+            <div id="nav-overlay"></div>
+
+            <div class="header-controls">
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="ابحث...">
+                    <button id="search-button"><i class="fas fa-search"></i></button>
+                </div>
+                <select id="language-switcher">
+                    <option value="ar">AR</option> <option value="fr">FR</option>
+                    <option value="en">EN</option>
+                </select>
+                <button id="dark-mode-toggle"><i class="fas fa-moon"></i></button>
+                <button id="cart-button"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></button>
+                <button id="profile-button"><i class="fas fa-user"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="explore-section" class="hero-section">
+            <div class="hero-content">
+                <h1 data-key="hero_title">استكشف مجموعتنا الجديدة</h1>
+                <p data-key="hero_subtitle">أفضل التصاميم العصرية بجودة عالية</p>
+                <button id="scroll-to-products">تسوق الآن</button>
+            </div>
+        </section>
+        <section id="products-section" class="container">
+            <h2 data-key="products_title">منتجاتنا</h2>
+            <div id="categories-filter">
+                <button class="category-btn active" data-category-id="all" data-key="category_all">كل الفئات</button>
+                </div>
+            <div id="products-grid">
+                </div>
+        </section>
+
+       <section id="about-section" class="container">
+            <div class="about-content-wrapper">
+                <h2 data-key="about_title">عن ICOSIUM STORE</h2>
+                
+                <div class="about-story">
+                    <p data-key="about_history_text"></p>
+                </div>
+
+                <hr class="about-divider">
+
+                <div class="about-philosophy">
+                    <h3 data-key="about_why_title">لماذا تختار ICOSIUM</h3>
+                    <p data-key="about_why_text"></p>
+                </div>
+            </div>
+        </section>
+<section id="reviews-section" class="container">
+            <h2 data-key="reviews_title" class="section-title">آراء زبائننا</h2>
+            <button id="open-review-modal-btn" class="add-review-btn" data-key="btn_write_review">أكتب رأيك</button>
+            <div class="reviews-container">
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <h4 data-key="review_1_name">أمين. ب</h4>
+                            <span class="review-date" data-key="review_1_location">الجزائر العاصمة</span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="review-text" data-key="review_1_text">"الجودة ممتازة جداً! القماش مريح والتصميم فريد من نوعه. التوصيل كان سريعاً جداً."</p>
+                    <i class="fas fa-quote-left quote-icon"></i>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <h4 data-key="review_2_name">سارة. م</h4>
+                            <span class="review-date" data-key="review_2_location">وهران</span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                        </div>
+                    </div>
+                    <p class="review-text" data-key="review_2_text">"أعجبني التغليف والاهتمام بالتفاصيل. المقاسات مضبوطة تماماً كما في الوصف. شكراً إيكوزيوم!"</p>
+                    <i class="fas fa-quote-left quote-icon"></i>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <h4 data-key="review_3_name">كريم. س</h4>
+                            <span class="review-date" data-key="review_3_location">قسنطينة</span>
+                        </div>
+                        <div class="review-stars">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <p class="review-text" data-key="review_3_text">"أفضل متجر تعاملت معه. خدمة الزبائن راقية والمنتج يستحق كل دينار. بالتوفيق!"</p>
+                    <i class="fas fa-quote-left quote-icon"></i>
+                </div>
+            </div>
+        </section>
+        <div id="review-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-review-modal">&times;</span>
+            <h2 data-key="review_form_title">شاركنا تجربتك</h2>
+            
+            <form id="add-review-form">
+                <div class="star-rating-input">
+                    <span class="star-input" data-value="1"><i class="far fa-star"></i></span>
+                    <span class="star-input" data-value="2"><i class="far fa-star"></i></span>
+                    <span class="star-input" data-value="3"><i class="far fa-star"></i></span>
+                    <span class="star-input" data-value="4"><i class="far fa-star"></i></span>
+                    <span class="star-input" data-value="5"><i class="far fa-star"></i></span>
+                    <input type="hidden" id="rating-value" required> </div>
+                <p id="rating-text" style="text-align: center; color: #888;">0/5</p>
+
+                <label data-key="contact_name">الاسم:</label>
+                <input type="text" id="review-name" required placeholder="الاسم أو اللقب">
+
+                <label>الولاية / المدينة:</label>
+                <input type="text" id="review-location" placeholder="مثال: Alger">
+
+                <label data-key="contact_message">رأيك:</label>
+                <textarea id="review-text" rows="4" required placeholder="اكتب تجربتك هنا..."></textarea>
+
+                <button type="submit" class="add-to-cart-btn" data-key="contact_send">نشر الرأي</button>
+            </form>
+        </div>
+    </div>
+       <section id="contact-section">
+    <div class="section-header">
+        <i class="fas fa-phone-alt icon-title"></i>
+        <h2 data-key="contact_title">Contact</h2>
+    </div>
+
+    <div class="contact-container">
+        
+        <div class="contact-form-box">
+            <h3 data-key="contact_message_title">Contactez-nous directement</h3>
+            <form id="contact-form">
+                <div class="input-group">
+                    <input type="text" id="contact-name" required placeholder="Votre Nom Complet">
+                </div>
+                <div class="input-group">
+                    <input type="email" id="contact-email" required placeholder="Votre Email">
+                </div>
+                <div class="input-group">
+                    <textarea id="contact-message" rows="4" required placeholder="Votre Message..."></textarea>
+                </div>
+                <button type="submit" id="contact-submit-btn" data-key="contact_send">Envoyer le Message</button>
+                <p id="contact-status"></p>
+            </form>
         </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+        <div class="contact-info-box">
+            <h3>Restons Connectés</h3>
+            
+            <div class="direct-info">
+                <div class="info-row">
+                    <span class="icon-box gmail-icon"><i class="fas fa-envelope"></i></span>
+                    <p><strong>**Gmail**:</strong> contact@icosium.com</p>
+                </div>
+                <div class="info-row">
+                    <span class="icon-box phone-icon"><i class="fas fa-mobile-alt"></i></span>
+                    <p><strong>**Téléphone**:</strong> +213 780331979</p>
+                </div>
+            </div>
+
+            <div class="social-buttons-grid">
+                <a href="https://www.instagram.com/icosium.casual?igsh=bHhsaXo3eGhvc3F3&utm_source=qr" target="_blank" class="social-btn insta">
+                    <i class="fab fa-instagram"></i> <span>Instagram</span>
+                </a>
+                <a href="https://www.tiktok.com/@icosium.casual?_r=1&_t=ZS-91TOnXe0VrL" target="_blank" class="social-btn tiktok">
+                    <i class="fab fa-tiktok"></i> <span>TikTok</span>
+                </a>
+                <a href="#" target="_blank" class="social-btn telegram">
+                    <i class="fab fa-telegram-plane"></i> <span>Telegram</span>
+                </a>
+                <a href="#" target="_blank" class="social-btn whatsapp">
+                    <i class="fab fa-whatsapp"></i> <span>WhatsApp</span>
+                </a>
+                 <a href="https://www.snapchat.com/add/icosium.casual?share_id=GLfK6h1v6Ug&locale=fr-DZ" target="_blank" class="social-btn Snapchat">
+                    <i class="fab fa-snapchat"></i> <span>Snapchat</span>
+                </a>
+                <a href="https://www.facebook.com/share/1CUkYNfPxB/" target="_blank" class="social-btn facebook">
+                    <i class="fab fa-facebook-f"></i> <span>Facebook</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</section>
+    </main>
+
+   <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-cart-modal">&times;</span>
+            <h2 data-key="cart_title">سلة مشترياتك</h2>
+            <div id="cart-items-container"></div>
+            
+            <div class="cart-summary">
+                <p data-key="cart_total">الإجمالي: <span id="cart-total-price">0</span> DZD</p>
+                <hr>
+                <h3 data-key="checkout_title">إتمام الطلب</h3>
+                
+                <form id="checkout-form">
+                    <label for="checkout-name" data-key="form_name">الاسم الكامل:</label>
+                    <input type="text" id="checkout-name" required>
+
+                    <label for="checkout-phone" data-key="form_phone">رقم الهاتف:</label>
+                    <input type="tel" id="checkout-phone" required>
+
+                    <label for="checkout-wilaya">الولاية (Wilaya):</label>
+                    <select id="checkout-wilaya" required>
+                        <option value="" disabled selected>اختر ولايتك</option>
+                        </select>
+
+                    <label for="checkout-address" data-key="form_address">العنوان (البلدية/الشارع):</label>
+                    <input type="text" id="checkout-address" required>
+
+                    <p>سعر التوصيل: <span id="delivery-fee-display">0</span> DZD</p>
+                    <p><strong>الإجمالي الكلي: <span id="final-total-price">0</span> DZD</strong></p>
+
+                    <button type="submit" id="checkout-submit-btn" data-key="form_confirm">تأكيد الطلب</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-profile-modal">&times;</span>
+            <h2 data-key="profile_login">تسجيل الدخول</h2>
+            <p>(قريباً...)</p>
+        </div>
+    </div>
+<div id="product-details-modal" class="modal">
+        <div class="modal-content product-modal-content">
+            <span class="close-btn" id="close-product-details">&times;</span>
+            
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <img id="modal-product-image" src="" alt="Product Image">
+                </div>
+
+                <div class="modal-info-container">
+                    <h2 id="modal-product-name"></h2>
+                    <p id="modal-product-desc" class="product-desc-text"></p>
+                    <h3 id="modal-product-price"></h3>
+                    
+                    <div id="modal-product-options"></div>
+
+                    <button id="modal-add-to-cart-btn" class="add-to-cart-btn">أضف إلى السلة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 <strong>ICOSIUM STORE</strong>. Tous droits réservés.</p>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="script.js"></script>
 </body>
 </html>
