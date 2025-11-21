@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Panier - ICOSIUM</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/logo2.svg">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body> 
+   <header class="main-header">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html" style="text-decoration: none; color: var(--color-primary); display: flex; align-items: center; gap: 10px;">
+                    <img src="images/logo2.svg" alt="Logo" class="brand-logo">
+                    ICOSIUM
+                </a>
+            </div>
+            
+            <nav class="main-nav">
+                <a href="index.html">Retour à l'accueil</a>
+            </nav>
+
+            <div class="header-controls">
+                <button id="dark-mode-toggle"><i class="fas fa-moon"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="margin-top: 40px; margin-bottom: 60px;">
+        <h1 class="section-title">Finaliser votre commande</h1>
+
+        <div class="cart-page-wrapper">
+            
+            <div class="cart-items-section">
+                <h3>Articles dans le panier (<span id="cart-count-page">0</span>)</h3>
+                <div id="cart-items-container-page">
+                    <p>Votre panier est vide.</p>
+                </div>
+            </div>
+
+            <div class="cart-form-section">
+                <div class="cart-summary-box">
+                    <h3>Détails de livraison</h3>
+                    <form id="checkout-form-page">
+                        <div class="input-group">
+                            <label>Nom Complet</label>
+                            <input type="text" id="checkout-name" required placeholder="Votre nom">
+                        </div>
+                        <div class="input-group">
+                            <label>Téléphone</label>
+                            <input type="tel" id="checkout-phone" required placeholder="05...">
+                        </div>
+                        <div class="input-group">
+                            <label>Wilaya</label>
+                            <select id="checkout-wilaya" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                                <option value="" disabled selected>Choisir Wilaya</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Adresse (Commune/Rue)</label>
+                            <input type="text" id="checkout-address" required placeholder="Adresse précise">
+                        </div>
+
+                        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+
+                        <div class="price-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Sous-total:</span>
+                            <span id="cart-total-price-page">0</span> DZD
+                        </div>
+                        <div class="price-row" style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Livraison:</span>
+                            <span><span id="delivery-fee-display">0</span> DZD</span>
+                        </div>
+                        <div class="price-row total" style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; color: var(--color-primary);">
+                            <span>Total Final:</span>
+                            <span><span id="final-total-price">0</span> DZD</span>
+                        </div>
+
+                        <button type="submit" id="checkout-submit-btn" style="width: 100%; padding: 15px; background: var(--color-primary); color: white; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 20px;">
+                            Confirmer la commande
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 <strong>ICOSIUM STORE</strong>. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script> </body>
+</html>
