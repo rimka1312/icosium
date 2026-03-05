@@ -946,69 +946,68 @@ html[dir="rtl"] .out-of-stock-badge {
     transform: none !important;
     box-shadow: none !important;
 }
-/* حاوية الملصق لضبط التموضع */
-.sticker-wrapper {
-    position: relative;
+/* الحاوية الأساسية للعنوان */
+.section-header-row {
+    position: relative; /* ضروري لكي يتموضع الملصق نسبةً إليها */
+    display: flex;
+    justify-content: center; /* يضمن بقاء Nos Produits في المنتصف تماماً */
+    align-items: center;
     width: 100%;
-    height: 0; /* لكي لا يأخذ مساحة فارغة ويؤثر على التصميم */
-    z-index: 99;
+    margin-top: 60px; /* مسافة من القسم العلوي */
+    margin-bottom: 40px;
 }
 
-.cbn-sticker {
-    position: absolute;
-    top: -40px; /* لكي يظهر فوق بداية قسم المنتجات قليلاً */
-    right: 5%;   /* يبعد عن الحافة اليمنى */
-    transform: rotate(8deg); /* إمالة الملصق */
-    width: 150px; /* يمكنك تكبير أو تصغير الحجم من هنا */
+/* الملصق الجانبي */
+.cbn-sticker-side {
+    position: absolute; /* يخرجه من تدفق العناصر فلا يدفع العنوان */
+    right: 15%; /* يبعد عن العنوان مسافة مريحة جهة اليمين */
+    top: -20px; /* رفعه قليلاً للأعلى ليعطي شكلاً عشوائياً جذاباً */
+    width: 130px; /* حجم مناسب للكمبيوتر */
+    transform: rotate(12deg);
+    pointer-events: none;
+    z-index: 10;
 }
 
-/* تأثير الشريط اللاصق (Scotch Tape) */
-.scotch-tape {
-    position: absolute;
-    top: -15px;
-    left: 30%;
-    width: 60px;
-    height: 25px;
-    background: rgba(255, 255, 255, 0.3); /* لون شفاف */
-    backdrop-filter: blur(2px); /* تمويه خلف الشريط */
-    border-radius: 2px;
-    transform: rotate(-15deg);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    z-index: 2;
-}
-
-/* صورة الملصق مع الظل */
 .sticker-img {
     width: 100%;
-    height: auto;
-    display: block;
-    /* ظل واقعي يجعله يبدو كأنه مرتفع عن الصفحة */
-    filter: drop-shadow(5px 10px 15px rgba(0,0,0,0.3));
-    transition: transform 0.3s ease;
+    filter: drop-shadow(8px 12px 10px rgba(0,0,0,0.25));
 }
 
-/* حركة بسيطة عند تمرير الماوس */
-.cbn-sticker:hover .sticker-img {
-    transform: scale(1.05) rotate(5deg);
+/* شريط السكوتش */
+.scotch-tape {
+    position: absolute;
+    top: -12px;
+    left: 20%;
+    width: 50px;
+    height: 22px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(2px);
+    transform: rotate(-15deg);
+    z-index: 11;
 }
 
-/* دعم اللغة العربية (نقل الملصق لليسار) */
-html[dir="rtl"] .cbn-sticker {
-    right: auto;
-    left: 5%;
-    transform: rotate(-8deg);
-}
-
-html[dir="rtl"] .scotch-tape {
-    left: auto;
-    right: 30%;
-    transform: rotate(15deg);
-}
-
-/* للهواتف المحمولة */
+/* 📱 للهاتف: لكي يبدو جميلاً ولا يغطي العنوان */
 @media (max-width: 768px) {
-    .cbn-sticker {
-        width: 100px; /* تصغير الحجم في الموبايل */
-        top: -30px;
+    .cbn-sticker-side {
+        right: 2%; /* تقريبه من الحافة في الشاشات الصغيرة */
+        top: -45px; /* رفعه أكثر لكي لا يلمس الكلمات */
+        width: 85px; /* تصغير الحجم */
+    }
+    
+    .section-header-row {
+        margin-top: 80px; /* زيادة المساحة في الهاتف */
+    }
+}
+
+/* دعم اللغة العربية: نقل الملصق لجهة اليسار */
+html[dir="rtl"] .cbn-sticker-side {
+    right: auto;
+    left: 15%;
+    transform: rotate(-12deg);
+}
+
+@media (max-width: 768px) {
+    html[dir="rtl"] .cbn-sticker-side {
+        left: 2%;
     }
 }
