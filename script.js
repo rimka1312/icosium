@@ -12,6 +12,7 @@ console.log('Supabase client is ready!');
 // --- 1. الترجمة الكاملة ---
 const translations = {
     ar: {
+        out_of_stock: "نفاذ الكمية",
         nav_home: "الرئيسية", nav_category: "الفئات", nav_trend: "الرائج", nav_about: "من نحن", nav_contact: "اتصل بنا",
         hero_title: "اكتشف مجموعتنا الجديدة", hero_subtitle: "تصميم عصري بجودة عالية",
         products_title: "منتجاتنا", category_all: "الكل",
@@ -27,6 +28,7 @@ const translations = {
         colors: "الألوان:", sizes: "المقاسات:", search_placeholder: "ابحث عن منتج..."
     },
     fr: {
+        out_of_stock: "Rupture de stock",
         nav_home: "Accueil", nav_category: "Catégorie", nav_trend: "Tendance", nav_about: "À Propos", nav_contact: "Contact",
         hero_title: "Découvrez notre nouvelle collection", hero_subtitle: "Design moderne, qualité supérieure",
         products_title: "Nos Produits", category_all: "Tout",
@@ -42,6 +44,7 @@ const translations = {
         colors: "Couleurs:", sizes: "Tailles:", search_placeholder: "Rechercher..."
     },
     en: {
+        out_of_stock: "Out of Stock",
         nav_home: "Home", nav_category: "Category", nav_trend: "Trend", nav_about: "About", nav_contact: "Contact",
         hero_title: "Discover our new collection", hero_subtitle: "Modern design, premium quality",
         products_title: "Our Products", category_all: "All",
@@ -142,7 +145,25 @@ function showProductDetails(id) {
     `;
     modal.style.display = 'block';
 }
+function setLanguage(lang) {
+    currentLanguage = lang;
+    localStorage.setItem('icosium_lang', lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    
+    // تحديث النصوص الثابتة
+    document.querySelectorAll('[data-key]').forEach(el => {
+        const k = el.getAttribute('data-key');
+        if(k && translations[lang][k]) el.textContent = translations[lang][k];
+    });
 
+    // إضافة هذا السطر لتحديث المنتجات المعروضة باللغة الجديدة فوراً
+    if (allProducts.length > 0) {
+        renderProducts(allProducts);
+    }
+    
+    getCategories(); 
+}
 function updateMainImage(src) {
     document.getElementById('main-product-img').src = src;
 }
@@ -259,28 +280,24 @@ async function getReviews() {
 function renderProducts(products) {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
-
     grid.innerHTML = '';
-    if(!products.length) { grid.innerHTML = '<p style="text-align:center; width:100%;">Aucun produit.</p>'; return; }
 
     products.forEach(p => {
+        const isOutOfStock = p.stock <= 0;
         const card = document.createElement('div');
-        card.className = 'product-card';
+        card.className = `product-card ${isOutOfStock ? 'out-of-stock' : ''}`;
         
-        const colorsHtml = Array.isArray(p.colors) ? p.colors.map(c => `<span class="color-dot" style="background:${c.replace(/"/g,'')}" title="${c}" data-val="${c.replace(/"/g,'')}"></span>`).join('') : '';
-        const sizesHtml = Array.isArray(p.sizes) ? p.sizes.map(s => `<span class="size-box" data-val="${s.replace(/"/g,'')}">${s.replace(/"/g,'')}</span>`).join('') : '';
-
+        // نضع data-key="out_of_stock" ليتغير النص تلقائياً مع نظام الترجمة الخاص بك
         card.innerHTML = `
+            ${isOutOfStock ? `<div class="out-of-stock-badge" data-key="out_of_stock">${translations[currentLanguage].out_of_stock}</div>` : ''}
             <img src="${p.image_url}" alt="${p.name}">
             <div class="product-details">
                 <h3 class="product-name">${p.name}</h3>
-                <div class="product-options">
-                    ${colorsHtml ? `<div class="product-colors">${colorsHtml}</div>` : ''}
-                    ${sizesHtml ? `<div class="product-sizes">${sizesHtml}</div>` : ''}
-                </div>
                 <p class="product-price">${p.price} DZD</p>
                 <div class="product-actions">
-                    <button class="add-to-cart-btn">Ajouter</button>
+                    <button class="add-to-cart-btn" ${isOutOfStock ? 'disabled' : ''} data-key="${isOutOfStock ? 'out_of_stock' : ''}">
+                        ${isOutOfStock ? translations[currentLanguage].out_of_stock : 'Ajouter'}
+                    </button>
                     <button class="details-btn">Détails</button>
                 </div>
             </div>
@@ -375,27 +392,144 @@ function calcFinalTotalPage() {
 
     finalDisplay.textContent = cartTotal + deliveryFee;
 }
+// ابحث عن الجزء الذي يقوم بعمل render للمنتجات وقم بتعديله كالتالي:
+function createProductCard(product) {
+    const isOutOfStock = product.stock <= 0; // التحقق من المخزون
+    const outOfStockText = translations[currentLanguage].out_of_stock;
 
-// --- 7. مودال التفاصيل ---
+    return `
+        <div class="product-card ${isOutOfStock ? 'out-of-stock' : ''}" style="position: relative;">
+            ${isOutOfStock ? `<div class="out-of-stock-badge">${outOfStockText}</div>` : ''}
+            <img src="${product.image}" alt="${product.name}">
+            <div class="product-details">
+                <h3 class="product-name">${product.name}</h3>
+                <p class="product-price">${product.price} DA</p>
+                <div class="product-actions">
+                    <button class="add-to-cart-btn" 
+                            ${isOutOfStock ? 'disabled' : ''} 
+                            onclick="addToCart(${product.id})">
+                        ${isOutOfStock ? outOfStockText : (translations[currentLanguage].add_to_cart || 'Ajouter')}
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+// --- 7. مودال التفاصيل (محسّن) ---
 function openDetails(p) {
     const m = document.getElementById('product-details-modal');
     if(!m) return;
 
-    document.getElementById('modal-product-image').src = p.image_url;
-    document.getElementById('modal-product-name').textContent = p.name;
-    document.getElementById('modal-product-desc').textContent = p.description || '-';
-    document.getElementById('modal-product-price').textContent = p.price + ' DZD';
+    // الصورة الرئيسية
+    const mainImg = document.getElementById('modal-product-image');
+    mainImg.src = p.image_url;
+    mainImg.style.cursor = 'default';
+
+    // معرض الصور المصغّرة
+    let galleryHtml = '';
+    if(p.image_url) {
+        const images = p.extra_images ? [p.image_url, ...p.extra_images] : [p.image_url];
+        if(images.length > 1) {
+            galleryHtml = `<div class="modal-thumbs">${images.map((src,i) =>
+                `<img src="${src}" class="modal-thumb${i===0?' active':''}" onclick="document.getElementById('modal-product-image').src=this.src; document.querySelectorAll('.modal-thumb').forEach(t=>t.classList.remove('active')); this.classList.add('active');">`
+            ).join('')}</div>`;
+        }
+    }
     
+    const imgContainer = document.querySelector('.modal-image-container');
+    // Remove old gallery if any
+    const oldGallery = imgContainer.querySelector('.modal-thumbs');
+    if(oldGallery) oldGallery.remove();
+    if(galleryHtml) imgContainer.insertAdjacentHTML('beforeend', galleryHtml);
+
+    // الاسم
+    document.getElementById('modal-product-name').textContent = p.name;
+
+    // الوصف
+    document.getElementById('modal-product-desc').textContent = p.description || '';
+
+    // التصنيف
+    const catTag = document.getElementById('modal-product-category');
+    if(catTag) catTag.textContent = p.category || '';
+
+    // النجوم (rating)
+    const starsEl = document.getElementById('modal-product-stars');
+    if(starsEl) {
+        const rating = p.rating || 4.5;
+        let starsHtml = '';
+        for(let i=1;i<=5;i++) {
+            if(i <= Math.floor(rating)) starsHtml += '<i class="fas fa-star"></i>';
+            else if(i - rating < 1) starsHtml += '<i class="fas fa-star-half-alt"></i>';
+            else starsHtml += '<i class="far fa-star"></i>';
+        }
+        starsEl.innerHTML = starsHtml + ` <small style="color:var(--color-text-muted);font-size:0.78rem;margin-left:4px;">${rating}/5</small>`;
+    }
+
+    // السعر + التخفيض
+    const priceEl = document.getElementById('modal-product-price');
+    const oldPriceEl = document.getElementById('modal-product-old-price');
+    const discountEl = document.getElementById('modal-discount-tag');
+    
+    if(p.old_price && p.old_price > p.price) {
+        const discPct = Math.round((1 - p.price/p.old_price)*100);
+        priceEl.textContent = p.price + ' DZD';
+        oldPriceEl.textContent = p.old_price + ' DZD';
+        oldPriceEl.style.display = 'inline';
+        discountEl.textContent = `-${discPct}%`;
+        discountEl.style.display = 'inline-block';
+    } else {
+        priceEl.textContent = p.price + ' DZD';
+        oldPriceEl.style.display = 'none';
+        discountEl.style.display = 'none';
+    }
+
+    // Badge
+    const badgeEl = document.getElementById('modal-product-badge');
+    if(badgeEl) {
+        if(p.badge) { badgeEl.textContent = p.badge; badgeEl.style.display='block'; }
+        else badgeEl.style.display='none';
+    }
+
+    // الألوان والمقاسات
     const opts = document.getElementById('modal-product-options');
     let html = '';
-    if(p.colors) html += `<div>${translations[currentLanguage].colors} ` + p.colors.map(c=>`<span class="color-dot" style="background:${c.replace(/"/g,'')}" data-val="${c.replace(/"/g,'')}"></span>`).join('') + '</div>';
-    if(p.sizes) html += `<div>${translations[currentLanguage].sizes} ` + p.sizes.map(s=>`<span class="size-box" data-val="${s.replace(/"/g,'')}">${s.replace(/"/g,'')}</span>`).join('') + '</div>';
+    if(p.colors && p.colors.length) {
+        html += `<div class="modal-opts-group"><label>${translations[currentLanguage].colors}</label><div class="product-colors">` 
+            + p.colors.map(c=>`<span class="color-dot" style="background:${c.replace(/"/g,'')}" data-val="${c.replace(/"/g,'')}" title="${c.replace(/"/g,'')}"></span>`).join('')
+            + '</div></div>';
+    }
+    if(p.sizes && p.sizes.length) {
+        html += `<div class="modal-opts-group"><label>${translations[currentLanguage].sizes}</label><div class="product-sizes">`
+            + p.sizes.map(s=>`<span class="size-box" data-val="${s.replace(/"/g,'')}">${s.replace(/"/g,'')}</span>`).join('')
+            + '</div></div>';
+    }
     opts.innerHTML = html;
-    
+
     let selColor, selSize;
-    opts.querySelectorAll('.color-dot').forEach(d=>d.addEventListener('click', e=>{opts.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('selected')); e.target.classList.add('selected'); selColor=e.target.dataset.val;}));
-    opts.querySelectorAll('.size-box').forEach(b=>b.addEventListener('click', e=>{opts.querySelectorAll('.size-box').forEach(x=>x.classList.remove('selected')); e.target.classList.add('selected'); selSize=e.target.dataset.val;}));
-    
+    opts.querySelectorAll('.color-dot').forEach(d=>d.addEventListener('click', e=>{
+        opts.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('selected'));
+        e.target.classList.add('selected'); selColor=e.target.dataset.val;
+    }));
+    opts.querySelectorAll('.size-box').forEach(b=>b.addEventListener('click', e=>{
+        opts.querySelectorAll('.size-box').forEach(x=>x.classList.remove('selected'));
+        e.target.classList.add('selected'); selSize=e.target.dataset.val;
+    }));
+
+    // المواصفات
+    const specsSection = document.getElementById('modal-specs-section');
+    const specsList = document.getElementById('modal-specs-list');
+    if(specsSection && specsList) {
+        if(p.specs && Object.keys(p.specs).length) {
+            specsList.innerHTML = Object.entries(p.specs).map(([k,v])=>
+                `<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`
+            ).join('');
+            specsSection.style.display = 'block';
+        } else {
+            specsSection.style.display = 'none';
+        }
+    }
+
+    // زر الإضافة
     const btn = document.getElementById('modal-add-to-cart-btn');
     const newBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(newBtn, btn);
@@ -403,10 +537,15 @@ function openDetails(p) {
         if(p.colors?.length && !selColor) return alert(translations[currentLanguage].alert_color);
         if(p.sizes?.length && !selSize) return alert(translations[currentLanguage].alert_size);
         addToCart({ id: `${p.id}-${selColor}-${selSize}`, ...p, color: selColor, size: selSize, qty: 1 });
-        m.style.display='none';
+        // Animate button
+        newBtn.innerHTML = '<i class="fas fa-check"></i> Ajouté!';
+        newBtn.style.background = '#059669';
+        setTimeout(()=>{ newBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Ajouter au panier'; newBtn.style.background=''; }, 1500);
     });
 
     m.style.display = 'block';
+    // Animate modal body
+    setTimeout(()=>{ m.querySelector('.modal-content').style.opacity='1'; }, 10);
 }
 
 // --- 8. دوال اللغة والثيم (المعدلة للحفظ) ---
