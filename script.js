@@ -107,7 +107,45 @@ function updateCartCountHeader() {
     const countElPage = document.getElementById('cart-count-page');
     if(countElPage) countElPage.textContent = cart.length;
 }
+function showProductDetails(id) {
+    const p = allProducts.find(item => item.id === id);
+    const lang = document.documentElement.lang || 'fr';
+    const modal = document.getElementById('product-modal');
+    
+    // إنشاء معرض الصور
+    const galleryHtml = p.images.map(img => `<img src="${img}" onclick="updateMainImage(this.src)" class="thumb">`).join('');
+    
+    // استخراج الألوان والمقاسات المتاحة
+    const availableColors = [...new Set(p.inventory.filter(i => i.stock > 0).map(i => i.color))];
+    const availableSizes = [...new Set(p.inventory.filter(i => i.stock > 0).map(i => i.size))];
 
+    modal.querySelector('.modal-body').innerHTML = `
+        <div class="modal-gallery">
+            <img src="${p.images[0]}" id="main-product-img" class="main-view">
+            <div class="thumbnails">${galleryHtml}</div>
+        </div>
+        <div class="modal-info">
+            <h2>${p['name_' + lang]}</h2>
+            <p class="desc">${p['desc_' + lang]}</p>
+            <div class="options">
+                <h4>${translations[lang].colors}:</h4>
+                <div class="color-list">
+                    ${availableColors.map(c => `<span class="color-dot" style="background:${c}"></span>`).join('')}
+                </div>
+                <h4>${translations[lang].sizes}:</h4>
+                <div class="size-list">
+                    ${availableSizes.map(s => `<span class="size-tag">${s}</span>`).join('')}
+                </div>
+            </div>
+            <div class="price">${p.price} DZD</div>
+        </div>
+    `;
+    modal.style.display = 'block';
+}
+
+function updateMainImage(src) {
+    document.getElementById('main-product-img').src = src;
+}
 function addToCart(item) {
     cart.push(item);
     saveCartToStorage();
