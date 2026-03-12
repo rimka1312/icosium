@@ -3093,14 +3093,14 @@ function filterUsers(f, btn) {
   btn.classList.add('on');
   renderUsers(allUsers);
 }
-function openUserModal(u) {
-  currentUserId=u?.id||null;
-  document.getElementById('user-modal-title').textContent = u?'Modifier Utilisateur':'Nouvel Utilisateur';
-  document.getElementById('usr-name').value=u?.name||'';
-  document.getElementById('usr-email').value=u?.email||'';
-  document.getElementById('usr-pass').value='';
-  document.getElementById('usr-role').value=u?.role||'admin';
-  openModal('modal-user');
+function openUserModal(u = null) {
+    currentUserId = u ? u.id : null;
+    document.getElementById('user-modal-title').textContent = u ? 'Modifier Utilisateur' : 'Nouvel Utilisateur';
+    document.getElementById('usr-name').value = u ? u.name : '';
+    document.getElementById('usr-email').value = u ? u.email : '';
+    document.getElementById('usr-pass').value = '';
+    document.getElementById('usr-role').value = u ? u.role : 'admin';
+    document.getElementById('modal-user').classList.add('open');
 }
 async function saveUser() {
     const name = document.getElementById('usr-name').value.trim();
@@ -3299,5 +3299,6 @@ async function testSupabaseConnection() {
 </body>
 
 </html>
+
 
 
