@@ -10,7 +10,68 @@ const livreursList = [
     { id: 'L02', name: 'Karim (Oran)' },
     { id: 'L03', name: 'Yacine (Moto)' }
 ];
+async function saveUser() {
+  const name = document.getElementById('usr-name').value.trim();
+  const email = document.getElementById('usr-email').value.trim();
+  const pass = document.getElementById('usr-pass').value.trim();
+  const role = document.getElementById('usr-role').value;
 
+  // 1. Vérifications de base
+  if (!name || !email) {
+    toast('Nom et email requis.', 'err');
+    return;
+  }
+
+  // 2. Le mot de passe est obligatoire pour un NOUVEL utilisateur
+  if (!currentUserId && !pass) {
+    toast('Le mot de passe est obligatoire pour un nouvel utilisateur.', 'err');
+    return;
+  }
+
+  // 3. Préparation des données
+  const userData = { 
+    name: name, 
+    email: email, 
+    role: role, 
+    is_active: true 
+  };
+
+  // On n'ajoute le mot de passe que s'il est saisi (utile pour la modif)
+  if (pass) {
+    userData.password = pass;
+  }
+
+  try {
+    let result;
+    
+    if (currentUserId) {
+      // MODE ÉDITION
+      result = await dbFrom('admins').update(userData).eq('id', currentUserId);
+    } else {
+      // MODE CRÉATION
+      result = await dbFrom('admins').insert([userData]);
+    }
+
+    if (result.error) {
+      // Si Supabase renvoie une erreur de type "unique violation"
+      if (result.error.code === '23505') {
+        toast('Cet email est déjà utilisé par un autre compte.', 'err');
+      } else {
+        toast('Erreur: ' + result.error.message, 'err');
+      }
+      return;
+    }
+
+    toast(currentUserId ? 'Utilisateur modifié !' : 'Utilisateur créé !');
+    logAudit('user', `Utilisateur ${currentUserId ? 'modifié' : 'créé'}: ${name} (${role})`, 'user');
+    closeModal('modal-user');
+    await loadAll();
+
+  } catch (e) {
+    console.error(e);
+    toast('Une erreur critique est survenue.', 'err');
+  }
+}
 // --- 1. إدارة تسجيل الدخول (Login) ---
 document.addEventListener('DOMContentLoaded', () => {
     checkSession(); // التحقق هل الآدمن مسجل دخول؟
@@ -362,4 +423,5 @@ function toggleTheme() {
     document.body.classList.toggle('dark-mode');
     const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
     localStorage.setItem('admin_theme', theme);
+
 }
