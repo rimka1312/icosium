@@ -3103,66 +3103,40 @@ function openUserModal(u) {
   openModal('modal-user');
 }
 async function saveUser() {
-  const name = document.getElementById('usr-name').value.trim();
-  const email = document.getElementById('usr-email').value.trim();
-  const pass = document.getElementById('usr-pass').value.trim();
-  const role = document.getElementById('usr-role').value;
+    const name = document.getElementById('usr-name').value.trim();
+    const email = document.getElementById('usr-email').value.trim();
+    const pass = document.getElementById('usr-pass').value.trim();
+    const role = document.getElementById('usr-role').value;
 
-  // 1. Vérifications de base
-  if (!name || !email) {
-    toast('Nom et email requis.', 'err');
-    return;
-  }
+    if (!name || !email || (!currentUserId && !pass)) {
+        alert('Veuillez remplir les champs obligatoires.');
+        return;
+    }
 
-  // 2. Le mot de passe est obligatoire pour un NOUVEL utilisateur
-  if (!currentUserId && !pass) {
-    toast('Le mot de passe est obligatoire pour un nouvel utilisateur.', 'err');
-    return;
-  }
+    // Objet de données correspondant exactement à votre table SQL mise à jour
+    const userData = { 
+        name, 
+        email, 
+        role 
+    };
 
-  // 3. Préparation des données
-  const userData = { 
-    name: name, 
-    email: email, 
-    role: role, 
-  
-  };
+    if (pass) userData.password = pass;
 
-  // On n'ajoute le mot de passe que s'il est saisi (utile pour la modif)
-  if (pass) {
-    userData.password = pass;
-  }
-
-  try {
-    let result;
-    
+    let error;
     if (currentUserId) {
-      // MODE ÉDITION
-      result = await dbFrom('admins').update(userData).eq('id', currentUserId);
+        const { error: err } = await dbFrom('admins').update(userData).eq('id', currentUserId);
+        error = err;
     } else {
-      // MODE CRÉATION
-      result = await dbFrom('admins').insert([userData]);
+        const { error: err } = await dbFrom('admins').insert([userData]);
+        error = err;
     }
 
-    if (result.error) {
-      // Si Supabase renvoie une erreur de type "unique violation"
-      if (result.error.code === '23505') {
-        toast('Cet email est déjà utilisé par un autre compte.', 'err');
-      } else {
-        toast('Erreur: ' + result.error.message, 'err');
-      }
-      return;
+    if (error) {
+        alert("Erreur: " + error.message);
+    } else {
+        document.getElementById('modal-user').classList.remove('open');
+        await loadUsers();
     }
-
-    toast(currentUserId ? 'Utilisateur modifié !' : 'Utilisateur créé !');
-    logAudit('user', `Utilisateur ${currentUserId ? 'modifié' : 'créé'}: ${name} (${role})`, 'user');
-    closeModal('modal-user');
-    await loadAll();
-
-  } catch (e) {
-    console.error(e);
-    toast('Une erreur critique est survenue.', 'err');
-  }
 }
 async function deleteUser(id) {
   const session = JSON.parse(localStorage.getItem('icosium_session'));
@@ -3325,4 +3299,5 @@ async function testSupabaseConnection() {
 </body>
 
 </html>
+
 
