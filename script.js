@@ -648,18 +648,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.textContent = "Envoi en cours...";
                 submitBtn.disabled = true;
 
-                const wilayaSelect = document.getElementById('checkout-wilaya');
-                const wilayaName = wilayaSelect.options[wilayaSelect.selectedIndex].text;
+              const wilayaSelect = document.getElementById('checkout-wilaya');
+// 1. قطع النص عند القوس لإزالة السعر من الولاية
+const wilayaName = wilayaSelect.options[wilayaSelect.selectedIndex].text.split(' (+')[0];
 
-                const orderData = {
-                    customer_name: document.getElementById('checkout-name').value,
-                    customer_phone: document.getElementById('checkout-phone').value,
-                    customer_address: `${wilayaName} - ${document.getElementById('checkout-address').value}`,
-                    items: cart,
-                    total_price: parseFloat(document.getElementById('final-total-price').textContent),
-                    delivery_fee: parseFloat(document.getElementById('delivery-fee-display').textContent),
-                    status: 'Pending'
-                };
+// 2. ترجمة أكواد الألوان إلى اللغة العربية
+const formattedCart = cart.map(item => {
+    let colorName = item.color;
+    if (item.color === '#ffffff') colorName = 'أبيض';
+    else if (item.color === '#000000') colorName = 'أسود';
+    else if (item.color === '#808080') colorName = 'رمادي';
+    // يمكنك إضافة ألوان أخرى هنا بنفس الطريقة مستقبلاً
+    
+    return { ...item, color: colorName };
+});
+
+const orderData = {
+    customer_name: document.getElementById('checkout-name').value,
+    customer_phone: document.getElementById('checkout-phone').value,
+    customer_address: `${wilayaName} - ${document.getElementById('checkout-address').value}`,
+    items: formattedCart,  // نرسل السلة المترجمة بدلاً من القديمة
+    total_price: parseFloat(document.getElementById('final-total-price').textContent),
+    delivery_fee: parseFloat(document.getElementById('delivery-fee-display').textContent),
+    status: 'Pending'
+};
 
                 const { error } = await supabaseClient.from('orders').insert(orderData);
 
