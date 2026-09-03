@@ -2816,85 +2816,98 @@ function searchProducts(q) {
   renderProducts(base.filter(p=>p.name?.toLowerCase().includes(q.toLowerCase())||p.sku?.toLowerCase().includes(q.toLowerCase())));
 }
   // 6. الجافاسكريبت لمعالجة الصور المتعددة
+// 1. معالجة الصور المتعددة (Base64)
+let uploadedExtraImages = [];
 document.getElementById('prd-img-file').addEventListener('change', function(e) {
   const files = e.target.files;
   if(!files.length) return;
   
   const previewContainer = document.getElementById('image-preview-container');
-  previewContainer.innerHTML = ''; // تنظيف المعاينة السابقة
-  
-  // نأخذ الصورة الأولى كصورة رئيسية (image_url)
-  const readerMain = new FileReader();
-  readerMain.onload = function(event) {
-    document.getElementById('prd-img-base64').value = event.target.result;
-    
-    // إنشاء معاينة صغيرة للصورة
-    const img = document.createElement('img');
-    img.src = event.target.result;
-    img.style.width = '40px'; img.style.height = '40px'; img.style.objectFit = 'cover'; img.style.borderRadius = '5px';
-    previewContainer.appendChild(img);
-  };
-  readerMain.readAsDataURL(files[0]);
+  previewContainer.innerHTML = ''; 
+  uploadedExtraImages = [];
 
-  toast('Image chargée !', 'ok');
-  
-  // ملاحظة: لحفظ صور إضافية، ستحتاج إلى عمود "extra_images" (نوع jsonb) في قاعدة البيانات
-  // وهذا يتطلب كود إضافي لمعالجة المصفوفة إذا كنت ترغب بذلك لاحقاً.
+  Array.from(files).forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const base64String = event.target.result;
+      
+      // الصورة الأولى نضعها كصورة رئيسية
+      if (index === 0) {
+        document.getElementById('prd-img-base64').value = base64String;
+      } else {
+        // باقي الصور نضعها في مصفوفة الصور الإضافية
+        uploadedExtraImages.push(base64String);
+      }
+
+      // عرض الصور للمعاينة
+      const img = document.createElement('img');
+      img.src = base64String;
+      img.style.width = '45px'; img.style.height = '45px'; img.style.objectFit = 'cover'; img.style.borderRadius = '5px';
+      previewContainer.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  });
+  toast('Images chargées !', 'ok');
 });
+
+// 2. إضافة سطر (مقاس - لون - كمية)
 function addSizeRow(size = '', color = '', qty = '') {
   const container = document.getElementById('sizes-container');
   const row = document.createElement('div');
   row.style.display = 'flex';
   row.style.gap = '10px';
   row.innerHTML = `
-    <input type="text" placeholder="Taille (ex: M)" value="${size}" class="size-name" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
-    <input type="text" placeholder="Couleur (ex: Noir)" value="${color}" class="size-color" style="flex: 1.5; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="text" placeholder="Taille (S, M, L)" value="${size}" class="size-name" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="text" placeholder="Couleur (Noir, Blanc)" value="${color}" class="size-color" style="flex: 1.5; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
     <input type="number" placeholder="Qté" value="${qty}" class="size-qty" style="width: 80px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
     <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="padding: 10px;"><i class="fas fa-trash"></i></button>
   `;
   container.appendChild(row);
 }
- // 2. تعديل دالة فتح نافذة المنتج لتشمل الصور المتعددة
+
+// 3. فتح نافذة المنتج للتعديل أو الإضافة
 function openProductModal(p) {
   currentProductId = p?.id||null;
   document.getElementById('prod-modal-title').textContent = p ? 'Modifier Produit' : 'Nouveau Produit';
   document.getElementById('prd-name').value=p?.name||'';
   document.getElementById('prd-sku').value=p?.sku||'';
   document.getElementById('prd-price').value=p?.price||'';
-  document.getElementById('prd-compare').value=p?.compare_at_price||''; // تم التعديل لتطابق عمود Supabase
+  document.getElementById('prd-compare').value=p?.compare_at_price||''; 
   document.getElementById('prd-cat').value=p?.category_id||'';
   document.getElementById('prd-desc').value=p?.description||'';
   document.getElementById('prd-featured').checked=p?.is_featured||false;
   
-  // إعادة تعيين الصور
+  // تصفير الصور
   document.getElementById('prd-img-file').value = '';
   document.getElementById('prd-img-base64').value = p?.image_url || '';
-  // إضافة حقل مخفي للصور الإضافية إذا أردت استخدامها لاحقاً
-  
-  // إعادة تعيين المقاسات والألوان
+  document.getElementById('image-preview-container').innerHTML = '';
+  uploadedExtraImages = p?.extra_images || [];
+
+  // ملء المقاسات والألوان إن وجدت
   document.getElementById('sizes-container').innerHTML = '';
   if(p && p.sizes && p.sizes.length > 0) {
     let sizesObj = typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes;
     sizesObj.forEach(s => addSizeRow(s.size, s.color, s.qty));
   } else {
-    addSizeRow(); // سطر فارغ افتراضي
+    addSizeRow();
   }
   
   openModal('modal-product');
 }
-  // 3. تعديل دالة حفظ المنتج
+
+// 4. حفظ المنتج
 async function saveProduct() {
   const name = document.getElementById('prd-name').value.trim();
   const price = parseFloat(document.getElementById('prd-price').value)||0;
   if(!name||price<1) { toast('Nom et prix sont requis.','err'); return; }
 
-  // حساب الكمية الكلية وجمع المقاسات والألوان
+  // جمع معلومات المقاسات والألوان والكميات
   const sizeRows = document.querySelectorAll('#sizes-container > div');
   let sizesArray = [];
   let totalStock = 0;
   sizeRows.forEach(row => {
     const sName = row.querySelector('.size-name').value.trim();
-    const sColor = row.querySelector('.size-color').value.trim();
+    const sColor = row.querySelector('.size-color').value.trim(); // سحب اللون
     const sQty = parseInt(row.querySelector('.size-qty').value) || 0;
     if (sName && sQty > 0) {
       sizesArray.push({ size: sName, color: sColor, qty: sQty });
@@ -2906,11 +2919,12 @@ async function saveProduct() {
     name, 
     sku: document.getElementById('prd-sku').value.trim()||null,
     price, 
-    compare_at_price: parseFloat(document.getElementById('prd-compare').value)||null, // تم التعديل هنا
-    stock: totalStock, 
-    sizes: sizesArray, // المصفوفة ترسل مباشرة لعمود jsonb
+    compare_at_price: parseFloat(document.getElementById('prd-compare').value)||null,
+    stock: totalStock, // الحساب الآلي للكمية
+    sizes: sizesArray, // المزيج (مقاس/لون/كمية)
     category_id: document.getElementById('prd-cat').value||null,
     image_url: document.getElementById('prd-img-base64').value || null,
+    extra_images: uploadedExtraImages, // حفظ الصور الإضافية
     description: document.getElementById('prd-desc').value.trim()||null,
     is_featured: document.getElementById('prd-featured').checked,
     is_deleted: false
@@ -2925,28 +2939,24 @@ async function saveProduct() {
     closeModal('modal-product'); 
     await loadAll();
   } else {
-    console.error("Supabase Save Error:", error);
+    console.error("Erreur DB:", error);
     toast('Erreur DB: ' + error.message, 'err');
   }
 }
 
-// 4. دالة حذف المنتج نهائياً من قاعدة البيانات
+// 5. الحذف النهائي من قاعدة البيانات (كما طلبت)
 async function deleteProduct(id) {
-  if(!confirm('Êtes-vous sûr de vouloir supprimer DÉFINITIVEMENT ce produit ? Cette action est irréversible.')) return;
-  
-  // الحذف النهائي بدلاً من التحديث (Update)
+  if(!confirm('Voulez-vous DÉFINITIVEMENT supprimer ce produit ? Cette action est irréversible.')) return;
+  // حذف فعلي (Delete) بدلاً من التحديث (Update)
   const { error } = await dbFrom('products').delete().eq('id', id);
-  
   if(!error) {
-    const p = allProducts.find(x=>x.id===id);
-    logAudit('product', `Produit supprimé définitivement: ${p?.name||id}`, 'product');
+    logAudit('product', `Produit supprimé définitivement: #${id}`, 'product');
     toast('Produit supprimé définitivement.'); 
     await loadAll();
   } else {
     toast('Erreur lors de la suppression.', 'err');
   }
 }
-
 /* ─── CATEGORIES ─── */
 function renderCategories(cats) {
   const el = document.getElementById('cats-body');
