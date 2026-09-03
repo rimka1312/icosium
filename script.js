@@ -192,13 +192,12 @@ async function getReviews() {
     if (reviews && reviews.length > 0) renderReviews(reviews);
 }
 
-// --- 5. عرض كروت المنتجات مع دعم Coming Soon ---
 function renderProducts(products) {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    if (!products.length) {
+    if (!products || !products.length) {
         grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-muted);">Aucun produit disponible pour le moment.</p>';
         return;
     }
@@ -226,12 +225,11 @@ function renderProducts(products) {
             </div>
         `;
         
-        // ربط أزرار البطاقة
         card.querySelector('.details-btn').addEventListener('click', () => openDetails(p));
         
         const addBtn = card.querySelector('.add-to-cart-btn');
         if (!isComingSoon && !isOutOfStock) {
-            addBtn.addEventListener('click', () => openDetails(p)); // فتح التفاصيل لاختيار المقاس واللون
+            addBtn.addEventListener('click', () => openDetails(p));
         }
 
         grid.appendChild(card);
