@@ -452,15 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-    // تحميل السلة من الـ LocalStorage فور فتح الصفحة
-    loadCartFromStorage();
-
-    if (window.location.pathname.includes('cart.html')) {
-        populateWilayas(); // تعبئة قائمة الولايات
-        renderCartPage();  // عرض المنتجات داخل السلة
-    }
-});
+ 
     // إغلاق المودالز
     document.querySelectorAll('.close-btn').forEach(b => b.addEventListener('click', e => e.target.closest('.modal').style.display = 'none'));
     window.onclick = e => { if(e.target.classList.contains('modal')) e.target.style.display = 'none'; };
