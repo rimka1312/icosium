@@ -1982,25 +1982,42 @@ a { text-decoration: none; }
   <div class="modal-box modal-lg">
     <div class="modal-hdr">
       <h3 id="prod-modal-title">Nouveau Produit</h3>
-      <button class="modal-close" onclick="closeModal('modal-product')"><i class="fas fa-times"></i></button>
+      <button class="modal-close" type="button" onclick="closeModal('modal-product')"><i class="fas fa-times"></i></button>
     </div>
 
     <div class="modal-body">
       <div class="form-row form-row-2">
-        <div class="fg"><label>Nom *</label><input type="text" id="prd-name" placeholder="T-shirt Premium"></div>
-        <div class="fg"><label>SKU</label><input type="text" id="prd-sku" placeholder="SKU-001"></div>
+        <div class="fg">
+          <label for="prd-name">Nom *</label>
+          <input type="text" id="prd-name" placeholder="T-shirt Premium">
+        </div>
+        <div class="fg">
+          <label for="prd-sku">SKU</label>
+          <input type="text" id="prd-sku" placeholder="SKU-001">
+        </div>
       </div>
 
       <div class="form-row form-row-3">
-        <div class="fg"><label>Prix (DA) *</label><input type="number" id="prd-price" placeholder="2500"></div>
-        <div class="fg"><label>Prix barré (DA)</label><input type="number" id="prd-compare" placeholder="3500"></div>
-        <div class="fg"><label>Stock</label><input type="number" id="prd-stock" placeholder="100"></div>
+        <div class="fg">
+          <label for="prd-price">Prix (DA) *</label>
+          <input type="number" id="prd-price" placeholder="2500">
+        </div>
+        <div class="fg">
+          <label for="prd-compare">Prix barré (DA)</label>
+          <input type="number" id="prd-compare" placeholder="3500">
+        </div>
+        <div class="fg">
+          <label for="prd-stock">Stock</label>
+          <input type="number" id="prd-stock" placeholder="100">
+        </div>
       </div>
 
       <div class="form-row form-row-2">
         <div class="fg">
-          <label>Catégorie</label>
-          <select id="prd-cat"><option value="">— Aucune —</option></select>
+          <label for="prd-cat">Catégorie</label>
+          <select id="prd-cat">
+            <option value="">— Aucune —</option>
+          </select>
         </div>
 
         <div class="fg">
@@ -2018,10 +2035,10 @@ a { text-decoration: none; }
               <input type="file" accept="image/*" class="hidden" onchange="handleMainImage(event)">
             </label>
 
-            <!-- حاوية عرض الصور المرفوعة (الرئيسية والإضافية) -->
+            <!-- حاوية عرض الصور المرفوعة -->
             <div id="images-preview-list" class="flex items-center gap-3"></div>
 
-            <!-- زر الإضافة (+) : مخفي افتراضياً ولا يظهر إلا بعد رفع الصورة الرئيسية -->
+            <!-- زر الإضافة (+) -->
             <label id="add-more-btn" class="hidden w-24 h-24 border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer transition bg-gray-50 hover:bg-gray-100 flex-shrink-0 group">
               <svg class="w-7 h-7 text-gray-400 group-hover:text-emerald-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -2033,9 +2050,8 @@ a { text-decoration: none; }
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
+
+      <!-- قسم المقاسات والألوان -->
       <div class="fg" style="background: var(--bg3); padding: 15px; border-radius: 12px; margin-top: 10px;">
         <label style="color: var(--accent);"><i class="fas fa-ruler-combined"></i> Tailles, Couleurs et Quantités</label>
         <div id="sizes-container" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;"></div>
@@ -2044,18 +2060,23 @@ a { text-decoration: none; }
         </button>
       </div>
 
+      <!-- الوصف -->
       <div class="fg" style="margin-top: 14px;">
-        <label>Description</label>
+        <label for="prd-desc">Description</label>
         <textarea id="prd-desc" placeholder="Description du produit..."></textarea>
       </div>
+
+      <!-- خيار التمييز -->
       <div class="fg-check">
         <input type="checkbox" id="prd-featured">
         <label for="prd-featured">⭐ Produit en vedette</label>
       </div>
     </div>
+
+    <!-- أسفل النافذة -->
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeModal('modal-product')">Annuler</button>
-      <button class="btn btn-accent" onclick="saveProduct()"><i class="fas fa-save"></i> Enregistrer</button>
+      <button type="button" class="btn btn-ghost" onclick="closeModal('modal-product')">Annuler</button>
+      <button type="button" class="btn btn-accent" onclick="saveProduct()"><i class="fas fa-save"></i> Enregistrer</button>
     </div>
   </div>
 </div>
