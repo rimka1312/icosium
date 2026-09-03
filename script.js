@@ -717,7 +717,19 @@ const orderData = {
             }
         });
     }
+// تفحص هل المنتج في حالة Coming Soon حالياً
+function checkIsComingSoon(product) {
+  if (!product.is_coming_soon) return false;
+  
+  // إذا لم يحدد الآدمن تاريخاً، يعتبر قريباً دائماً حتى يلغيه
+  if (!product.available_at) return true;
 
+  const now = new Date();
+  const availableDate = new Date(product.available_at);
+
+  // إذا وصل الوقت الحالي لتاريخ الإتاحة، يلغى الحجب تلقائياً ويصبح متاحاً للبيع
+  return availableDate > now;
+}
     // 9. المودالات
     const opens = { 'profile-button': 'profile-modal', 'open-review-modal-btn': 'review-modal' };
     Object.keys(opens).forEach(id => {
