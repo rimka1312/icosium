@@ -3609,7 +3609,17 @@ async function testSupabaseConnection() {
     toast('Connexion Supabase échouée.','err');
   }
 }
+function handleNewImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
 
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // يمكنك هنا إما استبدال الرئيسية أو إنشاء كارد جديد بجانبهما
+    console.log("تم تحميل الصورة:", file.name);
+  };
+  reader.readAsDataURL(file);
+}
 </script>
 </body>
 
