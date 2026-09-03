@@ -3471,7 +3471,7 @@ async function saveProduct() {
     const mainImage = uploadedImages.length > 0 ? uploadedImages[0] : null;
     const extraImagesArray = uploadedImages.length > 1 ? uploadedImages.slice(1) : [];
 
-    // قراءة حالة Coming Soon والتاريخ
+    // 💡 تصحيح قراءة وعمل حقل Coming Soon والتاريخ ليتوافق مع Supabase 💡
     const isComingSoon = document.getElementById('is_coming_soon')?.checked || false;
     const availableAtVal = document.getElementById('available_at')?.value;
     const availableAt = (isComingSoon && availableAtVal) ? new Date(availableAtVal).toISOString() : null;
