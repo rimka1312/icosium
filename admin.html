@@ -2811,6 +2811,28 @@ function searchProducts(q) {
   if(catId) base = base.filter(p=>String(p.category_id)===String(catId));
   renderProducts(base.filter(p=>p.name?.toLowerCase().includes(q.toLowerCase())||p.sku?.toLowerCase().includes(q.toLowerCase())));
 }
+   document.getElementById('prd-img-file').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    document.getElementById('prd-img-base64').value = event.target.result;
+    toast('Image chargée avec succès !', 'ok');
+  };
+  reader.readAsDataURL(file);
+});
+   function addSizeRow(size = '', qty = '') {
+  const container = document.getElementById('sizes-container');
+  const row = document.createElement('div');
+  row.style.display = 'flex';
+  row.style.gap = '10px';
+  row.innerHTML = `
+    <input type="text" placeholder="Taille (ex: M, L, 42)" value="${size}" class="size-name" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="number" placeholder="Qté" value="${qty}" class="size-qty" style="width: 80px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="padding: 10px;"><i class="fas fa-trash"></i></button>
+  `;
+  container.appendChild(row);
+}
 function openProductModal(p) {
   currentProductId = p?.id||null;
   document.getElementById('prod-modal-title').textContent = p ? 'Modifier Produit' : 'Nouveau Produit';
@@ -2818,33 +2840,68 @@ function openProductModal(p) {
   document.getElementById('prd-sku').value=p?.sku||'';
   document.getElementById('prd-price').value=p?.price||'';
   document.getElementById('prd-compare').value=p?.compare_price||'';
-  document.getElementById('prd-stock').value=p?.stock||'';
   document.getElementById('prd-cat').value=p?.category_id||'';
-  document.getElementById('prd-img').value=p?.image_url||'';
   document.getElementById('prd-desc').value=p?.description||'';
   document.getElementById('prd-featured').checked=p?.is_featured||false;
+  
+  // إعادة تعيين الصورة
+  document.getElementById('prd-img-file').value = '';
+  document.getElementById('prd-img-base64').value = p?.image_url || '';
+
+  // إعادة تعيين المقاسات
+  document.getElementById('sizes-container').innerHTML = '';
+  if(p && p.sizes && p.sizes.length > 0) {
+    let sizesObj = typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes;
+    sizesObj.forEach(s => addSizeRow(s.size, s.qty));
+  } else {
+    addSizeRow(); // سطر فارغ افتراضي
+  }
+  
   openModal('modal-product');
 }
 async function saveProduct() {
   const name = document.getElementById('prd-name').value.trim();
   const price = parseFloat(document.getElementById('prd-price').value)||0;
   if(!name||price<1) { toast('Nom et prix sont requis.','err'); return; }
+
+  // حساب الكمية الكلية وجمع المقاسات
+  const sizeRows = document.querySelectorAll('#sizes-container > div');
+  let sizesArray = [];
+  let totalStock = 0;
+  sizeRows.forEach(row => {
+    const sName = row.querySelector('.size-name').value.trim();
+    const sQty = parseInt(row.querySelector('.size-qty').value) || 0;
+    if (sName) {
+      sizesArray.push({ size: sName, qty: sQty });
+      totalStock += sQty;
+    }
+  });
+
   const b = {
-    name, sku:document.getElementById('prd-sku').value.trim()||null,
-    price, compare_price:parseFloat(document.getElementById('prd-compare').value)||null,
-    stock:parseInt(document.getElementById('prd-stock').value)||0,
-    category_id:document.getElementById('prd-cat').value||null,
-    image_url:document.getElementById('prd-img').value.trim()||null,
-    description:document.getElementById('prd-desc').value.trim()||null,
-    is_featured:document.getElementById('prd-featured').checked,
-    is_deleted:false
+    name, 
+    sku: document.getElementById('prd-sku').value.trim()||null,
+    price, 
+    compare_price: parseFloat(document.getElementById('prd-compare').value)||null,
+    stock: totalStock, // تم حسابه آلياً
+    sizes: sizesArray, // سيتم حفظه كملف JSON في قاعدة البيانات
+    category_id: document.getElementById('prd-cat').value||null,
+    image_url: document.getElementById('prd-img-base64').value || null,
+    description: document.getElementById('prd-desc').value.trim()||null,
+    is_featured: document.getElementById('prd-featured').checked,
+    is_deleted: false
   };
-  const { error } = currentProductId ? await dbFrom('products').update(b).eq('id',currentProductId) : await dbFrom('products').insert([b]);
+
+  const { error } = currentProductId 
+    ? await dbFrom('products').update(b).eq('id',currentProductId) 
+    : await dbFrom('products').insert([b]);
+    
   if(!error) {
     toast(currentProductId?'Produit modifié !':'Produit créé !');
-    logAudit('product', `Produit ${currentProductId?'modifié':'créé'}: ${name}`, 'product');
-    closeModal('modal-product'); await loadAll();
-  } else toast('Erreur lors de la sauvegarde.','err');
+    closeModal('modal-product'); 
+    await loadAll();
+  } else {
+    toast('Erreur DB: Vérifiez que la colonne "sizes" existe (type JSON).','err');
+  }
 }
 async function deleteProduct(id) {
   if(!confirm('Supprimer ce produit ?')) return;
