@@ -284,30 +284,32 @@ function renderProducts(products) {
 
     products.forEach(p => {
         const isOutOfStock = p.stock <= 0;
+        const outOfStockText = translations[currentLanguage].out_of_stock;
+        
         const card = document.createElement('div');
         card.className = `product-card ${isOutOfStock ? 'out-of-stock' : ''}`;
         
-        // نضع data-key="out_of_stock" ليتغير النص تلقائياً مع نظام الترجمة الخاص بك
         card.innerHTML = `
-            ${isOutOfStock ? `<div class="out-of-stock-badge" data-key="out_of_stock">${translations[currentLanguage].out_of_stock}</div>` : ''}
-            <img src="${p.image_url}" alt="${p.name}">
+            ${isOutOfStock ? `<div class="out-of-stock-badge">${outOfStockText}</div>` : ''}
+            <img src="${p.image_url || p.image}" alt="${p.name}"> <!-- دعم لأسماء أعمدة الصور المتعددة -->
             <div class="product-details">
                 <h3 class="product-name">${p.name}</h3>
                 <p class="product-price">${p.price} DZD</p>
                 <div class="product-actions">
-                    <button class="add-to-cart-btn" ${isOutOfStock ? 'disabled' : ''} data-key="${isOutOfStock ? 'out_of_stock' : ''}">
-                        ${isOutOfStock ? translations[currentLanguage].out_of_stock : 'Ajouter'}
+                    <button class="add-to-cart-btn" ${isOutOfStock ? 'disabled' : ''}>
+                        ${isOutOfStock ? outOfStockText : 'Ajouter'}
                     </button>
-                    <button class="details-btn">Détails</button>
+                    <!-- الزر المفقود تمت إضافته هنا -->
+                    <button class="details-btn">Détails</button> 
                 </div>
             </div>
         `;
+        
+        // ربط أزرار البطاقة بالوظائف
         addCardLogic(card, p);
         grid.appendChild(card);
     });
-}
-
-function renderReviews(reviews) {
+}function renderReviews(reviews) {
     const container = document.querySelector('.reviews-container');
     if (!container) return;
     container.innerHTML = '';
