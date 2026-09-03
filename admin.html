@@ -1977,7 +1977,6 @@ a { text-decoration: none; }
   </div>
 </div>
 
-<!-- Product -->
 <!-- Product Modal -->
 <div class="modal-overlay" id="modal-product">
   <div class="modal-box modal-lg">
@@ -1985,51 +1984,57 @@ a { text-decoration: none; }
       <h3 id="prod-modal-title">Nouveau Produit</h3>
       <button class="modal-close" onclick="closeModal('modal-product')"><i class="fas fa-times"></i></button>
     </div>
+
     <div class="modal-body">
       <div class="form-row form-row-2">
         <div class="fg"><label>Nom *</label><input type="text" id="prd-name" placeholder="T-shirt Premium"></div>
         <div class="fg"><label>SKU</label><input type="text" id="prd-sku" placeholder="SKU-001"></div>
       </div>
+
       <div class="form-row form-row-3">
         <div class="fg"><label>Prix (DA) *</label><input type="number" id="prd-price" placeholder="2500"></div>
         <div class="fg"><label>Prix barré (DA)</label><input type="number" id="prd-compare" placeholder="3500"></div>
         <div class="fg"><label>Stock</label><input type="number" id="prd-stock" placeholder="100"></div>
       </div>
+
       <div class="form-row form-row-2">
-        <div class="fg"><label>Catégorie</label><select id="prd-cat"><option value="">— Aucune —</option></select></div>
+        <div class="fg">
+          <label>Catégorie</label>
+          <select id="prd-cat"><option value="">— Aucune —</option></select>
+        </div>
+
         <div class="fg">
           <label>Image(s) du Produit</label>
-          <input type="file" id="prd-img-file" accept="image/*" multiple style="background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:8px; color:var(--text); width:100%;">
-          <div id="image-preview-container" style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:5px;"></div>
+          
+          <!-- حاوية الصور وزر الإضافة -->
+          <div class="flex items-center gap-3 overflow-x-auto py-2" id="gallery-container">
+            
+            <!-- زر الرفع المبدئي (يظهر فقط إذا لم توجد صورة رئيسية) -->
+            <label id="initial-upload-btn" class="w-24 h-24 border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer transition bg-gray-50 hover:bg-gray-100 flex-shrink-0 group">
+              <svg class="w-7 h-7 text-gray-400 group-hover:text-emerald-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+              <span class="text-[11px] text-gray-500 group-hover:text-emerald-700 font-medium mt-1">Principale</span>
+              <input type="file" accept="image/*" class="hidden" onchange="handleMainImage(event)">
+            </label>
+
+            <!-- حاوية عرض الصور المرفوعة (الرئيسية والإضافية) -->
+            <div id="images-preview-list" class="flex items-center gap-3"></div>
+
+            <!-- زر الإضافة (+) : مخفي افتراضياً ولا يظهر إلا بعد رفع الصورة الرئيسية -->
+            <label id="add-more-btn" class="hidden w-24 h-24 border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer transition bg-gray-50 hover:bg-gray-100 flex-shrink-0 group">
+              <svg class="w-7 h-7 text-gray-400 group-hover:text-emerald-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span class="text-[11px] text-gray-500 group-hover:text-emerald-700 font-medium mt-1">Ajouter</span>
+              <input type="file" name="product_images[]" accept="image/*" multiple class="hidden" onchange="handleAdditionalImages(event)">
+            </label>
+
+          </div>
         </div>
-         
       </div>
-<div class="flex items-center gap-3">
-  <!-- معاينة الصورة الحالية -->
-  <div class="relative w-24 h-24 rounded-lg overflow-hidden border border-emerald-500 shadow-sm flex-shrink-0">
-    <span class="absolute top-0 left-0 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-br-md z-10">
-      Principale
-    </span>
-    <img src="path_to_image.jpg" alt="Image principale" class="w-full h-full object-cover" id="mainImagePreview">
+    </div>
   </div>
-
-  <!-- زر الإضافة (+) -->
-  <label class="w-24 h-24 border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer transition bg-gray-50 hover:bg-gray-100 flex-shrink-0 group">
-    <!-- أيقونة الزائد -->
-    <svg class="w-7 h-7 text-gray-400 group-hover:text-emerald-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-    </svg>
-    <span class="text-[11px] text-gray-500 group-hover:text-emerald-700 font-medium mt-1">Ajouter</span>
-
-    <!-- حقل الإدخال: يقبل المعرض والكاميرا تلقائياً -->
-    <input 
-      type="file" 
-      name="product_images[]" 
-      accept="image/*" 
-      class="hidden" 
-      onchange="handleNewImage(event)"
-    >
-  </label>
 </div>
       <div class="fg" style="background: var(--bg3); padding: 15px; border-radius: 12px; margin-top: 10px;">
         <label style="color: var(--accent);"><i class="fas fa-ruler-combined"></i> Tailles, Couleurs et Quantités</label>
@@ -3619,6 +3624,64 @@ function handleNewImage(event) {
     console.log("تم تحميل الصورة:", file.name);
   };
   reader.readAsDataURL(file);
+}
+   let productImages = [];
+
+function handleMainImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  productImages.unshift(file);
+  renderGallery();
+}
+
+function handleAdditionalImages(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+
+  productImages.push(...files);
+  renderGallery();
+  e.target.value = '';
+}
+
+function removeImage(index) {
+  productImages.splice(index, 1);
+  renderGallery();
+}
+
+function renderGallery() {
+  const previewList = document.getElementById('images-preview-list');
+  const initialBtn = document.getElementById('initial-upload-btn');
+  const addBtn = document.getElementById('add-more-btn');
+
+  previewList.innerHTML = '';
+
+  if (productImages.length === 0) {
+    initialBtn.classList.remove('hidden');
+    addBtn.classList.add('hidden');
+    return;
+  }
+
+  initialBtn.classList.add('hidden');
+  addBtn.classList.remove('hidden');
+
+  productImages.forEach((file, index) => {
+    const isMain = index === 0;
+    const url = URL.createObjectURL(file);
+
+    const card = document.createElement('div');
+    card.className = `relative w-24 h-24 rounded-lg overflow-hidden border ${isMain ? 'border-emerald-500' : 'border-gray-200'} shadow-sm flex-shrink-0 group`;
+
+    card.innerHTML = `
+      ${isMain ? '<span class="absolute top-0 left-0 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-br-md z-10">Principale</span>' : ''}
+      <img src="${url}" class="w-full h-full object-cover">
+      <button type="button" onclick="removeImage(${index})" class="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition z-10">
+        &times;
+      </button>
+    `;
+
+    previewList.appendChild(card);
+  });
 }
 </script>
 </body>
