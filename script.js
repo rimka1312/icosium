@@ -298,62 +298,106 @@ function openDetails(p) {
     document.getElementById('modal-product-price').textContent = p.price + ' DZD';
 
     const opts = document.getElementById('modal-product-options');
-    opts.innerHTML = '';
-    let parsedSizes = [];
-    if (p.sizes) {
-        try { parsedSizes = typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes; } catch(e) {}
-    }
+    if (opts) {
+        opts.innerHTML = '';
+        let parsedSizes = [];
+        if (p.sizes) {
+            try { parsedSizes = typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes; } catch(e) {}
+        }
 
-    let availableColors = [];
-    let availableSizes = [];
-    if (Array.isArray(parsedSizes)) {
-        parsedSizes.forEach(s => {
-            if (s.color && !availableColors.includes(s.color)) availableColors.push(s.color);
-            if (s.size && !availableSizes.includes(s.size)) availableSizes.push(s.size);
+        let availableColors = [];
+        let availableSizes = [];
+        if (Array.isArray(parsedSizes)) {
+            parsedSizes.forEach(s => {
+                if (s.color && !availableColors.includes(s.color)) availableColors.push(s.color);
+                if (s.size && !availableSizes.includes(s.size)) availableSizes.push(s.size);
+            });
+        }
+
+        let html = '';
+        if (availableColors.length > 0) {
+            html += `<div class="modal-opts-group"><label>${translations[currentLanguage].colors || 'Couleurs'}</label><div class="product-colors" style="display:flex; gap:8px; flex-wrap:wrap;">` 
+                + availableColors.map(c => `<span class="color-box" data-val="${c}" style="border:1.5px solid var(--color-border); padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:600;">${c}</span>`).join('')
+                + '</div></div>';
+        }
+        if (availableSizes.length > 0) {
+            html += `<div class="modal-opts-group" style="margin-top:12px;"><label>${translations[currentLanguage].sizes || 'Tailles'}</label><div class="product-sizes" style="display:flex; gap:8px; flex-wrap:wrap;">`
+                + availableSizes.map(s => `<span class="size-box" data-val="${s}" style="border:1.5px solid var(--color-border); padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:600;">${s}</span>`).join('')
+                + '</div></div>';
+        }
+
+        // إضافة حقل اختيار الكمية (Quantity Selector) داخل النافذة
+        html += `
+            <div class="modal-opts-group" style="margin-top:14px;">
+                <label>Quantité</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button type="button" id="qty-minus" style="width:36px; height:36px; border:1px solid var(--color-border); background:var(--color-bg); border-radius:8px; cursor:pointer; font-weight:bold;">-</button>
+                    <input type="number" id="modal-product-qty" value="1" min="1" max="50" style="width:60px; height:36px; text-align:center; border:1px solid var(--color-border); border-radius:8px; background:var(--color-bg); color:var(--color-text); font-weight:bold;">
+                    <button type="button" id="qty-plus" style="width:36px; height:36px; border:1px solid var(--color-border); background:var(--color-bg); border-radius:8px; cursor:pointer; font-weight:bold;">+</button>
+                </div>
+            </div>
+        `;
+
+        opts.innerHTML = html;
+
+        // تفاعلات اختيار الألوان والمقاسات
+        let selColor = availableColors.length > 0 ? null : 'Standard';
+        let selSize = availableSizes.length > 0 ? null : 'Standard';
+
+        opts.querySelectorAll('.color-box').forEach(b => b.addEventListener('click', e => {
+            opts.querySelectorAll('.color-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; x.style.color = 'var(--color-text)'; });
+            e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = '#fff';
+            selColor = e.target.dataset.val;
+        }));
+        
+        opts.querySelectorAll('.size-box').forEach(b => b.addEventListener('click', e => {
+            opts.querySelectorAll('.size-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; x.style.color = 'var(--color-text)'; });
+            e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = '#fff';
+            selSize = e.target.dataset.val;
+        }));
+
+        // أزرار زيادة ونقصان الكمية
+        const qtyInput = document.getElementById('modal-product-qty');
+        document.getElementById('qty-minus')?.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value) || 1;
+            if (val > 1) qtyInput.value = val - 1;
         });
-    }
-
-    let html = '';
-    if (availableColors.length > 0) {
-        html += `<div class="modal-opts-group"><label>${translations[currentLanguage].colors}</label><div class="product-colors" style="display:flex; gap:8px;">` 
-            + availableColors.map(c => `<span class="color-box" data-val="${c}" style="border:1.5px solid var(--color-border); padding:5px 12px; border-radius:6px; cursor:pointer;">${c}</span>`).join('')
-            + '</div></div>';
-    }
-    if (availableSizes.length > 0) {
-        html += `<div class="modal-opts-group" style="margin-top:10px;"><label>${translations[currentLanguage].sizes}</label><div class="product-sizes" style="display:flex; gap:8px;">`
-            + availableSizes.map(s => `<span class="size-box" data-val="${s}" style="border:1.5px solid var(--color-border); padding:5px 12px; border-radius:6px; cursor:pointer;">${s}</span>`).join('')
-            + '</div></div>';
-    }
-    opts.innerHTML = html;
-
-    let selColor = null, selSize = null;
-    opts.querySelectorAll('.color-box').forEach(b => b.addEventListener('click', e => {
-        opts.querySelectorAll('.color-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; });
-        e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = '#fff';
-        selColor = e.target.dataset.val;
-    }));
-    opts.querySelectorAll('.size-box').forEach(b => b.addEventListener('click', e => {
-        opts.querySelectorAll('.size-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; });
-        e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = '#fff';
-        selSize = e.target.dataset.val;
-    }));
-
-    const cartBtn = document.getElementById('modal-add-to-cart-btn');
-    const newCartBtn = cartBtn.cloneNode(true);
-    cartBtn.parentNode.replaceChild(newCartBtn, cartBtn);
-
-    if (isComingSoon) {
-        newCartBtn.disabled = true;
-        newCartBtn.style.opacity = '0.5';
-    } else {
-        newCartBtn.disabled = false;
-        newCartBtn.style.opacity = '1';
-        newCartBtn.addEventListener('click', () => {
-            if (availableColors.length && !selColor) return alert(translations[currentLanguage].alert_color);
-            if (availableSizes.length && !selSize) return alert(translations[currentLanguage].alert_size);
-            addToCart({ id: `${p.id}-${selColor}-${selSize}`, ...p, color: selColor, size: selSize, qty: 1 });
-            modal.style.display = 'none';
+        document.getElementById('qty-plus')?.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value) || 1;
+            qtyInput.value = val + 1;
         });
+
+        // زر الإضافة للسلة وتفعيل وظائفه بالكامل
+        const cartBtn = document.getElementById('modal-add-to-cart-btn');
+        const newCartBtn = cartBtn.cloneNode(true);
+        cartBtn.parentNode.replaceChild(newCartBtn, cartBtn);
+
+        if (isComingSoon) {
+            newCartBtn.disabled = true;
+            newCartBtn.style.opacity = '0.5';
+            newCartBtn.textContent = "Bientôt disponible";
+        } else {
+            newCartBtn.disabled = false;
+            newCartBtn.style.opacity = '1';
+            newCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Ajouter au panier';
+            
+            newCartBtn.addEventListener('click', () => {
+                if (availableColors.length > 0 && !selColor) return alert(translations[currentLanguage].alert_color || "Veuillez choisir une couleur");
+                if (availableSizes.length > 0 && !selSize) return alert(translations[currentLanguage].alert_size || "Veuillez choisir une taille");
+                
+                const quantity = parseInt(qtyInput?.value, 10) || 1;
+
+                addToCart({ 
+                    id: `${p.id}-${selColor}-${selSize}`, 
+                    ...p, 
+                    color: selColor, 
+                    size: selSize, 
+                    qty: quantity,
+                    price: p.price * quantity // حساب السعر الإجمالي للكمية المختارة
+                });
+                modal.style.display = 'none';
+            });
+        }
     }
 
     modal.style.display = 'block';
