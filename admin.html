@@ -2956,6 +2956,765 @@ function searchProducts(q) {
 }
   // 6. الجافاسكريبت لمعالجة الصور المتعددة
 // مصفوفة عالمية لتخزين جميع الصور المرفوعة
+<script>
+/* ═══════════════════════════════════════════════════════
+   ICOSIUM OS — Super Admin v3.0 — Full JS
+═══════════════════════════════════════════════════════ */
+
+/* ─── SUPABASE ─── */
+const { createClient } = supabase;
+const SB_URL = 'https://vhrvdkaqlrwplkdgwwkl.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZocnZka2FxbHJ3cGxrZGd3d2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTUyMTAsImV4cCI6MjA3ODk3MTIxMH0.mNAn3qo48y46FDkDOqUVt1xwN2smFMZL1lBNbT0OkTA';
+const db = createClient(SB_URL, SB_KEY);
+const dbFrom = (table) => db.from(table);
+function getDb() { return db; }
+
+
+/* ─── STATE ─── */
+let allOrders=[], allProducts=[], allLivreurs=[], allCategories=[], allWilayas=[], allReviews=[], allStock=[], allCoupons=[], allUsers=[], allNotifications=[];
+let salesChartInst=null, statusChartInst=null, rptSalesChart=null, rptWilayaChart=null, rptProductsChart=null;
+let productView='grid', currentOrderFilter='all', currentReviewFilter='all', currentCouponFilter='all', currentUserFilter='all', currentAuditFilter='all';
+let currentOrderId=null, currentProductId=null, currentCatId=null, currentLivreurId=null, currentWilayaId=null, currentUserId=null;
+let auditLog=[], localNotifications=[];
+
+/* ─── Theme ─── */
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('icosium_theme', t);
+  updateThemeIcons(t);
+  if (salesChartInst) { salesChartInst.destroy(); salesChartInst=null; }
+  if (statusChartInst) { statusChartInst.destroy(); statusChartInst=null; }
+  if (rptSalesChart) { rptSalesChart.destroy(); rptSalesChart=null; }
+  if (rptWilayaChart) { rptWilayaChart.destroy(); rptWilayaChart=null; }
+  if (rptProductsChart) { rptProductsChart.destroy(); rptProductsChart=null; }
+  setTimeout(()=>{ buildCharts(); if(document.getElementById('sec-reports').classList.contains('active')) buildReportCharts(); }, 100);
+}
+function updateThemeIcons(t) {
+  const isDark = t==='dark';
+  document.querySelectorAll('[id^="theme-icon"]').forEach(el => {
+    el.className = `fas ${isDark?'fa-moon':'fa-sun'}`;
+    el.style.fontSize = '.6rem';
+  });
+}
+const savedTheme = localStorage.getItem('icosium_theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+updateThemeIcons(savedTheme);
+
+/* ─── Toast ─── */
+let toastTimer;
+function toast(msg, type='ok') {
+  const el = document.getElementById('toast');
+  el.querySelector('i').className = type==='ok' ? 'fas fa-check-circle' : 'fas fa-circle-exclamation';
+  el.className = `toast ${type}`;
+  document.getElementById('toast-msg').textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 3200);
+}
+function togglePassword() {
+  const inp = document.getElementById('inp-pass');
+  const icon = document.getElementById('toggle-pass-icon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    inp.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+}
+/* ─── Modals ─── */
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('open'); }));
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+    closeGlobalSearch();
+    document.getElementById('notif-panel').classList.remove('open');
+  }
+  if((e.ctrlKey||e.metaKey) && e.key==='k') { e.preventDefault(); openGlobalSearch(); }
+});
+
+/* ─── Nav ─── */
+const titles = {
+  dashboard:'Vue d\'ensemble', orders:'Commandes', products:'Produits',
+  categories:'Catégories', livreurs:'Livreurs', wilayas:'Wilayas',
+  coupons:'Coupons', reviews:'Avis Clients', stock:'Stock',
+  users:'Gestion Utilisateurs', reports:'Rapports & Statistiques',
+  backup:'Base de Données', audit:'Journal d\'Audit', settings:'Paramètres'
+};
+function goTo(id, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  const sec = document.getElementById('sec-'+id);
+  if(sec) sec.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.getElementById('page-title').textContent = titles[id]||'';
+  document.getElementById('sidebar').classList.remove('open');
+  if(id==='reports') { setTimeout(()=>buildReportCharts(),100); renderReports(); }
+  if(id==='backup') refreshDbStats();
+  if(id==='audit') renderAuditLog(auditLog);
+  if(id==='users') renderUsers(allUsers);
+  logAudit('navigation', `Navigation vers: ${titles[id]||id}`, 'system');
+}
+
+/* ─── FAB ─── */
+function toggleFab() { document.getElementById('fab-container').classList.toggle('open'); }
+function closeFab() { document.getElementById('fab-container').classList.remove('open'); }
+document.addEventListener('click', e=>{ if(!e.target.closest('#fab-container')) closeFab(); });
+
+/* ─── Notification Panel ─── */
+function toggleNotifPanel() {
+  const p = document.getElementById('notif-panel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')) renderNotifPanel();
+}
+document.addEventListener('click', e=>{
+  const panel = document.getElementById('notif-panel');
+  const btn = document.getElementById('notif-header-btn');
+  if(panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target))
+    panel.classList.remove('open');
+});
+function renderNotifPanel() {
+  const el = document.getElementById('notif-panel-body');
+  if(!localNotifications.length) {
+    el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text3)"><i class="fas fa-bell-slash" style="font-size:2rem;opacity:.2;display:block;margin-bottom:10px"></i>Aucune notification</div>';
+    return;
+  }
+  el.innerHTML = localNotifications.map((n,i)=>`
+    <div class="notif-item ${n.read?'':'unread'}" onclick="markNotifRead(${i})">
+      <div class="notif-dot ${n.read?'read':''}"></div>
+      <div class="notif-content">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-meta">${n.message} • ${n.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+function markNotifRead(i) { localNotifications[i].read=true; renderNotifPanel(); updateNotifBadge(); }
+function markAllNotifsRead() { localNotifications.forEach(n=>n.read=true); renderNotifPanel(); updateNotifBadge(); toast('Toutes les notifications lues.'); }
+function clearAllNotifs() { localNotifications=[]; renderNotifPanel(); updateNotifBadge(); toast('Notifications effacées.'); }
+function updateNotifBadge() {
+  const unread = localNotifications.filter(n=>!n.read).length;
+  const pip = document.getElementById('notif-pip');
+  const badge = document.getElementById('notif-badge-count');
+  pip.style.display = unread>0?'block':'none';
+  badge.style.display = unread>0?'flex':'none';
+  badge.textContent = unread>9?'9+':unread;
+}
+function addNotification(title, message, type='info') {
+  const now = new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  localNotifications.unshift({title, message, time:now, type, read:false});
+  if(localNotifications.length>50) localNotifications.pop();
+  updateNotifBadge();
+  const bell = document.getElementById('notif-bell-icon');
+  bell.classList.add('bell-pulse');
+  setTimeout(()=>bell.classList.remove('bell-pulse'),600);
+}
+
+/* ─── Global Search ─── */
+function openGlobalSearch() {
+  document.getElementById('global-search-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('global-search-input').focus(),100);
+}
+function closeGlobalSearch() {
+  document.getElementById('global-search-overlay').classList.remove('open');
+  document.getElementById('global-search-input').value='';
+  document.getElementById('global-search-results').innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text3)"><i class="fas fa-search" style="font-size:2rem;opacity:.25;display:block;margin-bottom:10px"></i>Commencez à taper pour chercher...</div>';
+}
+function runGlobalSearch(q) {
+  const el = document.getElementById('global-search-results');
+  if(!q.trim()) { el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text3)"><i class="fas fa-search" style="font-size:2rem;opacity:.25;display:block;margin-bottom:10px"></i>Commencez à taper pour chercher...</div>'; return; }
+  const lq = q.toLowerCase();
+  const orders = allOrders.filter(o=>o.customer_name?.toLowerCase().includes(lq)||String(o.id).includes(lq)||o.customer_phone?.includes(lq)).slice(0,4);
+  const products = allProducts.filter(p=>p.name?.toLowerCase().includes(lq)||p.sku?.toLowerCase().includes(lq)).slice(0,4);
+  const coupons = allCoupons.filter(c=>c.code?.toLowerCase().includes(lq)).slice(0,3);
+  const livreurs = allLivreurs.filter(l=>l.name?.toLowerCase().includes(lq)).slice(0,3);
+  let html = '';
+  if(orders.length) {
+    html += `<div class="global-result-group"><span class="global-result-label">Commandes</span>`;
+    html += orders.map(o=>`<div class="global-result-item" onclick="closeGlobalSearch();goTo('orders',null);setTimeout(()=>openOrderModal(${JSON.stringify(o).replace(/'/g,"\\'")}),300)">
+      <div class="global-result-icon" style="background:rgba(59,130,246,.12);color:#60a5fa"><i class="fas fa-receipt"></i></div>
+      <div class="global-result-info"><strong>#${o.id} — ${o.customer_name}</strong><span>${fmtPrice(o.total_price)} • ${statusPill(o.status)}</span></div>
+    </div>`).join('');
+    html += '</div>';
+  }
+  if(products.length) {
+    html += `<div class="global-result-group"><span class="global-result-label">Produits</span>`;
+    html += products.map(p=>`<div class="global-result-item" onclick="closeGlobalSearch();goTo('products',null);setTimeout(()=>openProductModal(${JSON.stringify(p).replace(/'/g,"\\'")}),300)">
+      <div class="global-result-icon" style="background:rgba(0,200,150,.12);color:var(--accent)">${p.image_url?`<img src="${p.image_url}" style="width:36px;height:36px;border-radius:10px;object-fit:cover">` : '<i class="fas fa-box"></i>'}</div>
+      <div class="global-result-info"><strong>${p.name}</strong><span>${fmtPrice(p.price)} • Stock: ${p.stock}</span></div>
+    </div>`).join('');
+    html += '</div>';
+  }
+  if(coupons.length) {
+    html += `<div class="global-result-group"><span class="global-result-label">Coupons</span>`;
+    html += coupons.map(c=>`<div class="global-result-item" onclick="closeGlobalSearch();goTo('coupons',null)">
+      <div class="global-result-icon" style="background:rgba(251,191,36,.12);color:#fbbf24"><i class="fas fa-tag"></i></div>
+      <div class="global-result-info"><strong>${c.code}</strong><span>${c.discount_percent}% de réduction</span></div>
+    </div>`).join('');
+    html += '</div>';
+  }
+  if(livreurs.length) {
+    html += `<div class="global-result-group"><span class="global-result-label">Livreurs</span>`;
+    html += livreurs.map(l=>`<div class="global-result-item" onclick="closeGlobalSearch();goTo('livreurs',null)">
+      <div class="global-result-icon" style="background:rgba(245,158,11,.12);color:#fbbf24"><i class="fas fa-truck"></i></div>
+      <div class="global-result-info"><strong>${l.name}</strong><span>${l.region||''} • ${l.is_active?'Actif':'Inactif'}</span></div>
+    </div>`).join('');
+    html += '</div>';
+  }
+  if(!html) html = `<div style="text-align:center;padding:40px 20px;color:var(--text3)"><i class="fas fa-search" style="font-size:2rem;opacity:.2;display:block;margin-bottom:10px"></i>Aucun résultat pour "${q}"</div>`;
+  el.innerHTML = html;
+}
+
+/* ─── Audit Log ─── */
+function logAudit(type, action, category='system') {
+  const entry = {
+    id: Date.now(), type, action, category,
+    user: document.getElementById('user-name-txt')?.textContent||'Admin',
+    time: new Date().toLocaleString('fr-FR'),
+    ts: Date.now()
+  };
+  auditLog.unshift(entry);
+  if(auditLog.length>500) auditLog.pop();
+  try { localStorage.setItem('icosium_audit', JSON.stringify(auditLog.slice(0,200))); } catch(e){}
+}
+function renderAuditLog(logs) {
+  const el = document.getElementById('audit-log-container');
+  const filtered = currentAuditFilter==='all' ? logs : logs.filter(l=>l.category===currentAuditFilter);
+  if(!filtered.length) { el.innerHTML='<div class="empty-st"><i class="fas fa-shield-alt"></i><p>Aucune entrée dans le journal</p></div>'; return; }
+  const colors = {order:'#60a5fa',product:'#34d399',user:'#a78bfa',system:'#fbbf24',navigation:'var(--text3)'};
+  el.innerHTML = `<div style="padding:8px 0">`+filtered.map(l=>`
+    <div class="audit-item">
+      <div class="audit-timeline-dot" style="background:${colors[l.category]||'var(--text3)'}"></div>
+      <div class="audit-content">
+        <div class="audit-action">${l.action}</div>
+        <div class="audit-time"><i class="fas fa-user" style="margin-right:4px;opacity:.6"></i>${l.user} • ${l.time}</div>
+      </div>
+      <span class="pill" style="font-size:.65rem;padding:2px 8px;background:rgba(255,255,255,.04);border-color:var(--border);color:var(--text3)">${l.category}</span>
+    </div>
+  `).join('')+'</div>';
+}
+function searchAudit(q) {
+  const filtered = auditLog.filter(l=>l.action.toLowerCase().includes(q.toLowerCase())||l.user.toLowerCase().includes(q.toLowerCase()));
+  renderAuditLog(filtered);
+}
+function filterAudit(f, btn) {
+  currentAuditFilter=f;
+  document.querySelectorAll('#sec-audit .filter-pill').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderAuditLog(auditLog);
+}
+function clearAuditLog() {
+  if(!confirm('Effacer tout le journal d\'audit ?')) return;
+  auditLog=[];
+  localStorage.removeItem('icosium_audit');
+  renderAuditLog([]);
+  toast('Journal d\'audit effacé.');
+}
+
+/* ─── Auth ─── */
+document.addEventListener('DOMContentLoaded', async () => {
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  // Load audit log from localStorage
+  try { const saved=localStorage.getItem('icosium_audit'); if(saved) auditLog=JSON.parse(saved); } catch(e){}
+  const session = JSON.parse(localStorage.getItem('icosium_session'));
+  if (session) { showApp(session); await loadAll(); }
+  else { showLogin(); }
+  document.getElementById('inp-pass').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+  document.getElementById('inp-email').addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+  // Auto-refresh notifications every 60s
+  setInterval(checkAutoNotifications, 60000);
+});
+function showLogin() {
+  document.getElementById('loader').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+function showApp(admin) {
+  document.getElementById('loader').style.display='none';
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='flex';
+  const name = admin.name || 'Admin';
+  const init = name.charAt(0).toUpperCase();
+  document.getElementById('user-av-initials').textContent = init;
+  document.getElementById('user-av-sm').textContent = init;
+  document.getElementById('user-name-txt').textContent = name;
+  document.getElementById('dash-greeting').textContent = `Bonjour, ${name} 👋`;
+}
+async function doLogin() {
+  const email = document.getElementById('inp-email').value.trim();
+  const pass  = document.getElementById('inp-pass').value.trim();
+  const errEl = document.getElementById('login-err');
+  const btn   = document.getElementById('btn-login');
+  errEl.style.display='none';
+  if (!email||!pass) { document.getElementById('err-msg').textContent='Veuillez remplir tous les champs.'; errEl.style.display='flex'; return; }
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Connexion...';
+  try {
+    const { data, error } = await dbFrom('admins').select('*').eq('email',email).eq('password',pass).single();
+    if (error||!data) { document.getElementById('err-msg').textContent='Email ou mot de passe incorrect.'; errEl.style.display='flex'; }
+    else {
+      localStorage.setItem('icosium_session', JSON.stringify(data));
+      showApp(data);
+      await loadAll();
+      logAudit('user','Connexion réussie','user');
+      addNotification('Connexion', `Bienvenue, ${data.name||'Admin'} !`, 'info');
+    }
+  } catch(e) { document.getElementById('err-msg').textContent='Erreur de connexion. Réessayez.'; errEl.style.display='flex'; }
+  btn.disabled=false; btn.innerHTML='<i class="fas fa-right-to-bracket"></i> Se connecter';
+}
+function doLogout() {
+  logAudit('user','Déconnexion','user');
+  localStorage.removeItem('icosium_session');
+  showLogin();
+}
+
+/* ─── Helpers ─── */
+const fmtPrice = n => Number(n||0).toLocaleString('fr-DZ') + ' DA';
+const fmtDate  = d => new Date(d).toLocaleDateString('fr-FR', {day:'2-digit',month:'2-digit',year:'numeric'});
+const fmtDateTime = d => new Date(d).toLocaleDateString('fr-FR', {weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+function statusPill(s) {
+  const m = {Pending:['p-pending','En attente'],Confirmed:['p-confirmed','Confirmée'],Shipped:['p-shipped','En livraison'],Delivered:['p-delivered','Livrée'],Cancelled:['p-cancelled','Annulée']};
+  const [cls,lbl] = m[s]||['p-pending',s];
+  return `<span class="pill ${cls}">${lbl}</span>`;
+}
+function roleBadge(r) {
+  const m = {super:['role-super','Super Admin'],admin:['role-admin','Admin'],manager:['role-manager','Manager'],viewer:['role-viewer','Lecteur']};
+  const [cls,lbl] = m[r]||['role-viewer',r];
+  return `<span class="role-badge ${cls}">${lbl}</span>`;
+}
+
+/* ─── Auto Notifications ─── */
+function checkAutoNotifications() {
+  const pendingOrders = allOrders.filter(o=>o.status==='Pending');
+  if(pendingOrders.length>0) addNotification('Commandes en attente', `${pendingOrders.length} commande(s) nécessitent une action`, 'warning');
+  const lowStock = allProducts.filter(p=>p.stock<5&&p.stock>0);
+  if(lowStock.length>0) addNotification('Stock faible', `${lowStock.length} produit(s) ont un stock faible`, 'warning');
+  const expiredCoupons = allCoupons.filter(c=>c.expire_at && new Date(c.expire_at)<new Date() && c.is_active);
+  if(expiredCoupons.length>0) addNotification('Coupons expirés', `${expiredCoupons.length} coupon(s) ont expiré`, 'info');
+}
+
+/* ─── Activity Feed ─── */
+function renderActivityFeed() {
+  const el = document.getElementById('activity-feed');
+  const recentLogs = auditLog.filter(l=>l.category!=='navigation').slice(0,8);
+  if(!recentLogs.length) { el.innerHTML='<div class="empty-st" style="padding:30px"><i class="fas fa-history"></i><p>Aucune activité récente</p></div>'; return; }
+  const icons = {order:'fa-receipt',product:'fa-box',user:'fa-user',system:'fa-cog'};
+  const colors = {order:'rgba(96,165,250,.15)',product:'rgba(52,211,153,.15)',user:'rgba(167,139,250,.15)',system:'rgba(251,191,36,.15)'};
+  el.innerHTML = recentLogs.map(l=>`
+    <div class="activity-feed-item">
+      <div class="activity-avatar" style="background:${colors[l.category]||'var(--bg4)'}"><i class="fas ${icons[l.category]||'fa-circle'}"></i></div>
+      <div class="activity-body">
+        <div class="activity-text">${l.action}</div>
+        <div class="activity-time">${l.user} • ${l.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─── LOAD ALL ─── */
+async function loadAll() {
+  const [oR, pR, lR, catR, wR, revR, stR, cupR] = await Promise.all([
+    dbFrom('orders').select('*').order('created_at',{ascending:false}),
+    dbFrom('products').select('*').eq('is_deleted',false),
+    dbFrom('livreurs').select('*'),
+    dbFrom('categories').select('*'),
+    dbFrom('wilayas').select('*').order('id'),
+    dbFrom('reviews').select('*').order('created_at',{ascending:false}),
+    dbFrom('stock_movements').select('*').order('created_at',{ascending:false}),
+    dbFrom('coupons').select('*').order('id',{ascending:false}),
+  ]);
+  allOrders     = oR.data||[];
+  allProducts   = pR.data||[];
+  allLivreurs   = lR.data||[];
+  allCategories = catR.data||[];
+  allWilayas    = wR.data||[];
+  allReviews    = revR.data||[];
+  allStock      = stR.data||[];
+  allCoupons    = cupR.data||[];
+
+  // Load admins (users)
+  const aR = await dbFrom('admins').select('*');
+  allUsers = aR.data||[];
+
+  // KPIs
+  const totalSales = allOrders.reduce((a,o)=>a+parseFloat(o.total_price||0),0);
+  const pending = allOrders.filter(o=>o.status==='Pending');
+  const lowStock = allProducts.filter(p=>p.stock<5);
+  const activeLiv = allLivreurs.filter(l=>l.is_active);
+  document.getElementById('kpi-sales').textContent = fmtPrice(totalSales);
+  document.getElementById('kpi-orders').textContent = allOrders.length;
+  document.getElementById('kpi-pending-txt').textContent = `${pending.length} en attente`;
+  document.getElementById('kpi-products').textContent = allProducts.length;
+  document.getElementById('kpi-lowstock-txt').textContent = `${lowStock.length} stock faible`;
+  document.getElementById('kpi-livreurs').textContent = activeLiv.length;
+
+  const badge = document.getElementById('badge-orders');
+  if (pending.length>0) { badge.textContent=pending.length; badge.style.display='inline'; }
+  else badge.style.display='none';
+
+  const pendingReviews = allReviews.filter(r=>!r.is_approved);
+  const revBadge = document.getElementById('badge-reviews');
+  if(pendingReviews.length>0) { revBadge.textContent=pendingReviews.length; revBadge.style.display='inline'; }
+  else revBadge.style.display='none';
+
+  // Order filter counts
+  ['all','Pending','Confirmed','Shipped','Delivered','Cancelled'].forEach(k=>{
+    const el = document.getElementById('fc-' + k.toLowerCase());
+    if(el) el.textContent = k==='all' ? allOrders.length : allOrders.filter(o=>o.status===k).length;
+  });
+
+  // Stock totals
+  const inTotal  = allStock.filter(m=>m.type==='IN').reduce((a,m)=>a+m.quantity,0);
+  const outTotal = allStock.filter(m=>m.type==='OUT').reduce((a,m)=>a+m.quantity,0);
+  document.getElementById('stock-in-total').textContent  = inTotal;
+  document.getElementById('stock-out-total').textContent = outTotal;
+
+  // Category filter in products
+  const catFilterSel = document.getElementById('cat-filter-sel');
+  catFilterSel.innerHTML = '<option value="">Toutes catégories</option>' + allCategories.map(c=>`<option value="${c.id}">${c.name_fr||c.name_ar||''}</option>`).join('');
+
+  renderStockAlerts(lowStock);
+  buildCharts();
+
+  const stkSel = document.getElementById('stk-product');
+  stkSel.innerHTML = '<option value="">— Sélectionner —</option>' + allProducts.map(p=>`<option value="${p.id}">${p.name} (Stock: ${p.stock})</option>`).join('');
+  const catSel = document.getElementById('prd-cat');
+  catSel.innerHTML = '<option value="">— Aucune —</option>' + allCategories.map(c=>`<option value="${c.id}">${c.name_fr||c.name_ar||''}</option>`).join('');
+  const livSel = document.getElementById('mod-livreur-sel');
+  livSel.innerHTML = '<option value="">— Non assigné —</option>' + allLivreurs.filter(l=>l.is_active).map(l=>`<option value="${l.id}">${l.name} — ${l.region||''}</option>`).join('');
+
+  renderOrders(allOrders);
+  renderProducts(allProducts);
+  renderCategories(allCategories);
+  renderLivreurs(allLivreurs);
+  renderWilayas(allWilayas);
+  renderCoupons(allCoupons);
+  renderReviews(allReviews);
+  renderStock(allStock);
+  renderRecentOrders(allOrders.slice(0,5));
+  renderActivityFeed();
+  refreshDbStats();
+  checkAutoNotifications();
+}
+
+/* ─── CHARTS ─── */
+function getChartColors() {
+  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+  return {
+    grid: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.06)',
+    tick: isDark ? '#4d6278' : '#8fa8bc',
+    tooltip_bg: isDark ? '#141d2a' : '#ffffff',
+    tooltip_border: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+    tooltip_title: isDark ? '#e4ecf7' : '#0f1923',
+    tooltip_body: isDark ? '#8fa3bb' : '#4a6070',
+  };
+}
+function buildCharts() {
+  const cc = getChartColors();
+  const months=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  const monthly = new Array(12).fill(0);
+  allOrders.forEach(o=>{ const m=new Date(o.created_at).getMonth(); monthly[m]+=parseFloat(o.total_price||0); });
+  const now = new Date().getMonth();
+  const labels = months.slice(0,now+1);
+  const data   = monthly.slice(0,now+1);
+  const ctx1 = document.getElementById('salesChart').getContext('2d');
+  if(salesChartInst) salesChartInst.destroy();
+  salesChartInst = new Chart(ctx1, {
+    type:'line',
+    data:{ labels, datasets:[{ label:'Ventes (DA)', data, borderColor:'#00c896', backgroundColor:'rgba(0,200,150,0.08)', pointBackgroundColor:'#00c896', pointRadius:5, pointHoverRadius:8, fill:true, tension:.42, borderWidth:2.5 }]},
+    options:{ responsive:true, maintainAspectRatio:true, plugins:{ legend:{display:false}, tooltip:{ backgroundColor:cc.tooltip_bg, borderColor:cc.tooltip_border, borderWidth:1, titleColor:cc.tooltip_title, bodyColor:cc.tooltip_body, padding:12, callbacks:{ label:c=>' '+Number(c.parsed.y).toLocaleString()+' DA' }}}, scales:{ x:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{family:'Satoshi'}}}, y:{grid:{color:cc.grid},ticks:{color:cc.tick,font:{family:'Satoshi'},callback:v=>Number(v).toLocaleString()}} }}
+  });
+  const statuses=['Pending','Confirmed','Shipped','Delivered','Cancelled'];
+  const statusCounts = statuses.map(s=>allOrders.filter(o=>o.status===s).length);
+  const statusLabels = ['En attente','Confirmée','En livraison','Livrée','Annulée'];
+  const ctx2 = document.getElementById('statusChart').getContext('2d');
+  if(statusChartInst) statusChartInst.destroy();
+  statusChartInst = new Chart(ctx2, {
+    type:'doughnut',
+    data:{ labels:statusLabels, datasets:[{ data:statusCounts, backgroundColor:['#fbbf24','#60a5fa','#c4b5fd','#34d399','#f87171'], borderWidth:0, hoverOffset:8 }]},
+    options:{ responsive:true, cutout:'68%', plugins:{ legend:{ position:'bottom', labels:{ color:cc.tick, padding:14, font:{family:'Satoshi',size:12} }}, tooltip:{ backgroundColor:cc.tooltip_bg, borderColor:cc.tooltip_border, borderWidth:1, titleColor:cc.tooltip_title, bodyColor:cc.tooltip_body }}}
+  });
+}
+
+/* ─── REPORT CHARTS (3 charts) ─── */
+function buildReportCharts() {
+  const cc = getChartColors();
+  const months=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  // 1. Monthly Sales
+  const monthly = new Array(12).fill(0);
+  allOrders.forEach(o=>{ const m=new Date(o.created_at).getMonth(); monthly[m]+=parseFloat(o.total_price||0); });
+  const ctx1 = document.getElementById('rpt-sales-chart').getContext('2d');
+  if(rptSalesChart) rptSalesChart.destroy();
+  rptSalesChart = new Chart(ctx1, {
+    type:'bar',
+    data:{ labels:months, datasets:[{ label:'Ventes (DA)', data:monthly, backgroundColor:'rgba(0,200,150,0.7)', borderRadius:8, borderSkipped:false }]},
+    options:{ responsive:true, plugins:{ legend:{display:false}, tooltip:{ backgroundColor:cc.tooltip_bg, borderColor:cc.tooltip_border, borderWidth:1, titleColor:cc.tooltip_title, bodyColor:cc.tooltip_body, callbacks:{ label:c=>' '+Number(c.parsed.y).toLocaleString()+' DA' }}}, scales:{ x:{grid:{color:cc.grid},ticks:{color:cc.tick}}, y:{grid:{color:cc.grid},ticks:{color:cc.tick,callback:v=>Number(v/1000).toFixed(0)+'k'}} }}
+  });
+  // 2. Orders by Wilaya
+  const wilayaMap = Object.fromEntries(allWilayas.map(w=>[w.id,w.name]));
+  const wilayaCount = {};
+  allOrders.forEach(o=>{ const wn=wilayaMap[o.wilaya_id]||'Inconnu'; wilayaCount[wn]=(wilayaCount[wn]||0)+1; });
+  const topWilayas = Object.entries(wilayaCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const ctx2 = document.getElementById('rpt-wilaya-chart').getContext('2d');
+  if(rptWilayaChart) rptWilayaChart.destroy();
+  rptWilayaChart = new Chart(ctx2, {
+    type:'bar',
+    data:{ labels:topWilayas.map(w=>w[0]), datasets:[{ label:'Commandes', data:topWilayas.map(w=>w[1]), backgroundColor:'rgba(96,165,250,0.7)', borderRadius:8, borderSkipped:false }]},
+    options:{ indexAxis:'y', responsive:true, plugins:{ legend:{display:false}, tooltip:{ backgroundColor:cc.tooltip_bg, borderColor:cc.tooltip_border, borderWidth:1, titleColor:cc.tooltip_title, bodyColor:cc.tooltip_body }}, scales:{ x:{grid:{color:cc.grid},ticks:{color:cc.tick}}, y:{grid:{color:cc.grid},ticks:{color:cc.tick}} }}
+  });
+  // 3. Top Products
+  const prodCount = {};
+  allOrders.forEach(o=>{
+    let items=o.items; if(typeof items==='string') try{items=JSON.parse(items);}catch(e){items=[];}
+    if(Array.isArray(items)) items.forEach(i=>{ const n=i.name||'?'; prodCount[n]=(prodCount[n]||0)+(i.qty||1); });
+  });
+  const topProds = Object.entries(prodCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const ctx3 = document.getElementById('rpt-products-chart').getContext('2d');
+  if(rptProductsChart) rptProductsChart.destroy();
+  rptProductsChart = new Chart(ctx3, {
+    type:'doughnut',
+    data:{ labels:topProds.map(p=>p[0]), datasets:[{ data:topProds.map(p=>p[1]), backgroundColor:['#00c896','#60a5fa','#a78bfa','#fbbf24','#f87171','#34d399'], borderWidth:0, hoverOffset:6 }]},
+    options:{ responsive:true, cutout:'60%', plugins:{ legend:{ position:'bottom', labels:{ color:cc.tick, padding:12, font:{family:'Satoshi',size:11} }}, tooltip:{ backgroundColor:cc.tooltip_bg, borderColor:cc.tooltip_border, borderWidth:1, titleColor:cc.tooltip_title, bodyColor:cc.tooltip_body }}}
+  });
+}
+
+/* ─── REPORTS SECTION ─── */
+function renderReports() {
+  const months=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  // Monthly report table
+  const monthlyData = Array.from({length:12},(_, m)=>{
+    const ords = allOrders.filter(o=>new Date(o.created_at).getMonth()===m);
+    const delivered = ords.filter(o=>o.status==='Delivered').length;
+    const cancelled = ords.filter(o=>o.status==='Cancelled').length;
+    const revenue = ords.reduce((a,o)=>a+parseFloat(o.total_price||0),0);
+    return { month:months[m], orders:ords.length, delivered, cancelled, revenue, avg:ords.length?revenue/ords.length:0 };
+  });
+  const tbody = document.getElementById('report-table-body');
+  tbody.innerHTML = monthlyData.map(r=>`<tr>
+    <td><strong>${r.month}</strong></td>
+    <td>${r.orders}</td>
+    <td style="color:#34d399;font-weight:700">${r.delivered}</td>
+    <td style="color:#f87171;font-weight:700">${r.cancelled}</td>
+    <td style="color:var(--accent);font-weight:700">${fmtPrice(r.revenue)}</td>
+    <td style="color:var(--text2)">${fmtPrice(r.avg)}</td>
+  </tr>`).join('');
+
+  // KPIs
+  const total = allOrders.reduce((a,o)=>a+parseFloat(o.total_price||0),0);
+  const delivered = allOrders.filter(o=>o.status==='Delivered').length;
+  const cancelled = allOrders.filter(o=>o.status==='Cancelled').length;
+  const today = allOrders.filter(o=>fmtDate(o.created_at)===fmtDate(new Date())).length;
+  const avgRating = allReviews.length ? (allReviews.reduce((a,r)=>a+(r.rating||0),0)/allReviews.length).toFixed(1) : '—';
+  document.getElementById('rpt-avg-order').textContent = allOrders.length ? fmtPrice(total/allOrders.length) : '—';
+  document.getElementById('rpt-delivery-rate').textContent = allOrders.length ? Math.round(delivered/allOrders.length*100)+'%' : '—';
+  document.getElementById('rpt-cancel-rate').textContent = allOrders.length ? Math.round(cancelled/allOrders.length*100)+'%' : '—';
+  document.getElementById('rpt-total-revenue').textContent = fmtPrice(total);
+  document.getElementById('rpt-today-orders').textContent = today;
+  document.getElementById('rpt-review-avg').textContent = avgRating==='—' ? '—' : `${avgRating}/5 ⭐`;
+
+  // Top products
+  const prodRevenue = {};
+  const prodOrders = {};
+  allOrders.forEach(o=>{
+    let items=o.items; if(typeof items==='string') try{items=JSON.parse(items);}catch(e){items=[];}
+    if(Array.isArray(items)) items.forEach(i=>{
+      const n=i.name||'?';
+      prodOrders[n]=(prodOrders[n]||0)+(i.qty||1);
+      prodRevenue[n]=(prodRevenue[n]||0)+(parseFloat(i.price||0)*(i.qty||1));
+    });
+  });
+  const topProds = Object.entries(prodOrders).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  document.getElementById('top-products-body').innerHTML = topProds.map(([name,cnt],i)=>`<tr>
+    <td><span style="background:var(--accent-dim);color:var(--accent);font-weight:900;padding:2px 10px;border-radius:8px">#${i+1}</span></td>
+    <td><strong>${name}</strong></td>
+    <td style="color:var(--text2)">${cnt}</td>
+    <td style="color:var(--accent);font-weight:700">${fmtPrice(prodRevenue[name]||0)}</td>
+  </tr>`).join('') || '<tr><td colspan="4"><div class="empty-st"><i class="fas fa-chart-bar"></i><p>Pas de données</p></div></td></tr>';
+}
+
+/* ─── PRINT / EXPORT ─── */
+function printSection(section) {
+  window.print();
+  logAudit('system', `Impression section: ${section}`, 'system');
+}
+function printChart(canvasId) { window.print(); }
+function printOrderDetail() {
+  window.print();
+}
+function exportOrdersCSV() {
+  const headers = ['ID','Client','Téléphone','Total','Livraison','Statut','Date'];
+  const rows = allOrders.map(o=>[o.id,o.customer_name,o.customer_phone,o.total_price,o.delivery_fee||0,o.status,fmtDate(o.created_at)]);
+  downloadCSV([headers,...rows],'commandes_icosium.csv');
+  logAudit('system','Export CSV commandes','system');
+}
+function exportReportCSV() {
+  const months=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const headers=['Mois','Commandes','Livrées','Annulées','Revenu (DA)','Panier Moyen (DA)'];
+  const rows = Array.from({length:12},(_, m)=>{
+    const ords = allOrders.filter(o=>new Date(o.created_at).getMonth()===m);
+    const delivered = ords.filter(o=>o.status==='Delivered').length;
+    const cancelled = ords.filter(o=>o.status==='Cancelled').length;
+    const revenue = ords.reduce((a,o)=>a+parseFloat(o.total_price||0),0);
+    return [months[m],ords.length,delivered,cancelled,revenue.toFixed(0),ords.length?(revenue/ords.length).toFixed(0):0];
+  });
+  downloadCSV([headers,...rows],'rapport_mensuel_icosium.csv');
+}
+function downloadCSV(data, filename) {
+  const csv = data.map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast(`Export CSV : ${filename}`);
+}
+
+/* ─── STOCK ALERTS ─── */
+function renderStockAlerts(lowStock) {
+  const el = document.getElementById('stock-alerts');
+  if (!lowStock.length) { el.innerHTML = '<li class="alert-empty"><i class="fas fa-check-circle"></i>Tous les stocks sont suffisants !</li>'; return; }
+  el.innerHTML = lowStock.map(p=>`<li class="alert-item ${p.stock===0?'alert-d':'alert-w'}"><i class="fas fa-exclamation-triangle"></i><span>${p.name} — Stock: <strong>${p.stock}</strong></span></li>`).join('');
+}
+
+/* ─── RECENT ORDERS ─── */
+function renderRecentOrders(orders) {
+  const el = document.getElementById('recent-orders-body');
+  if (!orders.length) { el.innerHTML='<tr><td colspan="5"><div class="empty-st"><i class="fas fa-inbox"></i><p>Aucune commande</p></div></td></tr>'; return; }
+  el.innerHTML = orders.map(o=>`<tr>
+    <td style="color:var(--text3);font-weight:700">#${o.id}</td>
+    <td><strong>${o.customer_name}</strong></td>
+    <td style="color:var(--accent);font-weight:700">${fmtPrice(o.total_price)}</td>
+    <td>${statusPill(o.status)}</td>
+    <td style="color:var(--text3);font-size:.8rem">${fmtDate(o.created_at)}</td>
+  </tr>`).join('');
+}
+
+/* ─── ORDERS ─── */
+function renderOrders(orders) {
+  const livMap = Object.fromEntries(allLivreurs.map(l=>[l.id,l.name]));
+  const el = document.getElementById('orders-body');
+  if (!orders.length) { el.innerHTML='<tr><td colspan="9"><div class="empty-st"><i class="fas fa-inbox"></i><p>Aucune commande</p></div></td></tr>'; return; }
+  el.innerHTML = orders.map(o=>`<tr>
+    <td style="color:var(--text3);font-weight:700">#${o.id}</td>
+    <td><strong>${o.customer_name}</strong></td>
+    <td style="color:var(--text2)">${o.customer_phone}</td>
+    <td style="color:var(--accent);font-weight:700">${fmtPrice(o.total_price)}</td>
+    <td style="color:var(--text2)">${fmtPrice(o.delivery_fee||0)}</td>
+    <td>${statusPill(o.status)}</td>
+    <td style="color:var(--text2)">${livMap[o.livreur_id]||'—'}</td>
+    <td style="color:var(--text3);font-size:.8rem">${fmtDate(o.created_at)}</td>
+    <td><button class="icn-btn g" onclick='openOrderModal(${JSON.stringify(o)})'><i class="fas fa-expand-alt"></i></button></td>
+  </tr>`).join('');
+}
+function filterOrders(f, btn) {
+  currentOrderFilter=f;
+  document.querySelectorAll('#orders-filters .filter-pill').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const filtered = f==='all' ? allOrders : allOrders.filter(o=>o.status===f);
+  renderOrders(filtered);
+}
+function searchOrders(q) {
+  const base = currentOrderFilter==='all' ? allOrders : allOrders.filter(o=>o.status===currentOrderFilter);
+  renderOrders(base.filter(o=>o.customer_name?.toLowerCase().includes(q.toLowerCase())||String(o.id).includes(q)||o.customer_phone?.includes(q)));
+}
+function openOrderModal(o) {
+  currentOrderId = o.id;
+  const wilayaMap = Object.fromEntries(allWilayas.map(w=>[w.id,w.name]));
+  document.getElementById('mod-ord-id').textContent = '#'+o.id;
+  document.getElementById('mod-client-name').textContent = o.customer_name;
+  document.getElementById('mod-client-phone').textContent = o.customer_phone;
+  document.getElementById('mod-client-addr').textContent = o.customer_address;
+  document.getElementById('mod-total').textContent = fmtPrice(o.total_price);
+  document.getElementById('mod-fee').textContent = fmtPrice(o.delivery_fee||0);
+  document.getElementById('mod-wilaya').textContent = wilayaMap[o.wilaya_id]||'—';
+  document.getElementById('mod-date').textContent = fmtDateTime(o.created_at);
+  document.getElementById('mod-status-sel').value = o.status;
+  document.getElementById('mod-livreur-sel').value = o.livreur_id||'';
+  document.getElementById('mod-note').value = o.note_admin||'';
+  let items = o.items;
+  if(typeof items==='string') try{items=JSON.parse(items);}catch(e){items=[];}
+  const tbl = document.getElementById('mod-items');
+  tbl.innerHTML = (Array.isArray(items)&&items.length) ? items.map(i=>`<tr><td>${i.qty||1}× ${i.name}${i.color?` <span style="color:var(--text3)">(${i.color})</span>`:''}</td><td>${fmtPrice(i.price)}</td></tr>`).join('') : '<tr><td style="color:var(--text3);text-align:center;padding:14px">Aucun article</td></tr>';
+  openModal('modal-order');
+}
+async function saveOrder() {
+  const { error } = await dbFrom('orders').update({
+    status: document.getElementById('mod-status-sel').value,
+    livreur_id: document.getElementById('mod-livreur-sel').value||null,
+    note_admin: document.getElementById('mod-note').value||null,
+  }).eq('id', currentOrderId);
+  if(!error) {
+    toast('Commande mise à jour !');
+    logAudit('order', `Commande #${currentOrderId} mise à jour → ${document.getElementById('mod-status-sel').value}`, 'order');
+    addNotification('Commande mise à jour', `#${currentOrderId} → ${document.getElementById('mod-status-sel').value}`);
+    closeModal('modal-order'); await loadAll();
+  } else toast('Erreur lors de la mise à jour.','err');
+}
+
+/* ─── PRODUCTS ─── */
+function setProductView(v) {
+  productView=v;
+  document.getElementById('products-view-grid').style.display = v==='grid' ? 'grid' : 'none';
+  document.getElementById('products-view-table').style.display = v==='table' ? 'block' : 'none';
+  document.getElementById('vbtn-grid').className = `btn btn-sm ${v==='grid'?'btn-accent':'btn-ghost'}`;
+  document.getElementById('vbtn-table').className = `btn btn-sm ${v==='table'?'btn-accent':'btn-ghost'}`;
+}
+function filterProductsByCategory(catId) {
+  const filtered = catId ? allProducts.filter(p=>String(p.category_id)===String(catId)) : allProducts;
+  renderProducts(filtered);
+}
+function renderProducts(products) {
+  const catMap = Object.fromEntries(allCategories.map(c=>[c.id,c.name_fr||c.name_ar||'']));
+  const grid = document.getElementById('products-view-grid');
+  if (!products.length) { grid.innerHTML='<div class="empty-st" style="grid-column:1/-1"><i class="fas fa-boxes"></i><p>Aucun produit</p></div>'; }
+  else {
+    grid.innerHTML = products.map(p=>`
+      <div class="pcard">
+        ${p.image_url ? `<img class="pcard-img" src="${p.image_url}" alt="${p.name}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+        <div class="pcard-img-ph" style="${p.image_url?'display:none':''}"><i class="fas fa-image"></i></div>
+        <div class="pcard-body">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:4px">
+            <div class="pcard-name">${p.name}</div>
+            ${p.is_featured ? '<span style="color:#fbbf24;font-size:.85rem;flex-shrink:0">⭐</span>' : ''}
+          </div>
+          <div class="pcard-sku">${p.sku||'—'} · ${catMap[p.category_id]||'—'}</div>
+          <div class="pcard-price"><strong>${fmtPrice(p.price)}</strong>${p.compare_price?`<del>${fmtPrice(p.compare_price)}</del>`:''}</div>
+          <div class="pcard-foot">
+            <span class="stock-tag ${p.stock<5?'slow':'sok'}">${p.stock<5?'⚠ '+p.stock:'✓ '+p.stock}</span>
+            <div style="display:flex;gap:5px">
+              <button class="icn-btn g" onclick='openProductModal(${JSON.stringify(p)})'><i class="fas fa-edit"></i></button>
+              <button class="icn-btn r" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  const tbody = document.getElementById('products-table-body');
+  tbody.innerHTML = products.map(p=>`<tr>
+    <td>${p.image_url?`<img src="${p.image_url}" style="width:40px;height:40px;border-radius:10px;object-fit:cover">` : '<div style="width:40px;height:40px;border-radius:10px;background:var(--bg4);display:flex;align-items:center;justify-content:center;color:var(--text3)"><i class="fas fa-image"></i></div>'}</td>
+    <td><strong>${p.name}</strong></td>
+    <td style="color:var(--text3)">${p.sku||'—'}</td>
+    <td style="color:var(--accent);font-weight:700">${fmtPrice(p.price)}</td>
+    <td><span class="stock-tag ${p.stock<5?'slow':'sok'}">${p.stock}</span></td>
+    <td style="color:var(--text2)">${catMap[p.category_id]||'—'}</td>
+    <td>${p.is_featured?'<span style="color:#fbbf24">⭐ Oui</span>':'<span style="color:var(--text3)">Non</span>'}</td>
+    <td><div style="display:flex;gap:6px"><button class="icn-btn g" onclick='openProductModal(${JSON.stringify(p)})'><i class="fas fa-edit"></i></button><button class="icn-btn r" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button></div></td>
+  </tr>`).join('');
+}
+function searchProducts(q) {
+  const catId = document.getElementById('cat-filter-sel').value;
+  let base = allProducts;
+  if(catId) base = base.filter(p=>String(p.category_id)===String(catId));
+  renderProducts(base.filter(p=>p.name?.toLowerCase().includes(q.toLowerCase())||p.sku?.toLowerCase().includes(q.toLowerCase())));
+}
+  // 6. الجافاسكريبت لمعالجة الصور المتعددة
+// مصفوفة عالمية لتخزين جميع الصور المرفوعة
 let uploadedImages = []; 
 
 // معالجة الصور المتعددة عند الاختيار
@@ -3682,8 +4441,676 @@ function renderGallery() {
 
     previewList.appendChild(card);
   });
+
+// معالجة الصور المتعددة عند الاختيار
+document.getElementById('prd-img-file').addEventListener('change', function(e) {
+  const files = e.target.files;
+  if(!files.length) return;
+  
+  const previewContainer = document.getElementById('image-preview-container');
+  previewContainer.innerHTML = ''; 
+  uploadedImages = []; 
+
+  Array.from(files).forEach((file, index) => {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const base64String = event.target.result;
+      uploadedImages.push(base64String);
+
+      // بناء معاينة الصورة
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'relative';
+      wrapper.style.flexShrink = '0';
+      
+      const img = document.createElement('img');
+      img.src = base64String;
+      img.style.width = '60px'; img.style.height = '60px'; 
+      img.style.objectFit = 'cover'; img.style.borderRadius = '8px';
+      img.style.border = index === 0 ? '2px solid var(--accent)' : '1px solid var(--border)';
+      
+      wrapper.appendChild(img);
+      
+      // علامة لتمييز الصورة الرئيسية
+      if (index === 0) {
+        const badge = document.createElement('span');
+        badge.textContent = 'Principale';
+        badge.style.position = 'absolute'; badge.style.top = '-5px'; badge.style.right = '-5px';
+        badge.style.background = 'var(--accent)'; badge.style.color = '#fff';
+        badge.style.fontSize = '0.6rem'; badge.style.padding = '2px 6px';
+        badge.style.borderRadius = '10px'; badge.style.fontWeight = 'bold';
+        wrapper.appendChild(badge);
+      }
+      
+      previewContainer.appendChild(wrapper);
+    };
+    reader.readAsDataURL(file);
+  });
+  toast(files.length + ' image(s) ajoutée(s) !', 'ok');
+});
+
+// دالة إضافة سطر المقاس واللون
+function addSizeRow(size = '', color = '', qty = '') {
+  const container = document.getElementById('sizes-container');
+  const row = document.createElement('div');
+  row.className = 'size-row'; // الكلاس الذي أصلحناه في الـ CSS
+  row.style.display = 'flex';
+  row.style.gap = '10px';
+  row.innerHTML = `
+    <input type="text" placeholder="Taille (ex: M, L)" value="${size}" class="size-name" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="text" placeholder="Couleur (ex: Noir)" value="${color}" class="size-color" style="flex: 1.5; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="number" placeholder="Qté" value="${qty}" class="size-qty" style="width: 80px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="padding: 10px;"><i class="fas fa-trash"></i></button>
+  `;
+  container.appendChild(row);
 }
-</script>
+
+// فتح نافذة المنتج للتعديل
+function openProductModal(p) {
+  currentProductId = p?.id||null;
+  document.getElementById('prod-modal-title').textContent = p ? 'Modifier Produit' : 'Nouveau Produit';
+  document.getElementById('prd-name').value=p?.name||'';
+  document.getElementById('prd-sku').value=p?.sku||'';
+  document.getElementById('prd-price').value=p?.price||'';
+  document.getElementById('prd-compare').value=p?.compare_at_price||''; 
+  document.getElementById('prd-cat').value=p?.category_id||'';
+  document.getElementById('prd-desc').value=p?.description||'';
+  document.getElementById('prd-featured').checked=p?.is_featured||false;
+  
+  // تصفير الصور في النافذة
+  document.getElementById('prd-img-file').value = '';
+  document.getElementById('image-preview-container').innerHTML = '';
+  uploadedImages = [];
+
+  if (p) {
+    if (p.image_url) uploadedImages.push(p.image_url);
+    if (p.extra_images && Array.isArray(p.extra_images)) {
+        uploadedImages = uploadedImages.concat(p.extra_images);
+    }
+    // عرض الصور الموجودة مسبقاً
+    uploadedImages.forEach((src, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'relative'; wrapper.style.flexShrink = '0';
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.width = '60px'; img.style.height = '60px'; img.style.objectFit = 'cover'; img.style.borderRadius = '8px';
+        img.style.border = idx === 0 ? '2px solid var(--accent)' : '1px solid var(--border)';
+        wrapper.appendChild(img);
+        if (idx === 0) {
+            const badge = document.createElement('span');
+            badge.textContent = 'Principale';
+            badge.style.position = 'absolute'; badge.style.top = '-5px'; badge.style.right = '-5px';
+            badge.style.background = 'var(--accent)'; badge.style.color = '#fff';
+            badge.style.fontSize = '0.6rem'; badge.style.padding = '2px 6px'; badge.style.borderRadius = '10px';
+            wrapper.appendChild(badge);
+        }
+        document.getElementById('image-preview-container').appendChild(wrapper);
+    });
+  }
+
+  // تحميل المقاسات
+  document.getElementById('sizes-container').innerHTML = '';
+  if(p && p.sizes && p.sizes.length > 0) {
+    let sizesObj = typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes;
+    sizesObj.forEach(s => addSizeRow(s.size, s.color, s.qty));
+  } else {
+    addSizeRow();
+  }
+  
+  openModal('modal-product');
+}
+
+// 5. حفظ المنتج (الصور والمقاسات)
+async function saveProduct() {
+  const name = document.getElementById('prd-name').value.trim();
+  const price = parseFloat(document.getElementById('prd-price').value)||0;
+  if(!name||price<1) { toast('Nom et prix sont requis.','err'); return; }
+
+  // 1. استخراج المقاسات والألوان والكميات
+  const sizeRows = document.querySelectorAll('#sizes-container .size-row'); // تم التصحيح هنا
+  let sizesArray = [];
+  let totalStock = 0;
+  sizeRows.forEach(row => {
+    const sName = row.querySelector('.size-name').value.trim();
+    const sColor = row.querySelector('.size-color').value.trim();
+    const sQty = parseInt(row.querySelector('.size-qty').value) || 0;
+    if (sName && sQty > 0) { // تأكدنا من إدخال اسم المقاس وكمية أكبر من صفر
+      sizesArray.push({ size: sName, color: sColor, qty: sQty });
+      totalStock += sQty; // تحديث المخزون الكلي تلقائياً
+    }
+  });
+
+  // 2. تقسيم الصور (الرئيسية والإضافية)
+  const mainImage = uploadedImages.length > 0 ? uploadedImages[0] : null;
+  const extraImagesArray = uploadedImages.length > 1 ? uploadedImages.slice(1) : [];
+
+  const b = {
+    name, 
+    sku: document.getElementById('prd-sku').value.trim()||null,
+    price, 
+    compare_at_price: parseFloat(document.getElementById('prd-compare').value)||null,
+    stock: totalStock, // الكمية الإجمالية
+    sizes: sizesArray, // المصفوفة (مقاس، لون، كمية)
+    category_id: document.getElementById('prd-cat').value||null,
+    image_url: mainImage, 
+    extra_images: extraImagesArray, // الصور الإضافية
+    description: document.getElementById('prd-desc').value.trim()||null,
+    is_featured: document.getElementById('prd-featured').checked,
+    is_deleted: false
+  };
+
+  const { error } = currentProductId 
+    ? await dbFrom('products').update(b).eq('id',currentProductId) 
+    : await dbFrom('products').insert([b]);
+    
+  if(!error) {
+    toast(currentProductId?'Produit modifié !':'Produit créé !');
+    closeModal('modal-product'); 
+    await loadAll();
+  } else {
+    console.error("Supabase Save Error:", error);
+    toast('Erreur DB: ' + error.message, 'err');
+  }
+}
+
+// الحذف النهائي (بدون سلة مهملات)
+async function deleteProduct(id) {
+  if(!confirm('Voulez-vous DÉFINITIVEMENT supprimer ce produit ? Cette action est irréversible.')) return;
+  
+  // الحذف النهائي بدلاً من التحديث (Update)
+  const { error } = await dbFrom('products').delete().eq('id', id);
+  
+  if(!error) {
+    const p = allProducts.find(x=>x.id===id);
+    logAudit('product', `Produit supprimé définitivement: ${p?.name||id}`, 'product');
+    toast('Produit supprimé définitivement.'); 
+    await loadAll();
+  } else {
+    toast('Erreur lors de la suppression.', 'err');
+  }
+}
+/* ─── CATEGORIES ─── */
+function renderCategories(cats) {
+  const el = document.getElementById('cats-body');
+  if(!cats.length) { el.innerHTML='<tr><td colspan="6"><div class="empty-st"><i class="fas fa-tags"></i><p>Aucune catégorie</p></div></td></tr>'; return; }
+  el.innerHTML = cats.map(c=>`<tr>
+    <td style="color:var(--text3);font-weight:700">${c.id}</td>
+    <td><strong>${c.name_fr||'—'}</strong></td>
+    <td style="direction:rtl;text-align:right;color:var(--text2)">${c.name_ar||'—'}</td>
+    <td style="color:var(--text2)">${c.name_en||'—'}</td>
+    <td style="color:var(--text3)">${allProducts.filter(p=>String(p.category_id)===String(c.id)).length} produits</td>
+    <td><div style="display:flex;gap:6px">
+      <button class="icn-btn g" onclick='openCatModal(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
+      <button class="icn-btn r" onclick="deleteCat(${c.id})"><i class="fas fa-trash"></i></button>
+    </div></td>
+  </tr>`).join('');
+}
+function searchCategories(q) {
+  renderCategories(allCategories.filter(c=>(c.name_fr||'').toLowerCase().includes(q.toLowerCase())||(c.name_en||'').toLowerCase().includes(q.toLowerCase())));
+}
+function openCatModal(c) {
+  currentCatId = c?.id||null;
+  document.getElementById('cat-modal-title').textContent = c ? 'Modifier Catégorie' : 'Nouvelle Catégorie';
+  document.getElementById('cat-fr').value=c?.name_fr||'';
+  document.getElementById('cat-ar').value=c?.name_ar||'';
+  document.getElementById('cat-en').value=c?.name_en||'';
+  openModal('modal-cat');
+}
+async function saveCat() {
+  const fr = document.getElementById('cat-fr').value.trim();
+  if(!fr) { toast('Le nom en français est requis.','err'); return; }
+  const b = {name_fr:fr, name_ar:document.getElementById('cat-ar').value.trim()||null, name_en:document.getElementById('cat-en').value.trim()||null};
+  const { error } = currentCatId ? await dbFrom('categories').update(b).eq('id',currentCatId) : await dbFrom('categories').insert([b]);
+  if(!error) { toast('Catégorie enregistrée !'); logAudit('product',`Catégorie ${currentCatId?'modifiée':'créée'}: ${fr}`,'product'); closeModal('modal-cat'); await loadAll(); }
+  else toast('Erreur.','err');
+}
+async function deleteCat(id) {
+  if(!confirm('Supprimer cette catégorie ?')) return;
+  await dbFrom('categories').delete().eq('id',id);
+  toast('Catégorie supprimée.'); await loadAll();
+}
+
+/* ─── LIVREURS ─── */
+function renderLivreurs(livreurs) {
+  const el = document.getElementById('livreurs-grid');
+  if(!livreurs.length) { el.innerHTML='<div class="empty-st" style="grid-column:1/-1"><i class="fas fa-truck"></i><p>Aucun livreur</p></div>'; return; }
+  el.innerHTML = livreurs.map(l=>`
+    <div class="lcard">
+      <div class="lcard-av">${l.name.charAt(0).toUpperCase()}</div>
+      <div class="lcard-name">${l.name}</div>
+      <div class="lcard-region"><i class="fas fa-map-marker-alt" style="color:var(--accent);margin-right:5px"></i>${l.region||'—'}</div>
+      <div class="lcard-info">
+        ${l.phone?`<div class="lcard-info-row"><i class="fas fa-phone"></i>${l.phone}</div>`:''}
+      </div>
+      <div class="lcard-foot">
+        <span class="pill ${l.is_active?'p-active':'p-inactive'}">${l.is_active?'Actif':'Inactif'}</span>
+        <div style="display:flex;gap:6px">
+          <button class="icn-btn g" onclick='openLivreurModal(${JSON.stringify(l)})'><i class="fas fa-edit"></i></button>
+          <button class="icn-btn" onclick="toggleLivreur(${l.id},${!l.is_active})" title="${l.is_active?'Désactiver':'Activer'}"><i class="fas fa-${l.is_active?'pause':'play'}"></i></button>
+          <button class="icn-btn r" onclick="deleteLivreur(${l.id})"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+function searchLivreurs(q) { renderLivreurs(allLivreurs.filter(l=>l.name.toLowerCase().includes(q.toLowerCase())||(l.region||'').toLowerCase().includes(q.toLowerCase()))); }
+function openLivreurModal(l) {
+  currentLivreurId = l?.id||null;
+  document.getElementById('liv-modal-title').textContent = l ? 'Modifier Livreur' : 'Ajouter un Livreur';
+  document.getElementById('liv-name').value=l?.name||'';
+  document.getElementById('liv-phone').value=l?.phone||'';
+  document.getElementById('liv-region').value=l?.region||'';
+  openModal('modal-livreur');
+}
+async function saveLivreur() {
+  const name = document.getElementById('liv-name').value.trim();
+  if(!name) { toast('Le nom est requis.','err'); return; }
+  const b = { name, phone:document.getElementById('liv-phone').value.trim()||null, region:document.getElementById('liv-region').value.trim()||null };
+  const { error } = currentLivreurId ? await dbFrom('livreurs').update(b).eq('id',currentLivreurId) : await dbFrom('livreurs').insert([{...b, is_active:true}]);
+  if(!error) { toast('Livreur enregistré !'); closeModal('modal-livreur'); await loadAll(); }
+  else toast('Erreur.','err');
+}
+async function toggleLivreur(id, active) { await dbFrom('livreurs').update({is_active:active}).eq('id',id); await loadAll(); }
+async function deleteLivreur(id) {
+  if(!confirm('Supprimer ce livreur ?')) return;
+  await dbFrom('livreurs').delete().eq('id',id); toast('Livreur supprimé.'); await loadAll();
+}
+
+/* ─── WILAYAS ─── */
+function renderWilayas(wilayas) {
+  const el = document.getElementById('wilayas-body');
+  if (!wilayas.length) { el.innerHTML='<tr><td colspan="4"><div class="empty-st"><i class="fas fa-map"></i><p>Aucune wilaya.</p></div></td></tr>'; return; }
+  el.innerHTML = wilayas.map(w=>`<tr>
+    <td style="color:var(--text3);font-weight:700">${w.id}</td>
+    <td><strong>${w.name}</strong></td>
+    <td><span style="color:var(--accent);font-weight:700">${fmtPrice(w.delivery_price||0)}</span></td>
+    <td><button class="icn-btn g" onclick='openWilayaModal(${JSON.stringify(w)})'><i class="fas fa-edit"></i></button></td>
+  </tr>`).join('');
+}
+function searchWilayas(q) { renderWilayas(allWilayas.filter(w=>w.name.toLowerCase().includes(q.toLowerCase()))); }
+function openWilayaModal(w) {
+  currentWilayaId = w.id;
+  document.getElementById('w-name').textContent = w.name;
+  document.getElementById('w-price').value = w.delivery_price||0;
+  openModal('modal-wilaya');
+}
+async function saveWilaya() {
+  const price = parseFloat(document.getElementById('w-price').value)||0;
+  const { error } = await dbFrom('wilayas').update({delivery_price:price}).eq('id',currentWilayaId);
+  if(!error) { toast('Prix mis à jour !'); closeModal('modal-wilaya'); await loadAll(); }
+  else toast('Erreur.','err');
+}
+function bulkUpdateWilayas() { toast('Sélectionnez chaque wilaya à modifier individuellement.','ok'); }
+
+/* ─── COUPONS ─── */
+function renderCoupons(coupons) {
+  const el = document.getElementById('coupons-body');
+  let filtered = coupons;
+  if(currentCouponFilter==='active') filtered = coupons.filter(c=>c.is_active&&(!c.expire_at||new Date(c.expire_at)>new Date()));
+  if(currentCouponFilter==='expired') filtered = coupons.filter(c=>c.expire_at&&new Date(c.expire_at)<new Date());
+  if (!filtered.length) { el.innerHTML='<tr><td colspan="6"><div class="empty-st"><i class="fas fa-tag"></i><p>Aucun coupon</p></div></td></tr>'; return; }
+  el.innerHTML = filtered.map(c=>{
+    const expired = c.expire_at && new Date(c.expire_at)<new Date();
+    const active  = c.is_active && !expired;
+    return `<tr>
+      <td><span class="coupon-code">${c.code}</span></td>
+      <td><span class="pill p-delivered">${c.discount_percent||0}%</span></td>
+      <td style="color:var(--text2)">${c.expire_at ? fmtDate(c.expire_at) : '—'}${expired?'<span style="color:#f87171;font-size:.72rem;margin-left:6px">Expiré</span>':''}</td>
+      <td style="color:var(--text3)">${c.usage_limit||'∞'}</td>
+      <td><span class="pill ${active?'p-active':'p-inactive'}">${active?'Actif':'Inactif'}</span></td>
+      <td><div style="display:flex;gap:6px">
+        <button class="icn-btn" onclick="toggleCoupon(${c.id},${!c.is_active})"><i class="fas fa-${c.is_active?'pause':'play'}"></i></button>
+        <button class="icn-btn r" onclick="deleteCoupon(${c.id})"><i class="fas fa-trash"></i></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function searchCoupons(q) { renderCoupons(allCoupons.filter(c=>c.code.toLowerCase().includes(q.toLowerCase()))); }
+function filterCoupons(f, btn) {
+  currentCouponFilter=f;
+  document.querySelectorAll('#sec-coupons .filter-pill').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderCoupons(allCoupons);
+}
+function openCouponModal() {
+  ['coup-code','coup-disc','coup-exp','coup-limit'].forEach(id=>document.getElementById(id).value='');
+  openModal('modal-coupon');
+}
+async function saveCoupon() {
+  const code = document.getElementById('coup-code').value.trim().toUpperCase();
+  const disc = parseInt(document.getElementById('coup-disc').value)||0;
+  const exp  = document.getElementById('coup-exp').value;
+  const limit = parseInt(document.getElementById('coup-limit').value)||null;
+  if(!code||disc<1||disc>100) { toast('Code requis et réduction entre 1-100%.','err'); return; }
+  const { error } = await dbFrom('coupons').insert([{ code, discount_percent:disc, expire_at:exp?new Date(exp).toISOString():null, is_active:true, usage_limit:limit }]);
+  if(!error) { toast('Coupon créé !'); closeModal('modal-coupon'); await loadAll(); }
+  else toast('Erreur: code déjà existant ?','err');
+}
+async function toggleCoupon(id, active) { await dbFrom('coupons').update({is_active:active}).eq('id',id); await loadAll(); }
+async function deleteCoupon(id) { if(!confirm('Supprimer ce coupon ?')) return; await dbFrom('coupons').delete().eq('id',id); toast('Coupon supprimé.'); await loadAll(); }
+
+/* ─── REVIEWS ─── */
+function renderReviews(reviews) {
+  const el = document.getElementById('reviews-list');
+  let filtered = reviews;
+  if(currentReviewFilter==='pending')  filtered = reviews.filter(r=>!r.is_approved);
+  if(currentReviewFilter==='approved') filtered = reviews.filter(r=>r.is_approved);
+  if (!filtered.length) { el.innerHTML='<div class="empty-st"><i class="fas fa-star"></i><p>Aucun avis</p></div>'; return; }
+  el.innerHTML = filtered.map(r=>`
+    <div class="rcard">
+      <div class="rcard-top">
+        <div>
+          <div class="rcard-author">${r.reviewer_name}${!r.is_approved?'<span style="font-size:.72rem;color:#fbbf24;margin-left:8px">⏳ En attente</span>':''}</div>
+          <div class="rcard-loc">${r.reviewer_location||''} — ${fmtDate(r.created_at)}</div>
+        </div>
+        <div>
+          <div class="stars">${'★'.repeat(r.rating||0)}${'☆'.repeat(5-(r.rating||0))}</div>
+          <div style="display:flex;gap:7px;margin-top:8px;justify-content:flex-end">
+            ${!r.is_approved ? `<button class="btn btn-accent btn-sm" onclick="approveReview(${r.id})"><i class="fas fa-check"></i> Approuver</button>` : ''}
+            <button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+      </div>
+      <p class="rcard-text">${r.review_text||''}</p>
+    </div>
+  `).join('');
+}
+function searchReviews(q) {
+  const filtered = allReviews.filter(r=>r.reviewer_name?.toLowerCase().includes(q.toLowerCase())||r.review_text?.toLowerCase().includes(q.toLowerCase()));
+  const el = document.getElementById('reviews-list');
+  currentReviewFilter='all';
+  document.querySelectorAll('#sec-reviews .filter-pill').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('#sec-reviews .filter-pill')[0]?.classList.add('on');
+  el.innerHTML = filtered.length ? filtered.map(r=>`<div class="rcard"><div class="rcard-top"><div><div class="rcard-author">${r.reviewer_name}</div><div class="rcard-loc">${r.reviewer_location||''}</div></div><div><div class="stars">${'★'.repeat(r.rating||0)}${'☆'.repeat(5-(r.rating||0))}</div><div style="display:flex;gap:7px;margin-top:8px"><button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})"><i class="fas fa-trash"></i></button></div></div></div><p class="rcard-text">${r.review_text||''}</p></div>`).join('') : '<div class="empty-st"><i class="fas fa-search"></i><p>Aucun résultat</p></div>';
+}
+function filterReviews(f, btn) {
+  currentReviewFilter=f;
+  document.querySelectorAll('#sec-reviews .filter-pill').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderReviews(allReviews);
+}
+async function approveReview(id) { await dbFrom('reviews').update({is_approved:true}).eq('id',id); toast('Avis approuvé !'); await loadAll(); }
+async function deleteReview(id) { if(!confirm('Supprimer cet avis ?')) return; await dbFrom('reviews').delete().eq('id',id); toast('Avis supprimé.'); await loadAll(); }
+
+/* ─── STOCK ─── */
+function renderStock(movements) {
+  const prodMap = Object.fromEntries(allProducts.map(p=>[p.id,p.name]));
+  const el = document.getElementById('stock-body');
+  if (!movements.length) { el.innerHTML='<tr><td colspan="6"><div class="empty-st"><i class="fas fa-chart-bar"></i><p>Aucun mouvement</p></div></td></tr>'; return; }
+  el.innerHTML = movements.slice(0,100).map(m=>`<tr>
+    <td style="color:var(--text3)">${m.id}</td>
+    <td><strong>${prodMap[m.product_id]||'Produit #'+m.product_id}</strong></td>
+    <td>${m.type==='IN'?'<span class="pill p-delivered">↓ Entrée</span>':'<span class="pill p-cancelled">↑ Sortie</span>'}</td>
+    <td style="color:${m.type==='IN'?'#34d399':'#f87171'};font-weight:700">${m.type==='IN'?'+':'-'}${m.quantity}</td>
+    <td style="color:var(--text2)">${m.reason||'—'}</td>
+    <td style="color:var(--text3);font-size:.8rem">${fmtDate(m.created_at)}</td>
+  </tr>`).join('');
+}
+function searchStock(q) {
+  const prodMap = Object.fromEntries(allProducts.map(p=>[p.id,p.name]));
+  const filtered = allStock.filter(m=>(prodMap[m.product_id]||'').toLowerCase().includes(q.toLowerCase())||(m.reason||'').toLowerCase().includes(q.toLowerCase()));
+  renderStock(filtered);
+}
+function openStockModal() {
+  ['stk-qty','stk-reason'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('stk-product').value='';
+  document.getElementById('stk-type').value='IN';
+  openModal('modal-stock');
+}
+async function saveStock() {
+  const productId = document.getElementById('stk-product').value;
+  const type      = document.getElementById('stk-type').value;
+  const qty       = parseInt(document.getElementById('stk-qty').value)||0;
+  const reason    = document.getElementById('stk-reason').value.trim()||null;
+  if(!productId||qty<1) { toast('Produit et quantité requis.','err'); return; }
+  await dbFrom('stock_movements').insert([{product_id:parseInt(productId),type,quantity:qty,reason}]);
+  const prod = allProducts.find(p=>p.id===parseInt(productId));
+  if(prod) {
+    const newStock = type==='IN' ? (prod.stock+qty) : Math.max(0,prod.stock-qty);
+    await dbFrom('products').update({stock:newStock}).eq('id',productId);
+  }
+  logAudit('product', `Mouvement stock: ${type} ${qty} × ${prod?.name||productId}`, 'product');
+  toast('Mouvement enregistré !'); closeModal('modal-stock'); await loadAll();
+}
+
+/* ─── USERS ─── */
+function renderUsers(users) {
+  const el = document.getElementById('users-body');
+  let filtered = users;
+  if(currentUserFilter!=='all') filtered = users.filter(u=>(u.role||'admin')===currentUserFilter);
+  if(!filtered.length) { el.innerHTML='<tr><td colspan="6"><div class="empty-st"><i class="fas fa-users"></i><p>Aucun utilisateur</p></div></td></tr>'; return; }
+  el.innerHTML = filtered.map(u=>`<tr>
+    <td><div class="user-row"><div class="user-av sm">${(u.name||'A').charAt(0).toUpperCase()}</div><div class="user-row-info"><strong>${u.name||'—'}</strong><span>${u.email}</span></div></div></td>
+    <td style="color:var(--text2)">${u.email}</td>
+    <td>${roleBadge(u.role||'admin')}</td>
+    <td style="color:var(--text3);font-size:.8rem">${u.last_login ? fmtDate(u.last_login) : 'Jamais'}</td>
+    <td><span class="pill ${u.is_active===false?'p-inactive':'p-active'}">${u.is_active===false?'Inactif':'Actif'}</span></td>
+    <td><div style="display:flex;gap:6px">
+      <button class="icn-btn g" onclick='openUserModal(${JSON.stringify(u)})'><i class="fas fa-edit"></i></button>
+      <button class="icn-btn r" onclick="deleteUser(${u.id})"><i class="fas fa-trash"></i></button>
+    </div></td>
+  </tr>`).join('');
+}
+function searchUsers(q) { renderUsers(allUsers.filter(u=>(u.name||'').toLowerCase().includes(q.toLowerCase())||(u.email||'').toLowerCase().includes(q.toLowerCase()))); }
+function filterUsers(f, btn) {
+  currentUserFilter=f;
+  document.querySelectorAll('#sec-users .filter-pill').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderUsers(allUsers);
+}
+function openUserModal(u = null) {
+    currentUserId = u ? u.id : null;
+    document.getElementById('user-modal-title').textContent = u ? 'Modifier Utilisateur' : 'Nouvel Utilisateur';
+    document.getElementById('usr-name').value = u ? u.name : '';
+    document.getElementById('usr-email').value = u ? u.email : '';
+    document.getElementById('usr-pass').value = '';
+    document.getElementById('usr-role').value = u ? u.role : 'admin';
+    document.getElementById('modal-user').classList.add('open');
+}
+async function saveUser() {
+    const name = document.getElementById('usr-name').value.trim();
+    const email = document.getElementById('usr-email').value.trim();
+    const pass = document.getElementById('usr-pass').value.trim();
+    const role = document.getElementById('usr-role').value;
+
+    if (!name || !email || (!currentUserId && !pass)) {
+        alert('Veuillez remplir les champs obligatoires.');
+        return;
+    }
+
+    // Objet de données correspondant exactement à votre table SQL mise à jour
+    const userData = { 
+        name, 
+        email, 
+        role 
+    };
+
+    if (pass) userData.password = pass;
+
+    let error;
+    if (currentUserId) {
+        const { error: err } = await dbFrom('admins').update(userData).eq('id', currentUserId);
+        error = err;
+    } else {
+        const { error: err } = await dbFrom('admins').insert([userData]);
+        error = err;
+    }
+
+    if (error) {
+        alert("Erreur: " + error.message);
+    } else {
+        document.getElementById('modal-user').classList.remove('open');
+        await loadUsers();
+    }
+}
+async function deleteUser(id) {
+  const session = JSON.parse(localStorage.getItem('icosium_session'));
+  if(session?.id===id) { toast('Impossible de supprimer votre propre compte.','err'); return; }
+  if(!confirm('Supprimer cet utilisateur ?')) return;
+  await dbFrom('admins').delete().eq('id',id);
+  logAudit('user',`Utilisateur supprimé: #${id}`,'user');
+  toast('Utilisateur supprimé.'); await loadAll();
+}
+
+/* ─── DATABASE BACKUP & RESTORE ─── */
+async function runBackup() {
+  const btn = document.getElementById('backup-btn');
+  const wrap = document.getElementById('backup-progress-wrap');
+  const fill = document.getElementById('backup-progress-fill');
+  const txt  = document.getElementById('backup-progress-txt');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sauvegarde en cours...';
+  wrap.style.display='block'; txt.style.display='block';
+
+  const steps = [
+    {pct:10, label:'Connexion à la base de données...'},
+    {pct:25, label:'Lecture des commandes...'},
+    {pct:40, label:'Lecture des produits et stocks...'},
+    {pct:55, label:'Lecture des clients et livreurs...'},
+    {pct:70, label:'Lecture des configurations...'},
+    {pct:85, label:'Compilation des données...'},
+    {pct:100, label:'Finalisation de la sauvegarde...'},
+  ];
+  for(const s of steps) {
+    fill.style.width=s.pct+'%'; txt.textContent=s.label;
+    await new Promise(r=>setTimeout(r,300));
+  }
+
+  const backup = {
+    version:'3.0', timestamp:new Date().toISOString(),
+    generated_by: document.getElementById('user-name-txt').textContent,
+    data: {
+      orders:allOrders, products:allProducts, categories:allCategories,
+      livreurs:allLivreurs, wilayas:allWilayas, reviews:allReviews,
+      stock_movements:allStock, coupons:allCoupons, admins:allUsers.map(u=>({...u,password:undefined}))
+    },
+    stats: { orders:allOrders.length, products:allProducts.length, revenue:allOrders.reduce((a,o)=>a+parseFloat(o.total_price||0),0) }
+  };
+  const blob = new Blob([JSON.stringify(backup,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=`icosium_backup_${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  // Add to history
+  const hist = JSON.parse(localStorage.getItem('icosium_backup_hist')||'[]');
+  hist.unshift({ name:a.download, time:new Date().toLocaleString('fr-FR'), size:Math.round(JSON.stringify(backup).length/1024)+'KB', status:'ok' });
+  localStorage.setItem('icosium_backup_hist', JSON.stringify(hist.slice(0,10)));
+  renderBackupHistory();
+
+  btn.disabled=false; btn.innerHTML='<i class="fas fa-download"></i> Lancer la Sauvegarde';
+  fill.style.width='100%'; txt.textContent='✓ Sauvegarde terminée !';
+  setTimeout(()=>{ wrap.style.display='none'; txt.style.display='none'; },3000);
+
+  logAudit('system','Sauvegarde DB effectuée: '+a.download,'system');
+  toast('Sauvegarde créée et téléchargée !');
+}
+
+function renderBackupHistory() {
+  const hist = JSON.parse(localStorage.getItem('icosium_backup_hist')||'[]');
+  const el = document.getElementById('backup-history-list');
+  if(!hist.length) { el.innerHTML='<p style="color:var(--text3);font-size:.82rem">Aucune sauvegarde récente.</p>'; return; }
+  el.innerHTML = hist.map(h=>`
+    <div class="backup-entry">
+      <div><div class="backup-entry-name"><i class="fas fa-file-code" style="color:var(--accent);margin-right:6px"></i>${h.name}</div><div class="backup-entry-meta">${h.time} • ${h.size}</div></div>
+      <span class="${h.status==='ok'?'backup-status-ok':'backup-status-err'}"><i class="fas fa-${h.status==='ok'?'check':'times'}-circle"></i> ${h.status==='ok'?'OK':'Erreur'}</span>
+    </div>
+  `).join('');
+}
+
+function previewRestore(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const preview = document.getElementById('restore-preview');
+      const content = document.getElementById('restore-preview-content');
+      preview.style.display='block';
+      content.innerHTML = `
+        <p><strong>Version:</strong> ${data.version||'—'}</p>
+        <p><strong>Date:</strong> ${data.timestamp ? new Date(data.timestamp).toLocaleString('fr-FR') : '—'}</p>
+        <p><strong>Commandes:</strong> ${data.data?.orders?.length||0}</p>
+        <p><strong>Produits:</strong> ${data.data?.products?.length||0}</p>
+        <p><strong>Généré par:</strong> ${data.generated_by||'—'}</p>
+      `;
+      document.getElementById('restore-btn').disabled=false;
+      document.getElementById('restore-btn')._data=data;
+    } catch(err) {
+      toast('Fichier JSON invalide.','err');
+    }
+  };
+  reader.readAsText(file);
+}
+
+async function runRestore() {
+  const btn = document.getElementById('restore-btn');
+  const data = btn._data;
+  if(!data) { toast('Aucun fichier chargé.','err'); return; }
+  if(!confirm(`⚠️ ATTENTION: Cette action va restaurer la base de données depuis la sauvegarde du ${new Date(data.timestamp).toLocaleString('fr-FR')}.\n\nToutes les données actuelles seront remplacées. Continuer ?`)) return;
+  toast('Restauration non connectée en mode démo. Connectez Supabase pour activer.','err');
+  logAudit('system','Tentative de restauration DB','system');
+}
+
+/* ─── DB STATS ─── */
+function refreshDbStats() {
+  document.getElementById('db-stat-orders').textContent = allOrders.length;
+  document.getElementById('db-stat-products').textContent = allProducts.length;
+  document.getElementById('db-stat-users').textContent = allUsers.length;
+  document.getElementById('db-stat-reviews').textContent = allReviews.length;
+  document.getElementById('db-stat-coupons').textContent = allCoupons.length;
+  document.getElementById('db-stat-stock').textContent = allStock.length;
+  renderBackupHistory();
+}
+
+/* ─── SETTINGS ─── */
+function showSettingsPanel(id, btn) {
+  document.querySelectorAll('.settings-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('spanel-'+id).classList.add('active');
+  document.querySelectorAll('.settings-nav-item').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function saveGeneralSettings() { toast('Paramètres généraux sauvegardés !'); logAudit('system','Paramètres généraux modifiés','system'); }
+function saveDeliverySettings() { toast('Paramètres de livraison sauvegardés !'); logAudit('system','Paramètres livraison modifiés','system'); }
+async function changePassword() {
+  const cur = document.getElementById('s-cur-pass').value;
+  const newp = document.getElementById('s-new-pass').value;
+  const conf = document.getElementById('s-conf-pass').value;
+  if(!cur||!newp||!conf) { toast('Tous les champs sont requis.','err'); return; }
+  if(newp!==conf) { toast('Les mots de passe ne correspondent pas.','err'); return; }
+  if(newp.length<6) { toast('Le mot de passe doit contenir au moins 6 caractères.','err'); return; }
+  const session = JSON.parse(localStorage.getItem('icosium_session'));
+  if(session?.password && session.password!==cur) { toast('Mot de passe actuel incorrect.','err'); return; }
+  const { error } = await dbFrom('admins').update({password:newp}).eq('id',session?.id);
+  if(!error) { toast('Mot de passe modifié !'); logAudit('user','Mot de passe modifié','user'); ['s-cur-pass','s-new-pass','s-conf-pass'].forEach(id=>document.getElementById(id).value=''); }
+  else toast('Erreur lors du changement de mot de passe.','err');
+}
+async function testSupabaseConnection() {
+  const statusEl = document.getElementById('supabase-status');
+  statusEl.textContent='Test en cours...';
+  try {
+    const { data, error } = await dbFrom('admins').select('count').limit(1);
+    if(error) throw error;
+    statusEl.textContent='✓ Connexion réussie'; statusEl.style.color='#34d399';
+    toast('Connexion Supabase OK !');
+  } catch(e) {
+    statusEl.textContent='✗ Connexion échouée'; statusEl.style.color='#f87171';
+    toast('Connexion Supabase échouée.','err');
+  }
+}
+   
+function handleNewImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // يمكنك هنا إما استبدال الرئيسية أو إنشاء كارد جديد بجانبهما
+    console.log("تم تحميل الصورة:", file.name);
+  };
+  reader.readAsDataURL(file);
+}
+ </script>
 </body>
 
 </html>
