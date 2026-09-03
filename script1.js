@@ -278,6 +278,23 @@ async function getReviews() {
 
 // --- 5. العرض (Render) ---
 function renderProducts(products) {
+        // مثال لما يضاف داخل حلقة عرض المنتجات:
+const isComingSoon = checkIsComingSoon(p);
+
+card.innerHTML = `
+    ${isComingSoon ? '<span class="card-cs-tag">COMING SOON</span>' : ''}
+    <img src="${p.image_url || 'images/placeholder.png'}" class="${isComingSoon ? 'is-coming-soon-blur' : ''}" alt="${p.name}">
+    <div class="product-details">
+        <h3>${p.name}</h3>
+        <p class="product-price">${isComingSoon ? '---' : p.price + ' DZD'}</p>
+        <div class="product-actions">
+            <button class="details-btn" onclick='openDetails(${JSON.stringify(p)})'>Détails</button>
+            <button class="add-to-cart-btn" ${isComingSoon ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+               ${isComingSoon ? 'Bientôt' : 'Ajouter'}
+            </button>
+        </div>
+    </div>
+`;
     const grid = document.getElementById('products-grid');
     if (!grid) return;
     grid.innerHTML = '';
@@ -705,21 +722,5 @@ function checkIsComingSoon(product) {
     // زر الاستكشاف
     const scrollBtn = document.getElementById('scroll-to-products');
     if(scrollBtn) scrollBtn.addEventListener('click', () => document.getElementById('products-section').scrollIntoView({behavior:'smooth'}));
-    // مثال لما يضاف داخل حلقة عرض المنتجات:
-const isComingSoon = checkIsComingSoon(p);
 
-card.innerHTML = `
-    ${isComingSoon ? '<span class="card-cs-tag">COMING SOON</span>' : ''}
-    <img src="${p.image_url || 'images/placeholder.png'}" class="${isComingSoon ? 'is-coming-soon-blur' : ''}" alt="${p.name}">
-    <div class="product-details">
-        <h3>${p.name}</h3>
-        <p class="product-price">${isComingSoon ? '---' : p.price + ' DZD'}</p>
-        <div class="product-actions">
-            <button class="details-btn" onclick='openDetails(${JSON.stringify(p)})'>Détails</button>
-            <button class="add-to-cart-btn" ${isComingSoon ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
-               ${isComingSoon ? 'Bientôt' : 'Ajouter'}
-            </button>
-        </div>
-    </div>
-`;
 });
