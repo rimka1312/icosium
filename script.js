@@ -1,5 +1,5 @@
 // ---------------------------------------------------
-// ملف script.js النهائي (مع حفظ الإعدادات - LocalStorage)
+// ملف script.js المصحح بالكامل
 // ---------------------------------------------------
 
 // --- 0. إعداد Supabase ---
@@ -7,7 +7,6 @@ const { createClient } = supabase;
 const SUPABASE_URL = 'https://vhrvdkaqlrwplkdgwwkl.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZocnZka2FxbHJ3cGxrZGd3d2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTUyMTAsImV4cCI6MjA3ODk3MTIxMH0.mNAn3qo48y46FDkDOqUVt1xwN2smFMZL1lBNbT0OkTA';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-console.log('Supabase client is ready!');
 
 // --- 1. الترجمة الكاملة ---
 const translations = {
@@ -17,9 +16,9 @@ const translations = {
         hero_title: "اكتشف مجموعتنا الجديدة", hero_subtitle: "تصميم عصري بجودة عالية",
         products_title: "منتجاتنا", category_all: "الكل",
         about_title: "عن ICOSIUM",
-        about_history_text: "في عام 140 قبل الميلاد، أسس الفينيقيون 'إيكوزيم' على ساحل شمال إفريقيا — القلب القديم لما يعرف اليوم بالجزائر العاصمة. مرت قرون، وقامت إمبراطوريات وسقطت. ومع ذلك، فإن روح إيكوزيم لا تزال حية. من تلك الطاقة الخالدة، ولدت ICOSIUM كعلامة تجارية جزائرية عصرية تمزج بين التراث والأناقة المعاصرة. نحن نجلب روح الماضي إلى عالم اليوم — ونصمم ملابس تعبر عن الهوية والإبداع والهدف. مهمتنا هي إعادة تعريف الموضة المحلية لجيل جديد يقدر الأصالة والشجاعة. ICOSIUM ليست مجرد علامة تجارية، إنها حركة وجسر بين الروح القديمة والحياة العصرية.",
+        about_history_text: "في عام 140 قبل الميلاد، أسس الفينيقيون 'إيكوزيم' على ساحل شمال إفريقيا...",
         about_why_title: "لماذا تختار ICOSIUM؟",
-        about_why_text: "لأن ما ترتديه يجب أن يحمل معنى. في ICOSIUM، كل قطعة تحكي قصة — قصة أرض وثقافة وجيل لا يخشى التميز. نحن لا نصنع الملابس فحسب؛ بل نخلق صلة بين روح الجزائر العريقة والروح الحديثة لشبابها. تصاميمنا أصيلة، ومصممة بعناية لتدوم — صُنعت لأولئك الذين يقدرون الهوية على الموضة العابرة، والمعنى على الإنتاج الضخم. عندما ترتدي ICOSIUM، فأنت ترتدي التراث والإبداع والثقة — لأن الأناقة الحقيقية تبدأ من الداخل.",
+        about_why_text: "لأن ما ترتديه يجب أن يحمل معنى...",
         reviews_title: "آراء الزبائن", btn_write_review: "أكتب رأيك", review_form_title: "شاركنا تجربتك",
         contact_title: "تواصل معنا", contact_message_title: "راسلنا مباشرة", contact_send: "إرسال",
         cart_title: "السلة", cart_total: "الإجمالي", checkout_title: "إتمام الطلب", 
@@ -33,9 +32,9 @@ const translations = {
         hero_title: "Découvrez notre nouvelle collection", hero_subtitle: "Design moderne, qualité supérieure",
         products_title: "Nos Produits", category_all: "Tout",
         about_title: "À propos d'ICOSIUM",
-        about_history_text: "En 140 av. J.-C., les Phéniciens fondèrent Ikosim sur la côte nord-africaine — le cœur antique de l'actuelle Alger. Des siècles ont passé, des empires se sont élevés et effondrés. Pourtant, l'esprit d'Ikosim perdure. Née de cette énergie intemporelle, ICOSIUM est une marque algérienne moderne qui allie héritage et style contemporain. Nous transportons l'âme du passé dans le monde d'aujourd'hui, créant des vêtements qui expriment identité et créativité. ICOSIUM est plus qu'une marque. C'est un mouvement — un pont entre l'esprit ancien et la vie moderne.",
+        about_history_text: "En 140 av. J.-C., les Phéniciens fondèrent Ikosim...",
         about_why_title: "Pourquoi choisir ICOSIUM",
-        about_why_text: "Parce que ce que vous portez doit avoir du sens. Chez ICOSIUM, chaque pièce raconte une histoire — celle d'une terre, d'une culture et d'une génération qui n'a pas peur de se démarquer. Nous créons un lien entre l'âme ancienne de l'Algérie et l'esprit moderne de sa jeunesse. Nos designs sont authentiques, pensés avec soin et faits pour durer — pour ceux qui privilégient l'identité sur la tendance et le sens sur la production de masse. Porter ICOSIUM, c'est porter l'héritage, la créativité et la confiance — car le vrai style vient de l'intérieur.",
+        about_why_text: "Parce que ce que vous portez doit avoir du sens...",
         reviews_title: "Avis Clients", btn_write_review: "Écrire un avis", review_form_title: "Partagez votre avis",
         contact_title: "Contact", contact_message_title: "Contactez-nous directement", contact_send: "Envoyer",
         cart_title: "Votre Panier", cart_total: "Total", checkout_title: "Commander", 
@@ -49,10 +48,10 @@ const translations = {
         hero_title: "Discover our new collection", hero_subtitle: "Modern design, premium quality",
         products_title: "Our Products", category_all: "All",
         about_title: "About ICOSIUM",
-        about_history_text: "In 140 B.C.E., the Phoenicians founded Ikosim on the North African coast — the ancient heart of what is today Algiers. Centuries have passed. Empires have risen and fallen. Yet, the spirit of Ikosim still lives on. Born from that timeless energy, ICOSIUM is a modern Algerian casualwear brand that blends heritage with contemporary style. We bring the soul of the past into today’s world — crafting clothing that expresses identity, creativity, and purpose. ICOSIUM is more than a brand. It’s a movement — a bridge between ancient spirit and modern life.",
+        about_history_text: "In 140 B.C.E., the Phoenicians founded Ikosim...",
         about_why_title: "Why Choose ICOSIUM",
-        about_why_text: "Because what you wear should mean something. At ICOSIUM, every piece tells a story — the story of a land, a culture, and a generation unafraid to stand out. We don’t just make clothes; we create a connection between the old soul of Algeria and the modern spirit of its youth. Our designs are authentic, thoughtfully crafted, and made to last — built for those who value identity over trend and meaning over mass production. When you wear ICOSIUM, you wear heritage, creativity, and confidence — because true style starts from within.",
-reviews_title: "Customer Reviews", btn_write_review: "Write Review", review_form_title: "Share your experience",
+        about_why_text: "Because what you wear should mean something...",
+        reviews_title: "Customer Reviews", btn_write_review: "Write Review", review_form_title: "Share your experience",
         contact_title: "Contact", contact_message_title: "Contact us directly", contact_send: "Send",
         cart_title: "Your Cart", cart_total: "Total", checkout_title: "Checkout", 
         form_name: "Name", form_phone: "Phone", form_address: "Address", delivery_fee: "Delivery", form_confirm: "Confirm",
@@ -61,9 +60,7 @@ reviews_title: "Customer Reviews", btn_write_review: "Write Review", review_form
     }
 };
 
-// ✅ التعديل 1: تحميل اللغة المحفوظة أو استخدام الفرنسية كافتراضي
 let currentLanguage = localStorage.getItem('icosium_lang') || 'fr'; 
-
 let allProducts = [];
 let cart = [];
 
@@ -90,7 +87,7 @@ const wilayasData = [
     { id: 58, name: "In Guezzam", price: 1600 }
 ];
 
-// --- 2. دوال السلة (localStorage) ---
+// --- 2. دوال السلة ---
 function loadCartFromStorage() {
     const savedCart = localStorage.getItem('icosium_cart');
     if (savedCart) {
@@ -107,66 +104,8 @@ function saveCartToStorage() {
 function updateCartCountHeader() {
     const countEl = document.getElementById('cart-count');
     if(countEl) countEl.textContent = cart.length;
-    const countElPage = document.getElementById('cart-count-page');
-    if(countElPage) countElPage.textContent = cart.length;
 }
-function showProductDetails(id) {
-    const p = allProducts.find(item => item.id === id);
-    const lang = document.documentElement.lang || 'fr';
-    const modal = document.getElementById('product-modal');
-    
-    // إنشاء معرض الصور
-    const galleryHtml = p.images.map(img => `<img src="${img}" onclick="updateMainImage(this.src)" class="thumb">`).join('');
-    
-    // استخراج الألوان والمقاسات المتاحة
-    const availableColors = [...new Set(p.inventory.filter(i => i.stock > 0).map(i => i.color))];
-    const availableSizes = [...new Set(p.inventory.filter(i => i.stock > 0).map(i => i.size))];
 
-    modal.querySelector('.modal-body').innerHTML = `
-        <div class="modal-gallery">
-            <img src="${p.images[0]}" id="main-product-img" class="main-view">
-            <div class="thumbnails">${galleryHtml}</div>
-        </div>
-        <div class="modal-info">
-            <h2>${p['name_' + lang]}</h2>
-            <p class="desc">${p['desc_' + lang]}</p>
-            <div class="options">
-                <h4>${translations[lang].colors}:</h4>
-                <div class="color-list">
-                    ${availableColors.map(c => `<span class="color-dot" style="background:${c}"></span>`).join('')}
-                </div>
-                <h4>${translations[lang].sizes}:</h4>
-                <div class="size-list">
-                    ${availableSizes.map(s => `<span class="size-tag">${s}</span>`).join('')}
-                </div>
-            </div>
-            <div class="price">${p.price} DZD</div>
-        </div>
-    `;
-    modal.style.display = 'block';
-}
-function setLanguage(lang) {
-    currentLanguage = lang;
-    localStorage.setItem('icosium_lang', lang);
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    
-    // تحديث النصوص الثابتة
-    document.querySelectorAll('[data-key]').forEach(el => {
-        const k = el.getAttribute('data-key');
-        if(k && translations[lang][k]) el.textContent = translations[lang][k];
-    });
-
-    // إضافة هذا السطر لتحديث المنتجات المعروضة باللغة الجديدة فوراً
-    if (allProducts.length > 0) {
-        renderProducts(allProducts);
-    }
-    
-    getCategories(); 
-}
-function updateMainImage(src) {
-    document.getElementById('main-product-img').src = src;
-}
 function addToCart(item) {
     cart.push(item);
     saveCartToStorage();
@@ -176,44 +115,27 @@ function addToCart(item) {
 function removeFromCart(index) {
     cart.splice(index, 1);
     saveCartToStorage();
-    if (window.location.pathname.includes('cart.html')) {
-        renderCartPage();
-    }
+    if (window.location.pathname.includes('cart.html')) renderCartPage();
 }
 
-// --- 3. دالة ملء الولايات ---
-function populateWilayas() {
-    const wilayaSelect = document.getElementById('checkout-wilaya');
-    if(!wilayaSelect) return;
+// --- 3. فحص خاصية Coming Soon التلقائي ---
+function checkIsComingSoon(product) {
+    if (!product.is_coming_soon) return false;
+    if (!product.available_at) return true;
 
-    wilayaSelect.innerHTML = '<option value="" disabled selected>Choisir Wilaya</option>';
-
-    wilayasData.forEach(wilaya => {
-        const option = document.createElement('option');
-        option.value = wilaya.price; 
-        option.textContent = `${wilaya.id} - ${wilaya.name} (+${wilaya.price} DA)`;
-        wilayaSelect.appendChild(option);
-    });
-
-    wilayaSelect.addEventListener('change', (e) => {
-        const deliveryPrice = parseFloat(e.target.value) || 0;
-        const feeDisplay = document.getElementById('delivery-fee-display');
-        if(feeDisplay) feeDisplay.textContent = deliveryPrice;
-        if (window.location.pathname.includes('cart.html')) {
-            calcFinalTotalPage();
-        }
-    });
+    const now = new Date();
+    const target = new Date(product.available_at);
+    return target > now; // إذا لم يحن الوقت بعد، تظل مفعلة
 }
 
-// --- 4. التحميل الأولي ---
+// --- 4. جلب وعرض البيانات ---
 async function loadInitialData() {
     await getCategories();
     await getProducts();
     await getReviews(); 
     setLanguage(currentLanguage);
     
-    // ✅ التعديل 2: تطبيق الثيم المحفوظ عند التحميل
-    const savedTheme = localStorage.getItem('icosium_theme') || 'light';
+    const savedTheme = localStorage.getItem('icosium_theme') || 'dark';
     applyTheme(savedTheme);
 }
 
@@ -232,8 +154,7 @@ async function getCategories() {
     }
 
     categories.forEach(cat => {
-        const name = cat[`name_${currentLanguage}`] || cat.name;
-        
+        const name = cat[`name_${currentLanguage}`] || cat.name_fr || cat.name;
         if (filterContainer) {
             const btn = document.createElement('button');
             btn.className = 'category-btn';
@@ -245,29 +166,24 @@ async function getCategories() {
             });
             filterContainer.appendChild(btn);
         }
-
-        if (navDropdown) {
-            const link = document.createElement('a');
-            link.href = "index.html#products-section";
-            link.textContent = name;
-            link.addEventListener('click', () => {
-                if (!window.location.pathname.includes('cart.html')) {
-                    filterProducts(cat.id);
-                    const section = document.getElementById('products-section');
-                    if(section) section.scrollIntoView({behavior:'smooth'});
-                } else {
-                    window.location.href = 'index.html#products-section';
-                }
-                if (typeof closeMenu === 'function') closeMenu();
-            });
-            navDropdown.appendChild(link);
-        }
     });
 }
 
 async function getProducts() {
-    let { data: products } = await supabaseClient.from('products').select('*');
-    if (products) { allProducts = products; renderProducts(allProducts); }
+    // جلب المنتجات غير المحذوفة
+    let { data: products, error } = await supabaseClient
+        .from('products')
+        .select('*')
+        .eq('is_deleted', false)
+        .order('id', { ascending: false });
+
+    if (error) {
+        console.error("Error fetching products:", error);
+        return;
+    }
+
+    allProducts = products || [];
+    renderProducts(allProducts);
 }
 
 async function getReviews() {
@@ -276,254 +192,205 @@ async function getReviews() {
     if (reviews && reviews.length > 0) renderReviews(reviews);
 }
 
-// --- 5. العرض (Render) ---
+// --- 5. عرض كروت المنتجات مع دعم Coming Soon ---
 function renderProducts(products) {
-        // مثال لما يضاف داخل حلقة عرض المنتجات:
-const isComingSoon = checkIsComingSoon(p);
-
-card.innerHTML = `
-    ${isComingSoon ? '<span class="card-cs-tag">COMING SOON</span>' : ''}
-    <img src="${p.image_url || 'images/placeholder.png'}" class="${isComingSoon ? 'is-coming-soon-blur' : ''}" alt="${p.name}">
-    <div class="product-details">
-        <h3>${p.name}</h3>
-        <p class="product-price">${isComingSoon ? '---' : p.price + ' DZD'}</p>
-        <div class="product-actions">
-            <button class="details-btn" onclick='openDetails(${JSON.stringify(p)})'>Détails</button>
-            <button class="add-to-cart-btn" ${isComingSoon ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
-               ${isComingSoon ? 'Bientôt' : 'Ajouter'}
-            </button>
-        </div>
-    </div>
-`;
     const grid = document.getElementById('products-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
+    if (!products.length) {
+        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-muted);">Aucun produit disponible pour le moment.</p>';
+        return;
+    }
+
     products.forEach(p => {
         const isOutOfStock = p.stock <= 0;
+        const isComingSoon = checkIsComingSoon(p);
         const outOfStockText = translations[currentLanguage].out_of_stock;
         
         const card = document.createElement('div');
-        card.className = `product-card ${isOutOfStock ? 'out-of-stock' : ''}`;
+        card.className = `product-card ${isOutOfStock ? 'out-of-stock' : ''} ${isComingSoon ? 'is-coming-soon' : ''}`;
         
         card.innerHTML = `
-            ${isOutOfStock ? `<div class="out-of-stock-badge">${outOfStockText}</div>` : ''}
-            <img src="${p.image_url || p.image}" alt="${p.name}"> <!-- دعم لأسماء أعمدة الصور المتعددة -->
+            ${isComingSoon ? '<span class="card-cs-tag">COMING SOON</span>' : (isOutOfStock ? `<div class="out-of-stock-badge">${outOfStockText}</div>` : '')}
+            <img src="${p.image_url || 'images/logo3.png'}" class="${isComingSoon ? 'is-coming-soon-blur' : ''}" alt="${p.name}">
             <div class="product-details">
                 <h3 class="product-name">${p.name}</h3>
-                <p class="product-price">${p.price} DZD</p>
+                <p class="product-price">${isComingSoon ? 'Bientôt disponible' : p.price + ' DZD'}</p>
                 <div class="product-actions">
-                    <button class="add-to-cart-btn" ${isOutOfStock ? 'disabled' : ''}>
-                        ${isOutOfStock ? outOfStockText : 'Ajouter'}
+                    <button class="details-btn">Détails</button>
+                    <button class="add-to-cart-btn" ${isOutOfStock || isComingSoon ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+                        ${isComingSoon ? 'Bientôt' : (isOutOfStock ? outOfStockText : 'Ajouter')}
                     </button>
-                    <!-- الزر المفقود تمت إضافته هنا -->
-                    <button class="details-btn">Détails</button> 
                 </div>
             </div>
         `;
         
-        // ربط أزرار البطاقة بالوظائف
-        addCardLogic(card, p);
+        // ربط أزرار البطاقة
+        card.querySelector('.details-btn').addEventListener('click', () => openDetails(p));
+        
+        const addBtn = card.querySelector('.add-to-cart-btn');
+        if (!isComingSoon && !isOutOfStock) {
+            addBtn.addEventListener('click', () => openDetails(p)); // فتح التفاصيل لاختيار المقاس واللون
+        }
+
         grid.appendChild(card);
     });
-}function renderReviews(reviews) {
-    const container = document.querySelector('.reviews-container');
-    if (!container) return;
-    container.innerHTML = '';
-    reviews.forEach(r => {
-        let stars = '';
-        for(let i=1; i<=5; i++) stars += i <= r.rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-        container.innerHTML += `
-            <div class="review-card">
-                <div class="review-header">
-                    <div><h4>${r.reviewer_name}</h4><small>${r.reviewer_location||''}</small></div>
-                    <div class="review-stars">${stars}</div>
-                </div>
-                <p>"${r.review_text}"</p>
-            </div>`;
-    });
-}
-
-function addCardLogic(card, product) {
-    let selColor=null, selSize=null;
-    card.querySelectorAll('.color-dot').forEach(d => d.addEventListener('click', e => {
-        card.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('selected')); e.target.classList.add('selected'); selColor = e.target.dataset.val;
-    }));
-    card.querySelectorAll('.size-box').forEach(b => b.addEventListener('click', e => {
-        card.querySelectorAll('.size-box').forEach(x=>x.classList.remove('selected')); e.target.classList.add('selected'); selSize = e.target.dataset.val;
-    }));
-    
-    card.querySelector('.add-to-cart-btn').addEventListener('click', () => {
-        if(product.colors?.length && !selColor) return alert(translations[currentLanguage].alert_color);
-        if(product.sizes?.length && !selSize) return alert(translations[currentLanguage].alert_size);
-        addToCart({ id: `${product.id}-${selColor}-${selSize}`, ...product, color: selColor, size: selSize, qty: 1 });
-    });
-
-    card.querySelector('.details-btn').addEventListener('click', () => openDetails(product));
 }
 
 function filterProducts(catId) {
     renderProducts(catId === 'all' ? allProducts : allProducts.filter(p => p.category_id == catId));
 }
 
-// --- 6. صفحة السلة (cart.html) ---
-function renderCartPage() {
-    const container = document.getElementById('cart-items-container-page');
-    const totalEl = document.getElementById('cart-total-price-page');
-    
-    if (!container) return; 
-
-    container.innerHTML = '';
-    let total = 0;
-
-    if (cart.length === 0) {
-        container.innerHTML = '<p style="text-align:center; padding:20px;">Votre panier est vide.</p>';
-    } else {
-        cart.forEach((item, i) => {
-            total += item.price;
-            container.innerHTML += `
-                <div class="cart-item-row" style="display:flex; justify-content:space-between; align-items:center; padding:15px 0; border-bottom:1px solid #eee;">
-                    <div class="cart-item-info">
-                        <h4 style="margin:0;">${item.name}</h4>
-                        <small style="color:#666;">Couleur: ${item.color || '-'} | Taille: ${item.size || '-'}</small>
-                    </div>
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        <span style="font-weight:bold; color:var(--color-primary);">${item.price} DA</span>
-                        <i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="removeFromCart(${i})"></i>
-                    </div>
-                </div>`;
-        });
-    }
-
-    if(totalEl) totalEl.textContent = total;
-    calcFinalTotalPage();
-}
-
-function calcFinalTotalPage() {
-    const totalEl = document.getElementById('cart-total-price-page');
-    const feeDisplay = document.getElementById('delivery-fee-display');
-    const finalDisplay = document.getElementById('final-total-price');
-
-    if(!totalEl || !feeDisplay || !finalDisplay) return;
-
-    const cartTotal = parseFloat(totalEl.textContent) || 0;
-    const deliveryFee = parseFloat(feeDisplay.textContent) || 0;
-
-    finalDisplay.textContent = cartTotal + deliveryFee;
-}
-// ابحث عن الجزء الذي يقوم بعمل render للمنتجات وقم بتعديله كالتالي:
-function createProductCard(product) {
-    const isOutOfStock = product.stock <= 0; // التحقق من المخزون
-    const outOfStockText = translations[currentLanguage].out_of_stock;
-
-    return `
-        <div class="product-card ${isOutOfStock ? 'out-of-stock' : ''}" style="position: relative;">
-            ${isOutOfStock ? `<div class="out-of-stock-badge">${outOfStockText}</div>` : ''}
-            <img src="${product.image}" alt="${product.name}">
-            <div class="product-details">
-                <h3 class="product-name">${product.name}</h3>
-                <p class="product-price">${product.price} DA</p>
-                <div class="product-actions">
-                    <button class="add-to-cart-btn" 
-                            ${isOutOfStock ? 'disabled' : ''} 
-                            onclick="addToCart(${product.id})">
-                        ${isOutOfStock ? outOfStockText : (translations[currentLanguage].add_to_cart || 'Ajouter')}
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-}
+// --- 6. فتح تفاصيل المنتج (Modal) مع تطبيق الضبابية التامة والحجب لـ Coming Soon ---
 let countdownInterval = null;
 
 function openDetails(p) {
-  const modal = document.getElementById('product-details-modal');
-  const overlay = document.getElementById('modal-coming-soon-overlay');
-  const imageContainer = document.querySelector('.modal-image-container');
-  const infoContainer = document.querySelector('.modal-info-container');
-  const countdownEl = document.getElementById('cs-countdown');
+    const modal = document.getElementById('product-details-modal');
+    if (!modal) return;
 
-  if (countdownInterval) clearInterval(countdownInterval);
+    const overlay = document.getElementById('modal-coming-soon-overlay');
+    const imageContainer = modal.querySelector('.modal-image-container');
+    const infoContainer = modal.querySelector('.modal-info-container');
+    const countdownEl = document.getElementById('cs-countdown');
 
-  const isComingSoon = checkIsComingSoon(p);
+    if (countdownInterval) clearInterval(countdownInterval);
 
-  if (isComingSoon) {
-    // تفعيل الضبابية على الصورة والمعلومات
-    imageContainer.classList.add('is-coming-soon-blur');
-    infoContainer.classList.add('is-coming-soon-blur');
-    overlay.style.display = 'flex';
+    const isComingSoon = checkIsComingSoon(p);
 
-    // عداد تنازلي إذا كان هناك تاريخ محدد
-    if (p.available_at) {
-      countdownEl.style.display = 'block';
-      const targetTime = new Date(p.available_at).getTime();
+    if (isComingSoon) {
+        // حجب تام وضبابية كما طلبت
+        if (imageContainer) imageContainer.classList.add('is-coming-soon-blur');
+        if (infoContainer) infoContainer.classList.add('is-coming-soon-blur');
+        if (overlay) overlay.style.display = 'flex';
 
-      const updateTimer = () => {
-        const now = new Date().getTime();
-        const diff = targetTime - now;
+        // العد التنازلي التلقائي حتى موعد البيع
+        if (p.available_at && countdownEl) {
+            countdownEl.style.display = 'block';
+            const targetTime = new Date(p.available_at).getTime();
 
-        if (diff <= 0) {
-          // انتهت المدة: إزالة الحجب فوراً وجعل المنتج متاحاً للبيع
-          clearInterval(countdownInterval);
-          overlay.style.display = 'none';
-          imageContainer.classList.remove('is-coming-soon-blur');
-          infoContainer.classList.remove('is-coming-soon-blur');
-          return;
+            const updateTimer = () => {
+                const now = new Date().getTime();
+                const diff = targetTime - now;
+
+                if (diff <= 0) {
+                    // انتهى الوقت: إزالة الحجب فوراً وتنشيط الشراء تلقائياً!
+                    clearInterval(countdownInterval);
+                    if (overlay) overlay.style.display = 'none';
+                    if (imageContainer) imageContainer.classList.remove('is-coming-soon-blur');
+                    if (infoContainer) infoContainer.classList.remove('is-coming-soon-blur');
+                    return;
+                }
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+                countdownEl.textContent = `Disponible dans: ${days}j ${hours}h ${mins}m ${secs}s`;
+            };
+
+            updateTimer();
+            countdownInterval = setInterval(updateTimer, 1000);
+        } else if (countdownEl) {
+            countdownEl.style.display = 'none';
         }
-
-        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const secs = Math.floor((diff % (1000 * 60)) / 1000);
-
-        countdownEl.textContent = `Disponible dans: ${days}j ${hours}h ${mins}m ${secs}s`;
-      };
-
-      updateTimer();
-      countdownInterval = setInterval(updateTimer, 1000);
     } else {
-      countdownEl.style.display = 'none';
+        // متاح للبيع بشكل طبيعي
+        if (imageContainer) imageContainer.classList.remove('is-coming-soon-blur');
+        if (infoContainer) infoContainer.classList.remove('is-coming-soon-blur');
+        if (overlay) overlay.style.display = 'none';
     }
-  } else {
-    // المنتج متاح للبيع بشكل طبيعي
-    imageContainer.classList.remove('is-coming-soon-blur');
-    infoContainer.classList.remove('is-coming-soon-blur');
-    overlay.style.display = 'none';
-  }
 
-  // ملء بيانات المنتج العادية (الاسم، السعر، الصورة)
-  document.getElementById('modal-product-image').src = p.image_url || '';
-  document.getElementById('modal-product-name').textContent = p.name || '';
-  document.getElementById('modal-product-price').textContent = (p.price || 0) + ' DZD';
+    // تجهيز الصور (الرئيسية + الإضافية)
+    const mainImg = document.getElementById('modal-product-image');
+    if (mainImg) mainImg.src = p.image_url || 'images/logo3.png';
 
-  modal.style.display = 'block';
+    // نصوص ومقاسات
+    document.getElementById('modal-product-name').textContent = p.name;
+    document.getElementById('modal-product-desc').textContent = p.description || '';
+    document.getElementById('modal-product-price').textContent = p.price + ' DZD';
+
+    // استخراج المقاسات والألوان الفريدة
+    const opts = document.getElementById('modal-product-options');
+    opts.innerHTML = '';
+    let parsedSizes = [];
+    if (p.sizes) {
+        try { parsedSizes = typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes; } catch(e) {}
+    }
+
+    let availableColors = [];
+    let availableSizes = [];
+    if (Array.isArray(parsedSizes)) {
+        parsedSizes.forEach(s => {
+            if (s.color && !availableColors.includes(s.color)) availableColors.push(s.color);
+            if (s.size && !availableSizes.includes(s.size)) availableSizes.push(s.size);
+        });
+    }
+
+    let html = '';
+    if (availableColors.length > 0) {
+        html += `<div class="modal-opts-group"><label>${translations[currentLanguage].colors}</label><div class="product-colors" style="display:flex; gap:8px;">` 
+            + availableColors.map(c => `<span class="color-box" data-val="${c}" style="border:1.5px solid var(--color-border); padding:5px 12px; border-radius:6px; cursor:pointer;">${c}</span>`).join('')
+            + '</div></div>';
+    }
+    if (availableSizes.length > 0) {
+        html += `<div class="modal-opts-group" style="margin-top:10px;"><label>${translations[currentLanguage].sizes}</label><div class="product-sizes" style="display:flex; gap:8px;">`
+            + availableSizes.map(s => `<span class="size-box" data-val="${s}" style="border:1.5px solid var(--color-border); padding:5px 12px; border-radius:6px; cursor:pointer;">${s}</span>`).join('')
+            + '</div></div>';
+    }
+    opts.innerHTML = html;
+
+    let selColor = null, selSize = null;
+    opts.querySelectorAll('.color-box').forEach(b => b.addEventListener('click', e => {
+        opts.querySelectorAll('.color-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; });
+        e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = '#fff';
+        selColor = e.target.dataset.val;
+    }));
+    opts.querySelectorAll('.size-box').forEach(b => b.addEventListener('click', e => {
+        opts.querySelectorAll('.size-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; });
+        e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = '#fff';
+        selSize = e.target.dataset.val;
+    }));
+
+    // زر الإضافة للسلة
+    const cartBtn = document.getElementById('modal-add-to-cart-btn');
+    const newCartBtn = cartBtn.cloneNode(true);
+    cartBtn.parentNode.replaceChild(newCartBtn, cartBtn);
+
+    if (isComingSoon) {
+        newCartBtn.disabled = true;
+        newCartBtn.style.opacity = '0.5';
+    } else {
+        newCartBtn.disabled = false;
+        newCartBtn.style.opacity = '1';
+        newCartBtn.addEventListener('click', () => {
+            if (availableColors.length && !selColor) return alert(translations[currentLanguage].alert_color);
+            if (availableSizes.length && !selSize) return alert(translations[currentLanguage].alert_size);
+            addToCart({ id: `${p.id}-${selColor}-${selSize}`, ...p, color: selColor, size: selSize, qty: 1 });
+            modal.style.display = 'none';
+        });
+    }
+
+    modal.style.display = 'block';
 }
-// --- 8. دوال اللغة والثيم (المعدلة للحفظ) ---
 
+// --- 7. إعدادات الثيم واللغة والتشغيل ---
 function setLanguage(lang) {
     currentLanguage = lang;
-    // ✅ حفظ اللغة في التخزين المحلي
     localStorage.setItem('icosium_lang', lang);
-
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     
     document.querySelectorAll('[data-key]').forEach(el => {
         const k = el.getAttribute('data-key');
-        if(translations[lang][k]) el.textContent = translations[lang][k];
+        if(k && translations[lang][k]) el.textContent = translations[lang][k];
     });
-    
-    const search = document.getElementById('search-input');
-    if(search) search.placeholder = translations[lang].search_placeholder;
-    
-    // تحديث القائمة المنسدلة للغة لتعكس القيمة الحالية
+
     const langSelect = document.getElementById('language-switcher');
     if (langSelect) langSelect.value = lang;
-
-    getCategories();
 }
 
-// دالة تطبيق الثيم
 function applyTheme(theme) {
     const icon = document.querySelector('#dark-mode-toggle i');
     if (theme === 'dark') {
@@ -535,192 +402,29 @@ function applyTheme(theme) {
     }
 }
 
-// تبديل الثيم وحفظه
 function toggleTheme() {
     const isDark = document.body.classList.toggle('dark-mode');
     const newTheme = isDark ? 'dark' : 'light';
-    localStorage.setItem('icosium_theme', newTheme); // حفظ
-    applyTheme(newTheme); // تحديث الأيقونة
+    localStorage.setItem('icosium_theme', newTheme);
+    applyTheme(newTheme);
 }
 
-// --- 9. تشغيل عند التحميل ---
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // 1. تحميل البيانات
     loadInitialData();
-    
-    // 2. تحميل السلة
     loadCartFromStorage();
 
-    // 3. ملء الولايات
-    populateWilayas(); 
-
-    // 4. زر السلة
-  // 3. إدارة زر السلة (Redirect)
-    const cartBtn = document.getElementById('cart-button');
-    if (cartBtn) {
-        // استنساخ الزر لإزالة أي مستمعين قدامى (بدون إضافة عناصر جديدة)
-        const newCartBtn = cartBtn.cloneNode(true);
-        cartBtn.parentNode.replaceChild(newCartBtn, cartBtn);
-        
-        // إضافة حدث النقر فقط
-        newCartBtn.addEventListener('click', () => {
-            window.location.href = 'cart.html';
-        });
-    }
-
-    // 5. زر الوضع الداكن (ربطه بالدالة الجديدة)
-    const darkModeBtn = document.getElementById('dark-mode-toggle');
-    if (darkModeBtn) {
-        // إزالة المستمعين القدامى
-        const newDarkModeBtn = darkModeBtn.cloneNode(true);
-        darkModeBtn.parentNode.replaceChild(newDarkModeBtn, darkModeBtn);
-        newDarkModeBtn.addEventListener('click', toggleTheme);
-    }
-
-    // 6. قائمة اللغة (ربطها بالدالة الجديدة)
-    const langSwitcher = document.getElementById('language-switcher');
-    if (langSwitcher) {
-        langSwitcher.addEventListener('change', e => setLanguage(e.target.value));
-    }
-
-    // 7. صفحة السلة
-    if (window.location.pathname.includes('cart.html')) {
-        renderCartPage(); 
-
-        const formPage = document.getElementById('checkout-form-page');
-        if (formPage) {
-            formPage.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                if (cart.length === 0) return alert('Votre panier est vide !');
-
-                const submitBtn = document.getElementById('checkout-submit-btn');
-                submitBtn.textContent = "Envoi en cours...";
-                submitBtn.disabled = true;
-
-              const wilayaSelect = document.getElementById('checkout-wilaya');
-// 1. قطع النص عند القوس لإزالة السعر من الولاية
-const wilayaName = wilayaSelect.options[wilayaSelect.selectedIndex].text.split(' (+')[0];
-
-// 2. ترجمة أكواد الألوان إلى اللغة العربية
-const formattedCart = cart.map(item => {
-    let colorName = item.color;
-    if (item.color === '#ffffff') colorName = 'أبيض';
-    else if (item.color === '#000000') colorName = 'أسود';
-    else if (item.color === '#808080') colorName = 'رمادي';
-    // يمكنك إضافة ألوان أخرى هنا بنفس الطريقة مستقبلاً
+    document.getElementById('dark-mode-toggle')?.addEventListener('click', toggleTheme);
+    document.getElementById('language-switcher')?.addEventListener('change', e => setLanguage(e.target.value));
     
-    return { ...item, color: colorName };
-});
+    // إغلاق المودال
+    document.querySelectorAll('.close-btn').forEach(b => b.addEventListener('click', e => e.target.closest('.modal').style.display = 'none'));
+    window.onclick = e => { if(e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 
-const orderData = {
-    customer_name: document.getElementById('checkout-name').value,
-    customer_phone: document.getElementById('checkout-phone').value,
-    customer_address: `${wilayaName} - ${document.getElementById('checkout-address').value}`,
-    items: formattedCart,  // نرسل السلة المترجمة بدلاً من القديمة
-    total_price: parseFloat(document.getElementById('final-total-price').textContent),
-    delivery_fee: parseFloat(document.getElementById('delivery-fee-display').textContent),
-    status: 'Pending'
-};
-
-                const { error } = await supabaseClient.from('orders').insert(orderData);
-
-                if (error) {
-                    console.error(error);
-                    alert("Erreur lors de la commande.");
-                    submitBtn.textContent = "Confirmer la commande";
-                    submitBtn.disabled = false;
-                } else {
-                    alert("Commande réussie ! Merci.");
-                    cart = []; 
-                    saveCartToStorage(); 
-                    window.location.href = 'index.html'; 
-                }
-            });
-        }
-    }
-
-    // 8. النماذج الأخرى
-    const contactF = document.getElementById('contact-form');
-    if(contactF) {
-        contactF.addEventListener('submit', async e => {
-            e.preventDefault();
-            const data = {
-                name: document.getElementById('contact-name').value,
-                email: document.getElementById('contact-email').value,
-                message: document.getElementById('contact-message').value
-            };
-            const { error } = await supabaseClient.from('ContactMessages').insert(data);
-            if(!error) { alert('Message envoyé!'); contactF.reset(); }
-        });
-    }
-
-    const stars = document.querySelectorAll('.star-input');
-    let currentRating = 0;
-    if(stars.length > 0) {
-        stars.forEach(s => s.addEventListener('click', () => {
-            currentRating = s.dataset.value;
-            document.getElementById('rating-value').value = currentRating;
-            document.getElementById('rating-text').textContent = `${currentRating}/5`;
-            stars.forEach(st => st.classList.toggle('selected', st.dataset.value <= currentRating));
-            stars.forEach(st => st.querySelector('i').className = st.dataset.value <= currentRating ? 'fas fa-star' : 'far fa-star');
-        }));
-    }
-
-    const reviewForm = document.getElementById('add-review-form');
-    if(reviewForm) {
-        reviewForm.addEventListener('submit', async e => {
-            e.preventDefault();
-            if(!currentRating) return alert('Notez SVP');
-            const data = {
-                reviewer_name: document.getElementById('review-name').value,
-                reviewer_location: document.getElementById('review-location').value,
-                review_text: document.getElementById('review-text').value,
-                rating: currentRating, is_approved: true
-            };
-            const {error} = await supabaseClient.from('reviews').insert(data);
-            if(!error) { 
-                alert('Merci pour votre avis!'); 
-                document.getElementById('review-modal').style.display='none'; 
-                getReviews(); 
-            }
-        });
-    }
-// تفحص هل المنتج في حالة Coming Soon حالياً
-function checkIsComingSoon(product) {
-  if (!product.is_coming_soon) return false;
-  
-  // إذا لم يحدد الآدمن تاريخاً، يعتبر قريباً دائماً حتى يلغيه
-  if (!product.available_at) return true;
-
-  const now = new Date();
-  const availableDate = new Date(product.available_at);
-
-  // إذا وصل الوقت الحالي لتاريخ الإتاحة، يلغى الحجب تلقائياً ويصبح متاحاً للبيع
-  return availableDate > now;
-}
-    // 9. المودالات
-    const opens = { 'profile-button': 'profile-modal', 'open-review-modal-btn': 'review-modal' };
-    Object.keys(opens).forEach(id => {
-        const btn = document.getElementById(id);
-        if(btn) btn.addEventListener('click', () => document.getElementById(opens[id]).style.display='block');
-    });
-    document.querySelectorAll('.close-btn').forEach(b => b.addEventListener('click', e => e.target.closest('.modal').style.display='none'));
-    window.onclick = e => { if(e.target.classList.contains('modal')) e.target.style.display='none'; };
-
-    // 10. موبايل ميني
+    // القائمة الجانبية (الهاتف)
     const nav = document.getElementById('main-nav');
     const overlay = document.getElementById('nav-overlay');
-    const burgerBtn = document.getElementById('burger-menu-btn');
-    const closeNavBtn = document.getElementById('close-nav-btn');
-
-    if(burgerBtn) burgerBtn.addEventListener('click', () => { nav.classList.add('nav-active'); overlay.classList.add('overlay-active'); });
-    function closeMenu() { if(nav) nav.classList.remove('nav-active'); if(overlay) overlay.classList.remove('overlay-active'); }
-    if(closeNavBtn) closeNavBtn.addEventListener('click', closeMenu);
-    if(overlay) overlay.addEventListener('click', closeMenu);
-
-    // زر الاستكشاف
-    const scrollBtn = document.getElementById('scroll-to-products');
-    if(scrollBtn) scrollBtn.addEventListener('click', () => document.getElementById('products-section').scrollIntoView({behavior:'smooth'}));
-
+    document.getElementById('burger-menu-btn')?.addEventListener('click', () => { nav.classList.add('nav-active'); overlay.classList.add('overlay-active'); });
+    const closeMenu = () => { nav?.classList.remove('nav-active'); overlay?.classList.remove('overlay-active'); };
+    document.getElementById('close-nav-btn')?.addEventListener('click', closeMenu);
+    overlay?.addEventListener('click', closeMenu);
 });
