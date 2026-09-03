@@ -2020,35 +2020,11 @@ a { text-decoration: none; }
           </select>
         </div>
 
-        <div class="fg">
-          <label>Image(s) du Produit</label>
-          
-          <!-- حاوية الصور وزر الإضافة -->
-          <div class="flex items-center gap-3 overflow-x-auto py-2" id="gallery-container">
-            
-            <!-- زر الرفع المبدئي (يظهر فقط إذا لم توجد صورة رئيسية) -->
-            <label id="initial-upload-btn" class="w-24 h-24 border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer transition bg-gray-50 hover:bg-gray-100 flex-shrink-0 group">
-              <svg class="w-7 h-7 text-gray-400 group-hover:text-emerald-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-              </svg>
-              <span class="text-[11px] text-gray-500 group-hover:text-emerald-700 font-medium mt-1">Principale</span>
-              <input type="file" accept="image/*" class="hidden" onchange="handleMainImage(event)">
-            </label>
-
-            <!-- حاوية عرض الصور المرفوعة -->
-            <div id="images-preview-list" class="flex items-center gap-3"></div>
-
-            <!-- زر الإضافة (+) -->
-            <label id="add-more-btn" class="hidden w-24 h-24 border-2 border-dashed border-gray-300 hover:border-emerald-500 rounded-lg flex flex-col items-center justify-center cursor-pointer transition bg-gray-50 hover:bg-gray-100 flex-shrink-0 group">
-              <svg class="w-7 h-7 text-gray-400 group-hover:text-emerald-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-              </svg>
-              <span class="text-[11px] text-gray-500 group-hover:text-emerald-700 font-medium mt-1">Ajouter</span>
-              <input type="file" name="product_images[]" accept="image/*" multiple class="hidden" onchange="handleAdditionalImages(event)">
-            </label>
-
-          </div>
-        </div>
+     <div class="fg">
+  <label>Image(s) du Produit (Sélectionnez une ou plusieurs)</label>
+  <input type="file" id="prd-img-file" accept="image/*" multiple style="background:var(--input-bg); border:1.5px solid var(--border); border-radius:12px; padding:10px 14px; color:var(--text); width:100%; cursor:pointer;">
+  <div id="image-preview-container" style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:5px;"></div>
+</div>
       </div>
 
       <!-- قسم المقاسات والألوان -->
