@@ -1178,23 +1178,60 @@ a { text-decoration: none; }
 .img-preview-wrapper .primary-badge {
   position: absolute; top: -5px; right: -5px; background: var(--accent); color: #fff;
   font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; font-weight: bold;
-}
-@media (max-width: 768px) {
+}@media (max-width: 768px) {
+  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 200; transform: translateX(-100%); transition: transform .28s ease, background .3s; }
+  .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  .menu-toggle { display: flex !important; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .order-detail-grid { grid-template-columns: 1fr; }
+  .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
+  .content { padding: 18px; }
+  .header { padding: 0 18px; }
+
+  /* 💡 إصلاح النوافذ المنبثقة (Modals) للهواتف 💡 */
+  .modal-box {
+    margin: 10px;
+    width: calc(100% - 20px);
+    max-height: 90vh; /* لتجنب اختفاء الأزرار السفلية */
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-body {
+    overflow-y: auto; /* السماح بالتمرير داخل المحتوى فقط */
+    flex: 1;
+    padding: 15px;
+  }
+  .modal-foot {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    padding: 15px;
+    z-index: 10;
+    border-top: 1px solid var(--border);
+  }
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end; /* لكي تظهر النافذة من الأسفل */
+  }
+  
+  /* إصلاح أسطر المقاسات والألوان */
   .size-row {
     flex-wrap: wrap; /* السماح للحقول بالنزول للسطر التالي */
     background: var(--bg4);
-    padding: 12px;
+    padding: 15px;
     border-radius: 10px;
     border: 1px solid var(--border);
+    margin-bottom: 10px;
   }
   .size-row input {
-    flex: 1 1 40% !important; /* الحقول تأخذ نصف الشاشة */
-    min-width: 100px;
+    flex: 1 1 100% !important; /* كل حقل يأخذ سطراً كاملاً في الهاتف */
+    margin-bottom: 8px;
   }
   .size-row button {
-    flex: 1 1 100% !important; /* زر الحذف يأخذ سطراً كاملاً في الهاتف */
+    flex: 1 1 100% !important; /* زر الحذف يأخذ سطراً كاملاً */
     margin-top: 5px;
   }
+}
 }
 </style>
 </head>
@@ -1971,7 +2008,7 @@ a { text-decoration: none; }
       </div>
      <div class="form-row form-row-2">
         <div class="fg"><label>Catégorie</label><select id="prd-cat"><option value="">— Aucune —</option></select></div>
-      <div class="fg">
+    <div class="fg">
   <label>Image(s) du Produit (Sélectionnez plusieurs)</label>
   <input type="file" id="prd-img-file" accept="image/*" multiple style="background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:8px; color:var(--text); width:100%;">
   <!-- حاوية الصور المرفوعة -->
@@ -2895,17 +2932,17 @@ function searchProducts(q) {
   renderProducts(base.filter(p=>p.name?.toLowerCase().includes(q.toLowerCase())||p.sku?.toLowerCase().includes(q.toLowerCase())));
 }
   // 6. الجافاسكريبت لمعالجة الصور المتعددة
-// 1. مصفوفة عالمية لتخزين جميع الصور المرفوعة
+// مصفوفة عالمية لتخزين جميع الصور المرفوعة
 let uploadedImages = []; 
 
-// 2. معالجة الصور المتعددة عند اختيارها من الكاميرا/المعرض
+// معالجة الصور المتعددة عند الاختيار
 document.getElementById('prd-img-file').addEventListener('change', function(e) {
   const files = e.target.files;
   if(!files.length) return;
   
   const previewContainer = document.getElementById('image-preview-container');
   previewContainer.innerHTML = ''; 
-  uploadedImages = []; // تصفير المصفوفة للصور الجديدة
+  uploadedImages = []; 
 
   Array.from(files).forEach((file, index) => {
     const reader = new FileReader();
@@ -2915,19 +2952,25 @@ document.getElementById('prd-img-file').addEventListener('change', function(e) {
 
       // بناء معاينة الصورة
       const wrapper = document.createElement('div');
-      wrapper.className = 'img-preview-wrapper';
+      wrapper.style.position = 'relative';
+      wrapper.style.flexShrink = '0';
       
       const img = document.createElement('img');
       img.src = base64String;
+      img.style.width = '60px'; img.style.height = '60px'; 
+      img.style.objectFit = 'cover'; img.style.borderRadius = '8px';
       img.style.border = index === 0 ? '2px solid var(--accent)' : '1px solid var(--border)';
       
       wrapper.appendChild(img);
       
-      // علامة لتمييز الصورة الرئيسية (الأولى)
+      // علامة لتمييز الصورة الرئيسية
       if (index === 0) {
         const badge = document.createElement('span');
-        badge.className = 'primary-badge';
         badge.textContent = 'Principale';
+        badge.style.position = 'absolute'; badge.style.top = '-5px'; badge.style.right = '-5px';
+        badge.style.background = 'var(--accent)'; badge.style.color = '#fff';
+        badge.style.fontSize = '0.6rem'; badge.style.padding = '2px 6px';
+        badge.style.borderRadius = '10px'; badge.style.fontWeight = 'bold';
         wrapper.appendChild(badge);
       }
       
@@ -2938,21 +2981,23 @@ document.getElementById('prd-img-file').addEventListener('change', function(e) {
   toast(files.length + ' image(s) ajoutée(s) !', 'ok');
 });
 
-// 3. دالة إضافة سطر المقاس واللون المتجاوب مع الهاتف
+// دالة إضافة سطر المقاس واللون
 function addSizeRow(size = '', color = '', qty = '') {
   const container = document.getElementById('sizes-container');
   const row = document.createElement('div');
-  row.className = 'size-row'; // استخدام الكلاس الجديد
+  row.className = 'size-row'; // الكلاس الذي أصلحناه في الـ CSS
+  row.style.display = 'flex';
+  row.style.gap = '10px';
   row.innerHTML = `
-    <input type="text" placeholder="Taille (S, M, 42)" value="${size}" class="size-name" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
-    <input type="text" placeholder="Couleur (Noir, Bleu)" value="${color}" class="size-color" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
-    <input type="number" placeholder="Qté" value="${qty}" class="size-qty" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="text" placeholder="Taille (ex: M, L)" value="${size}" class="size-name" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="text" placeholder="Couleur (ex: Noir)" value="${color}" class="size-color" style="flex: 1.5; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="number" placeholder="Qté" value="${qty}" class="size-qty" style="width: 80px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
     <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="padding: 10px;"><i class="fas fa-trash"></i></button>
   `;
   container.appendChild(row);
 }
 
-// 4. دالة فتح نافذة المنتج للتعديل
+// فتح نافذة المنتج للتعديل
 function openProductModal(p) {
   currentProductId = p?.id||null;
   document.getElementById('prod-modal-title').textContent = p ? 'Modifier Produit' : 'Nouveau Produit';
@@ -2977,15 +3022,18 @@ function openProductModal(p) {
     // عرض الصور الموجودة مسبقاً
     uploadedImages.forEach((src, idx) => {
         const wrapper = document.createElement('div');
-        wrapper.className = 'img-preview-wrapper';
+        wrapper.style.position = 'relative'; wrapper.style.flexShrink = '0';
         const img = document.createElement('img');
         img.src = src;
+        img.style.width = '60px'; img.style.height = '60px'; img.style.objectFit = 'cover'; img.style.borderRadius = '8px';
         img.style.border = idx === 0 ? '2px solid var(--accent)' : '1px solid var(--border)';
         wrapper.appendChild(img);
         if (idx === 0) {
             const badge = document.createElement('span');
-            badge.className = 'primary-badge';
             badge.textContent = 'Principale';
+            badge.style.position = 'absolute'; badge.style.top = '-5px'; badge.style.right = '-5px';
+            badge.style.background = 'var(--accent)'; badge.style.color = '#fff';
+            badge.style.fontSize = '0.6rem'; badge.style.padding = '2px 6px'; badge.style.borderRadius = '10px';
             wrapper.appendChild(badge);
         }
         document.getElementById('image-preview-container').appendChild(wrapper);
@@ -3004,7 +3052,7 @@ function openProductModal(p) {
   openModal('modal-product');
 }
 
-// 5. دالة حفظ المنتج (الصور والمقاسات)
+// حفظ المنتج (الصور والمقاسات)
 async function saveProduct() {
   const name = document.getElementById('prd-name').value.trim();
   const price = parseFloat(document.getElementById('prd-price').value)||0;
@@ -3020,7 +3068,7 @@ async function saveProduct() {
     const sQty = parseInt(row.querySelector('.size-qty').value) || 0;
     if (sName && sQty > 0) {
       sizesArray.push({ size: sName, color: sColor, qty: sQty });
-      totalStock += sQty;
+      totalStock += sQty; // تحديث المخزون الكلي تلقائياً
     }
   });
 
@@ -3033,11 +3081,11 @@ async function saveProduct() {
     sku: document.getElementById('prd-sku').value.trim()||null,
     price, 
     compare_at_price: parseFloat(document.getElementById('prd-compare').value)||null,
-    stock: totalStock,
-    sizes: sizesArray, 
+    stock: totalStock, // الكمية الإجمالية
+    sizes: sizesArray, // المصفوفة ترسل مباشرة لعمود jsonb
     category_id: document.getElementById('prd-cat').value||null,
     image_url: mainImage, 
-    extra_images: extraImagesArray, // 👈 إرسال الصور الإضافية لقاعدة البيانات
+    extra_images: extraImagesArray, // 👈 تأكد من إنشاء هذا العمود (jsonb) في Supabase
     description: document.getElementById('prd-desc').value.trim()||null,
     is_featured: document.getElementById('prd-featured').checked,
     is_deleted: false
@@ -3057,13 +3105,16 @@ async function saveProduct() {
   }
 }
 
-// 5. الحذف النهائي من قاعدة البيانات (كما طلبت)
+// الحذف النهائي (بدون سلة مهملات)
 async function deleteProduct(id) {
   if(!confirm('Voulez-vous DÉFINITIVEMENT supprimer ce produit ? Cette action est irréversible.')) return;
-  // حذف فعلي (Delete) بدلاً من التحديث (Update)
+  
+  // الحذف النهائي بدلاً من التحديث (Update)
   const { error } = await dbFrom('products').delete().eq('id', id);
+  
   if(!error) {
-    logAudit('product', `Produit supprimé définitivement: #${id}`, 'product');
+    const p = allProducts.find(x=>x.id===id);
+    logAudit('product', `Produit supprimé définitivement: ${p?.name||id}`, 'product');
     toast('Produit supprimé définitivement.'); 
     await loadAll();
   } else {
