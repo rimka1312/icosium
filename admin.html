@@ -1890,8 +1890,22 @@ a { text-decoration: none; }
       </div>
       <div class="form-row form-row-2">
         <div class="fg"><label>Catégorie</label><select id="prd-cat"><option value="">— Aucune —</option></select></div>
-        <div class="fg"><label>URL Image</label><input type="url" id="prd-img" placeholder="https://..."></div>
-      </div>
+<div class="fg">
+    <label>Image (Caméra / Galerie)</label>
+    <input type="file" id="prd-img-file" accept="image/*" style="background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:8px; color:var(--text); width:100%;">
+    <input type="hidden" id="prd-img-base64">
+  </div>
+</div>
+
+<div class="fg" style="background: var(--bg3); padding: 15px; border-radius: 12px; margin-top: 10px;">
+  <label style="color: var(--accent);"><i class="fas fa-ruler-combined"></i> Tailles et Quantités</label>
+  <div id="sizes-container" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+    </div>
+  <button type="button" class="btn btn-ghost btn-sm" style="margin-top: 10px; width: 100%;" onclick="addSizeRow()">
+    <i class="fas fa-plus"></i> Ajouter une taille
+  </button>
+  <input type="hidden" id="prd-stock"> </div>     
+  
       <div class="fg"><label>Description</label><textarea id="prd-desc" placeholder="Description du produit..."></textarea></div>
       <div class="fg-check"><input type="checkbox" id="prd-featured"><label for="prd-featured">⭐ Produit en vedette</label></div>
     </div>
@@ -2096,7 +2110,19 @@ function toast(msg, type='ok') {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=>el.classList.remove('show'), 3200);
 }
-
+function togglePassword() {
+  const inp = document.getElementById('inp-pass');
+  const icon = document.getElementById('toggle-pass-icon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.classList.remove('fa-eye');
+    icon.classList.add('fa-eye-slash');
+  } else {
+    inp.type = 'password';
+    icon.classList.remove('fa-eye-slash');
+    icon.classList.add('fa-eye');
+  }
+}
 /* ─── Modals ─── */
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
