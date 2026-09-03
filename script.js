@@ -417,117 +417,69 @@ function createProductCard(product) {
         </div>
     `;
 }
-// دالة عرض التفاصيل في واجهة الزبون
+let countdownInterval = null;
+
 function openDetails(p) {
-    const m = document.getElementById('product-details-modal');
-    if(!m) return;
+  const modal = document.getElementById('product-details-modal');
+  const overlay = document.getElementById('modal-coming-soon-overlay');
+  const imageContainer = document.querySelector('.modal-image-container');
+  const infoContainer = document.querySelector('.modal-info-container');
+  const countdownEl = document.getElementById('cs-countdown');
 
-    // 1. معالجة الصور (الرئيسية والإضافية)
-    const mainImg = document.getElementById('modal-product-image');
-    mainImg.src = p.image_url || 'images/placeholder.png'; // في حال عدم وجود صورة
+  if (countdownInterval) clearInterval(countdownInterval);
 
-    const imgContainer = document.querySelector('.modal-image-container');
-    const oldGallery = imgContainer.querySelector('.modal-thumbs');
-    if(oldGallery) oldGallery.remove();
+  const isComingSoon = checkIsComingSoon(p);
 
-    let allImages = [p.image_url];
-    if (p.extra_images && Array.isArray(p.extra_images) && p.extra_images.length > 0) {
-        allImages = allImages.concat(p.extra_images);
-    }
+  if (isComingSoon) {
+    // تفعيل الضبابية على الصورة والمعلومات
+    imageContainer.classList.add('is-coming-soon-blur');
+    infoContainer.classList.add('is-coming-soon-blur');
+    overlay.style.display = 'flex';
 
-    if(allImages.length > 1) {
-        const galleryHtml = `<div class="modal-thumbs" style="display:flex; gap:8px; margin-top:10px; overflow-x:auto;">
-            ${allImages.map((src, i) => 
-                `<img src="${src}" class="modal-thumb${i===0?' active':''}" style="width:60px; height:60px; object-fit:cover; border-radius:8px; cursor:pointer; border: 2px solid ${i===0?'var(--color-primary)':'transparent'};" 
-                onclick="document.getElementById('modal-product-image').src=this.src; document.querySelectorAll('.modal-thumb').forEach(t=>t.style.borderColor='transparent'); this.style.borderColor='var(--color-primary)';">`
-            ).join('')}
-        </div>`;
-        imgContainer.insertAdjacentHTML('beforeend', galleryHtml);
-    }
+    // عداد تنازلي إذا كان هناك تاريخ محدد
+    if (p.available_at) {
+      countdownEl.style.display = 'block';
+      const targetTime = new Date(p.available_at).getTime();
 
-    // 2. تعبئة النصوص
-    document.getElementById('modal-product-name').textContent = p.name;
-    document.getElementById('modal-product-desc').textContent = p.description || '';
-    
-    // 3. الأسعار
-    const priceEl = document.getElementById('modal-product-price');
-    const oldPriceEl = document.getElementById('modal-product-old-price');
-    const discountEl = document.getElementById('modal-discount-tag');
-    
-    priceEl.textContent = p.price + ' DZD';
-    if(p.compare_at_price && p.compare_at_price > p.price) {
-        const discPct = Math.round((1 - p.price / p.compare_at_price) * 100);
-        oldPriceEl.textContent = p.compare_at_price + ' DZD';
-        oldPriceEl.style.display = 'inline';
-        discountEl.textContent = `-${discPct}%`;
-        discountEl.style.display = 'inline-block';
+      const updateTimer = () => {
+        const now = new Date().getTime();
+        const diff = targetTime - now;
+
+        if (diff <= 0) {
+          // انتهت المدة: إزالة الحجب فوراً وجعل المنتج متاحاً للبيع
+          clearInterval(countdownInterval);
+          overlay.style.display = 'none';
+          imageContainer.classList.remove('is-coming-soon-blur');
+          infoContainer.classList.remove('is-coming-soon-blur');
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+        countdownEl.textContent = `Disponible dans: ${days}j ${hours}h ${mins}m ${secs}s`;
+      };
+
+      updateTimer();
+      countdownInterval = setInterval(updateTimer, 1000);
     } else {
-        oldPriceEl.style.display = 'none';
-        discountEl.style.display = 'none';
+      countdownEl.style.display = 'none';
     }
+  } else {
+    // المنتج متاح للبيع بشكل طبيعي
+    imageContainer.classList.remove('is-coming-soon-blur');
+    infoContainer.classList.remove('is-coming-soon-blur');
+    overlay.style.display = 'none';
+  }
 
-    // 4. استخراج الألوان والمقاسات من نظام الـ JSON الجديد
-    const opts = document.getElementById('modal-product-options');
-    let availableColors = [];
-    let availableSizes = [];
+  // ملء بيانات المنتج العادية (الاسم، السعر، الصورة)
+  document.getElementById('modal-product-image').src = p.image_url || '';
+  document.getElementById('modal-product-name').textContent = p.name || '';
+  document.getElementById('modal-product-price').textContent = (p.price || 0) + ' DZD';
 
-    if (p.sizes && Array.isArray(p.sizes)) {
-        // استخراج الألوان والمقاسات الفريدة التي تحتوي على كمية أكبر من صفر
-        p.sizes.forEach(variant => {
-            if (variant.qty > 0) {
-                if (variant.color && !availableColors.includes(variant.color)) availableColors.push(variant.color);
-                if (variant.size && !availableSizes.includes(variant.size)) availableSizes.push(variant.size);
-            }
-        });
-    }
-
-    let html = '';
-    if (availableColors.length > 0) {
-        html += `<div class="modal-opts-group"><label>${translations[currentLanguage].colors}</label><div class="product-colors" style="display:flex; gap:8px;">` 
-            + availableColors.map(c => `<span class="color-box" data-val="${c}" style="border:1.5px solid var(--color-border); padding:6px 12px; border-radius:8px; cursor:pointer; font-weight:600;">${c}</span>`).join('')
-            + '</div></div>';
-    }
-    if (availableSizes.length > 0) {
-        html += `<div class="modal-opts-group" style="margin-top:10px;"><label>${translations[currentLanguage].sizes}</label><div class="product-sizes" style="display:flex; gap:8px;">`
-            + availableSizes.map(s => `<span class="size-box" data-val="${s}" style="border:1.5px solid var(--color-border); padding:6px 12px; border-radius:8px; cursor:pointer; font-weight:600;">${s}</span>`).join('')
-            + '</div></div>';
-    }
-    opts.innerHTML = html;
-
-    // تفعيل اختيار اللون والمقاس
-    let selColor = null, selSize = null;
-    opts.querySelectorAll('.color-box').forEach(b => b.addEventListener('click', e => {
-        opts.querySelectorAll('.color-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; x.style.color = 'var(--color-text)'; });
-        e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = 'white';
-        selColor = e.target.dataset.val;
-    }));
-    opts.querySelectorAll('.size-box').forEach(b => b.addEventListener('click', e => {
-        opts.querySelectorAll('.size-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; x.style.color = 'var(--color-text)'; });
-        e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = 'white';
-        selSize = e.target.dataset.val;
-    }));
-
-    // 5. زر الإضافة إلى السلة
-    const btn = document.getElementById('modal-add-to-cart-btn');
-    const newBtn = btn.cloneNode(true);
-    btn.parentNode.replaceChild(newBtn, btn);
-    
-    newBtn.addEventListener('click', () => {
-        if(availableColors.length > 0 && !selColor) return alert(translations[currentLanguage].alert_color);
-        if(availableSizes.length > 0 && !selSize) return alert(translations[currentLanguage].alert_size);
-        
-        addToCart({ id: `${p.id}-${selColor}-${selSize}`, ...p, color: selColor, size: selSize, qty: 1 });
-        
-        newBtn.innerHTML = '<i class="fas fa-check"></i> Ajouté!';
-        newBtn.style.background = '#059669';
-        setTimeout(() => { 
-            newBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Ajouter au panier'; 
-            newBtn.style.background = ''; 
-            m.style.display = 'none'; // إغلاق النافذة بعد الإضافة
-        }, 1200);
-    });
-
-    m.style.display = 'block';
+  modal.style.display = 'block';
 }
 // --- 8. دوال اللغة والثيم (المعدلة للحفظ) ---
 
@@ -753,4 +705,21 @@ function checkIsComingSoon(product) {
     // زر الاستكشاف
     const scrollBtn = document.getElementById('scroll-to-products');
     if(scrollBtn) scrollBtn.addEventListener('click', () => document.getElementById('products-section').scrollIntoView({behavior:'smooth'}));
+    // مثال لما يضاف داخل حلقة عرض المنتجات:
+const isComingSoon = checkIsComingSoon(p);
+
+card.innerHTML = `
+    ${isComingSoon ? '<span class="card-cs-tag">COMING SOON</span>' : ''}
+    <img src="${p.image_url || 'images/placeholder.png'}" class="${isComingSoon ? 'is-coming-soon-blur' : ''}" alt="${p.name}">
+    <div class="product-details">
+        <h3>${p.name}</h3>
+        <p class="product-price">${isComingSoon ? '---' : p.price + ' DZD'}</p>
+        <div class="product-actions">
+            <button class="details-btn" onclick='openDetails(${JSON.stringify(p)})'>Détails</button>
+            <button class="add-to-cart-btn" ${isComingSoon ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+               ${isComingSoon ? 'Bientôt' : 'Ajouter'}
+            </button>
+        </div>
+    </div>
+`;
 });
