@@ -417,139 +417,118 @@ function createProductCard(product) {
         </div>
     `;
 }
-// --- 7. مودال التفاصيل (محسّن) ---
+// دالة عرض التفاصيل في واجهة الزبون
 function openDetails(p) {
     const m = document.getElementById('product-details-modal');
     if(!m) return;
 
-    // الصورة الرئيسية
+    // 1. معالجة الصور (الرئيسية والإضافية)
     const mainImg = document.getElementById('modal-product-image');
-    mainImg.src = p.image_url;
-    mainImg.style.cursor = 'default';
+    mainImg.src = p.image_url || 'images/placeholder.png'; // في حال عدم وجود صورة
 
-    // معرض الصور المصغّرة
-    let galleryHtml = '';
-    if(p.image_url) {
-        const images = p.extra_images ? [p.image_url, ...p.extra_images] : [p.image_url];
-        if(images.length > 1) {
-            galleryHtml = `<div class="modal-thumbs">${images.map((src,i) =>
-                `<img src="${src}" class="modal-thumb${i===0?' active':''}" onclick="document.getElementById('modal-product-image').src=this.src; document.querySelectorAll('.modal-thumb').forEach(t=>t.classList.remove('active')); this.classList.add('active');">`
-            ).join('')}</div>`;
-        }
-    }
-    
     const imgContainer = document.querySelector('.modal-image-container');
-    // Remove old gallery if any
     const oldGallery = imgContainer.querySelector('.modal-thumbs');
     if(oldGallery) oldGallery.remove();
-    if(galleryHtml) imgContainer.insertAdjacentHTML('beforeend', galleryHtml);
 
-    // الاسم
-    document.getElementById('modal-product-name').textContent = p.name;
-
-    // الوصف
-    document.getElementById('modal-product-desc').textContent = p.description || '';
-
-    // التصنيف
-    const catTag = document.getElementById('modal-product-category');
-    if(catTag) catTag.textContent = p.category || '';
-
-    // النجوم (rating)
-    const starsEl = document.getElementById('modal-product-stars');
-    if(starsEl) {
-        const rating = p.rating || 4.5;
-        let starsHtml = '';
-        for(let i=1;i<=5;i++) {
-            if(i <= Math.floor(rating)) starsHtml += '<i class="fas fa-star"></i>';
-            else if(i - rating < 1) starsHtml += '<i class="fas fa-star-half-alt"></i>';
-            else starsHtml += '<i class="far fa-star"></i>';
-        }
-        starsEl.innerHTML = starsHtml + ` <small style="color:var(--color-text-muted);font-size:0.78rem;margin-left:4px;">${rating}/5</small>`;
+    let allImages = [p.image_url];
+    if (p.extra_images && Array.isArray(p.extra_images) && p.extra_images.length > 0) {
+        allImages = allImages.concat(p.extra_images);
     }
 
-    // السعر + التخفيض
+    if(allImages.length > 1) {
+        const galleryHtml = `<div class="modal-thumbs" style="display:flex; gap:8px; margin-top:10px; overflow-x:auto;">
+            ${allImages.map((src, i) => 
+                `<img src="${src}" class="modal-thumb${i===0?' active':''}" style="width:60px; height:60px; object-fit:cover; border-radius:8px; cursor:pointer; border: 2px solid ${i===0?'var(--color-primary)':'transparent'};" 
+                onclick="document.getElementById('modal-product-image').src=this.src; document.querySelectorAll('.modal-thumb').forEach(t=>t.style.borderColor='transparent'); this.style.borderColor='var(--color-primary)';">`
+            ).join('')}
+        </div>`;
+        imgContainer.insertAdjacentHTML('beforeend', galleryHtml);
+    }
+
+    // 2. تعبئة النصوص
+    document.getElementById('modal-product-name').textContent = p.name;
+    document.getElementById('modal-product-desc').textContent = p.description || '';
+    
+    // 3. الأسعار
     const priceEl = document.getElementById('modal-product-price');
     const oldPriceEl = document.getElementById('modal-product-old-price');
     const discountEl = document.getElementById('modal-discount-tag');
     
-    if(p.old_price && p.old_price > p.price) {
-        const discPct = Math.round((1 - p.price/p.old_price)*100);
-        priceEl.textContent = p.price + ' DZD';
-        oldPriceEl.textContent = p.old_price + ' DZD';
+    priceEl.textContent = p.price + ' DZD';
+    if(p.compare_at_price && p.compare_at_price > p.price) {
+        const discPct = Math.round((1 - p.price / p.compare_at_price) * 100);
+        oldPriceEl.textContent = p.compare_at_price + ' DZD';
         oldPriceEl.style.display = 'inline';
         discountEl.textContent = `-${discPct}%`;
         discountEl.style.display = 'inline-block';
     } else {
-        priceEl.textContent = p.price + ' DZD';
         oldPriceEl.style.display = 'none';
         discountEl.style.display = 'none';
     }
 
-    // Badge
-    const badgeEl = document.getElementById('modal-product-badge');
-    if(badgeEl) {
-        if(p.badge) { badgeEl.textContent = p.badge; badgeEl.style.display='block'; }
-        else badgeEl.style.display='none';
+    // 4. استخراج الألوان والمقاسات من نظام الـ JSON الجديد
+    const opts = document.getElementById('modal-product-options');
+    let availableColors = [];
+    let availableSizes = [];
+
+    if (p.sizes && Array.isArray(p.sizes)) {
+        // استخراج الألوان والمقاسات الفريدة التي تحتوي على كمية أكبر من صفر
+        p.sizes.forEach(variant => {
+            if (variant.qty > 0) {
+                if (variant.color && !availableColors.includes(variant.color)) availableColors.push(variant.color);
+                if (variant.size && !availableSizes.includes(variant.size)) availableSizes.push(variant.size);
+            }
+        });
     }
 
-    // الألوان والمقاسات
-    const opts = document.getElementById('modal-product-options');
     let html = '';
-    if(p.colors && p.colors.length) {
-        html += `<div class="modal-opts-group"><label>${translations[currentLanguage].colors}</label><div class="product-colors">` 
-            + p.colors.map(c=>`<span class="color-dot" style="background:${c.replace(/"/g,'')}" data-val="${c.replace(/"/g,'')}" title="${c.replace(/"/g,'')}"></span>`).join('')
+    if (availableColors.length > 0) {
+        html += `<div class="modal-opts-group"><label>${translations[currentLanguage].colors}</label><div class="product-colors" style="display:flex; gap:8px;">` 
+            + availableColors.map(c => `<span class="color-box" data-val="${c}" style="border:1.5px solid var(--color-border); padding:6px 12px; border-radius:8px; cursor:pointer; font-weight:600;">${c}</span>`).join('')
             + '</div></div>';
     }
-    if(p.sizes && p.sizes.length) {
-        html += `<div class="modal-opts-group"><label>${translations[currentLanguage].sizes}</label><div class="product-sizes">`
-            + p.sizes.map(s=>`<span class="size-box" data-val="${s.replace(/"/g,'')}">${s.replace(/"/g,'')}</span>`).join('')
+    if (availableSizes.length > 0) {
+        html += `<div class="modal-opts-group" style="margin-top:10px;"><label>${translations[currentLanguage].sizes}</label><div class="product-sizes" style="display:flex; gap:8px;">`
+            + availableSizes.map(s => `<span class="size-box" data-val="${s}" style="border:1.5px solid var(--color-border); padding:6px 12px; border-radius:8px; cursor:pointer; font-weight:600;">${s}</span>`).join('')
             + '</div></div>';
     }
     opts.innerHTML = html;
 
-    let selColor, selSize;
-    opts.querySelectorAll('.color-dot').forEach(d=>d.addEventListener('click', e=>{
-        opts.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('selected'));
-        e.target.classList.add('selected'); selColor=e.target.dataset.val;
+    // تفعيل اختيار اللون والمقاس
+    let selColor = null, selSize = null;
+    opts.querySelectorAll('.color-box').forEach(b => b.addEventListener('click', e => {
+        opts.querySelectorAll('.color-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; x.style.color = 'var(--color-text)'; });
+        e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = 'white';
+        selColor = e.target.dataset.val;
     }));
-    opts.querySelectorAll('.size-box').forEach(b=>b.addEventListener('click', e=>{
-        opts.querySelectorAll('.size-box').forEach(x=>x.classList.remove('selected'));
-        e.target.classList.add('selected'); selSize=e.target.dataset.val;
+    opts.querySelectorAll('.size-box').forEach(b => b.addEventListener('click', e => {
+        opts.querySelectorAll('.size-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; x.style.color = 'var(--color-text)'; });
+        e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = 'white';
+        selSize = e.target.dataset.val;
     }));
 
-    // المواصفات
-    const specsSection = document.getElementById('modal-specs-section');
-    const specsList = document.getElementById('modal-specs-list');
-    if(specsSection && specsList) {
-        if(p.specs && Object.keys(p.specs).length) {
-            specsList.innerHTML = Object.entries(p.specs).map(([k,v])=>
-                `<div class="spec-row"><span class="spec-key">${k}</span><span class="spec-val">${v}</span></div>`
-            ).join('');
-            specsSection.style.display = 'block';
-        } else {
-            specsSection.style.display = 'none';
-        }
-    }
-
-    // زر الإضافة
+    // 5. زر الإضافة إلى السلة
     const btn = document.getElementById('modal-add-to-cart-btn');
     const newBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(newBtn, btn);
+    
     newBtn.addEventListener('click', () => {
-        if(p.colors?.length && !selColor) return alert(translations[currentLanguage].alert_color);
-        if(p.sizes?.length && !selSize) return alert(translations[currentLanguage].alert_size);
+        if(availableColors.length > 0 && !selColor) return alert(translations[currentLanguage].alert_color);
+        if(availableSizes.length > 0 && !selSize) return alert(translations[currentLanguage].alert_size);
+        
         addToCart({ id: `${p.id}-${selColor}-${selSize}`, ...p, color: selColor, size: selSize, qty: 1 });
-        // Animate button
+        
         newBtn.innerHTML = '<i class="fas fa-check"></i> Ajouté!';
         newBtn.style.background = '#059669';
-        setTimeout(()=>{ newBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Ajouter au panier'; newBtn.style.background=''; }, 1500);
+        setTimeout(() => { 
+            newBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Ajouter au panier'; 
+            newBtn.style.background = ''; 
+            m.style.display = 'none'; // إغلاق النافذة بعد الإضافة
+        }, 1200);
     });
 
     m.style.display = 'block';
-    // Animate modal body
-    setTimeout(()=>{ m.querySelector('.modal-content').style.opacity='1'; }, 10);
 }
-
 // --- 8. دوال اللغة والثيم (المعدلة للحفظ) ---
 
 function setLanguage(lang) {
