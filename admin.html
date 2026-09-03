@@ -16,6 +16,11 @@
    Font: Cabinet Grotesk (headings) + Satoshi (body)
    Aesthetic: Refined Editorial Commerce
 ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════
+   ICOSIUM OS — Admin  |  Dark + Light Mode
+   Font: Cabinet Grotesk (headings) + Satoshi (body)
+   Aesthetic: Refined Editorial Commerce
+═══════════════════════════════════════════════════════ */
 
 /* ── FONTS via CDN fallback ── */
 @import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800,900&f[]=satoshi@300,400,500,700&display=swap');
@@ -1178,60 +1183,23 @@ a { text-decoration: none; }
 .img-preview-wrapper .primary-badge {
   position: absolute; top: -5px; right: -5px; background: var(--accent); color: #fff;
   font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; font-weight: bold;
-}@media (max-width: 768px) {
-  .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 200; transform: translateX(-100%); transition: transform .28s ease, background .3s; }
-  .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
-  .menu-toggle { display: flex !important; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
-  .order-detail-grid { grid-template-columns: 1fr; }
-  .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
-  .content { padding: 18px; }
-  .header { padding: 0 18px; }
-
-  /* 💡 إصلاح النوافذ المنبثقة (Modals) للهواتف 💡 */
-  .modal-box {
-    margin: 10px;
-    width: calc(100% - 20px);
-    max-height: 90vh; /* لتجنب اختفاء الأزرار السفلية */
-    display: flex;
-    flex-direction: column;
-  }
-  .modal-body {
-    overflow-y: auto; /* السماح بالتمرير داخل المحتوى فقط */
-    flex: 1;
-    padding: 15px;
-  }
-  .modal-foot {
-    position: sticky;
-    bottom: 0;
-    background: var(--surface);
-    padding: 15px;
-    z-index: 10;
-    border-top: 1px solid var(--border);
-  }
-  .modal-overlay {
-    padding: 0;
-    align-items: flex-end; /* لكي تظهر النافذة من الأسفل */
-  }
-  
-  /* إصلاح أسطر المقاسات والألوان */
+}
+@media (max-width: 768px) {
   .size-row {
     flex-wrap: wrap; /* السماح للحقول بالنزول للسطر التالي */
     background: var(--bg4);
-    padding: 15px;
+    padding: 12px;
     border-radius: 10px;
     border: 1px solid var(--border);
-    margin-bottom: 10px;
   }
   .size-row input {
-    flex: 1 1 100% !important; /* كل حقل يأخذ سطراً كاملاً في الهاتف */
-    margin-bottom: 8px;
+    flex: 1 1 40% !important; /* الحقول تأخذ نصف الشاشة */
+    min-width: 100px;
   }
   .size-row button {
-    flex: 1 1 100% !important; /* زر الحذف يأخذ سطراً كاملاً */
+    flex: 1 1 100% !important; /* زر الحذف يأخذ سطراً كاملاً في الهاتف */
     margin-top: 5px;
   }
-}
 }
 </style>
 </head>
