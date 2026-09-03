@@ -3354,6 +3354,7 @@ function addSizeRow(size = '', color = '', qty = '') {
   container.appendChild(row);
 }
 
+// تعديل دالة فتح نافذة المنتج لتعبئة تاريخ وحالة Coming Soon
 function openProductModal(p = null) {
   try {
     currentProductId = p?.id || null;
@@ -3375,6 +3376,25 @@ function openProductModal(p = null) {
     
     const featEl = document.getElementById('prd-featured');
     if (featEl) featEl.checked = p?.is_featured || false;
+
+    // 💡 تعبئة خيار Coming Soon وتاريخ الإتاحة 💡
+    const csToggle = document.getElementById('is_coming_soon');
+    const dateContainer = document.getElementById('date_picker_container');
+    const dateInput = document.getElementById('available_at');
+
+    if (csToggle) csToggle.checked = p?.is_coming_soon || false;
+    if (p?.available_at && dateInput) {
+      // تنسيق التاريخ ليتناسب مع datetime-local
+      const d = new Date(p.available_at);
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      dateInput.value = d.toISOString().slice(0, 16);
+    } else if (dateInput) {
+      dateInput.value = '';
+    }
+
+    if (dateContainer) {
+      dateContainer.classList.toggle('hidden', !(p?.is_coming_soon));
+    }
 
     const fileInp = document.getElementById('prd-img-file');
     if (fileInp) fileInp.value = '';
@@ -3420,6 +3440,7 @@ function openProductModal(p = null) {
   }
 }
 
+// تعديل دالة الحفظ لتشمل خيارات Coming Soon
 async function saveProduct() {
   try {
     const name = document.getElementById('prd-name')?.value.trim();
@@ -3444,12 +3465,16 @@ async function saveProduct() {
       }
     });
 
-    // استخدام كمية المقاسات إن وُجدت، أو القيمة المكتوبة في خانة Stock
     const manualStock = parseInt(document.getElementById('prd-stock')?.value, 10) || 0;
     const finalStock = calculatedStock > 0 ? calculatedStock : manualStock;
 
     const mainImage = uploadedImages.length > 0 ? uploadedImages[0] : null;
     const extraImagesArray = uploadedImages.length > 1 ? uploadedImages.slice(1) : [];
+
+    // قراءة حالة Coming Soon والتاريخ
+    const isComingSoon = document.getElementById('is_coming_soon')?.checked || false;
+    const availableAtVal = document.getElementById('available_at')?.value;
+    const availableAt = (isComingSoon && availableAtVal) ? new Date(availableAtVal).toISOString() : null;
 
     const payload = {
       name,
@@ -3463,6 +3488,8 @@ async function saveProduct() {
       extra_images: extraImagesArray,
       description: document.getElementById('prd-desc')?.value.trim() || null,
       is_featured: document.getElementById('prd-featured')?.checked || false,
+      is_coming_soon: isComingSoon,
+      available_at: availableAt,
       is_deleted: false
     };
 
@@ -3483,7 +3510,6 @@ async function saveProduct() {
     toast("Erreur lors de l'enregistrement", "err");
   }
 }
-
 async function deleteProduct(id) {
   if (!confirm('Voulez-vous DÉFINITIVEMENT supprimer ce produit ? Cette action est irréversible.')) return;
 
