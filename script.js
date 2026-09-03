@@ -115,10 +115,9 @@ function removeFromCart(index) {
     if (window.location.pathname.includes('cart.html')) renderCartPage();
 }
 
-// دالة التحقق الدقيق لحالة Coming Soon بناءً على التاريخ الحالي
 function checkIsComingSoon(product) {
     if (!product.is_coming_soon) return false;
-    if (!product.available_at) return true; // إذا مفعيل بدون تاريخ محدد يظل قريباً دائماً
+    if (!product.available_at) return true;
 
     const now = new Date();
     const target = new Date(product.available_at);
@@ -326,7 +325,6 @@ function openDetails(p) {
                 + '</div></div>';
         }
 
-        // إضافة حقل اختيار الكمية (Quantity Selector) داخل النافذة
         html += `
             <div class="modal-opts-group" style="margin-top:14px;">
                 <label>Quantité</label>
@@ -340,7 +338,6 @@ function openDetails(p) {
 
         opts.innerHTML = html;
 
-        // تفاعلات اختيار الألوان والمقاسات
         let selColor = availableColors.length > 0 ? null : 'Standard';
         let selSize = availableSizes.length > 0 ? null : 'Standard';
 
@@ -356,7 +353,6 @@ function openDetails(p) {
             selSize = e.target.dataset.val;
         }));
 
-        // أزرار زيادة ونقصان الكمية
         const qtyInput = document.getElementById('modal-product-qty');
         document.getElementById('qty-minus')?.addEventListener('click', () => {
             let val = parseInt(qtyInput.value) || 1;
@@ -367,7 +363,6 @@ function openDetails(p) {
             qtyInput.value = val + 1;
         });
 
-        // زر الإضافة للسلة وتفعيل وظائفه بالكامل
         const cartBtn = document.getElementById('modal-add-to-cart-btn');
         const newCartBtn = cartBtn.cloneNode(true);
         cartBtn.parentNode.replaceChild(newCartBtn, cartBtn);
@@ -393,7 +388,7 @@ function openDetails(p) {
                     color: selColor, 
                     size: selSize, 
                     qty: quantity,
-                    price: p.price * quantity // حساب السعر الإجمالي للكمية المختارة
+                    price: p.price * quantity 
                 });
                 modal.style.display = 'none';
             });
@@ -452,19 +447,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeMenu = () => { nav?.classList.remove('nav-active'); overlay?.classList.remove('overlay-active'); };
     document.getElementById('close-nav-btn')?.addEventListener('click', closeMenu);
     overlay?.addEventListener('click', closeMenu);
-    // --- تفعيل زر السلة العلوي لعرض المحتوى أو التوجيه ---
+
+    // ✅ تفعيل زر السلة العلوي لينقلك إلى cart.html فوراً
     const cartButton = document.getElementById('cart-button');
-   
-    
     if (cartButton) {
         cartButton.addEventListener('click', (e) => {
             e.preventDefault();
-            // إذا كان لديك نافذة منبثقة للسلة (Modal):
-              window.location.href = 'cart.html';
-            } else {
-                // وإذا كنت تريد توجيهه مباشرة إلى صفحة السلة المستقلة (cart.html):
-                window.location.href = 'cart.html';
-            }
+            window.location.href = 'cart.html';
         });
     }
 });
