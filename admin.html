@@ -2877,13 +2877,13 @@ async function saveProduct() {
     }
   });
 
-  const b = {
+const b = {
     name, 
     sku: document.getElementById('prd-sku').value.trim()||null,
     price, 
-    compare_price: parseFloat(document.getElementById('prd-compare').value)||null,
-    stock: totalStock, // تم حسابه آلياً
-    sizes: sizesArray, // 👈 التعديل هنا: إرسال المصفوفة مباشرة بدون JSON.stringify
+    compare_at_price: parseFloat(document.getElementById('prd-compare').value)||null, // 👈 التعديل هنا (compare_at_price)
+    stock: totalStock, 
+    sizes: sizesArray, 
     category_id: document.getElementById('prd-cat').value||null,
     image_url: document.getElementById('prd-img-base64').value || null,
     description: document.getElementById('prd-desc').value.trim()||null,
