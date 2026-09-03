@@ -1,10 +1,10 @@
 // ---------------------------------------------------
-// ملف script_2.js المصحح بالكامل (يعمل بكفاءة عالية)
+// ملف script.js الشامل والمصحح (يعمل على index.html و cart.html)
 // ---------------------------------------------------
 
 const { createClient } = supabase;
 const SUPABASE_URL = 'https://vhrvdkaqlrwplkdgwwkl.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZocnZka2FxbHJ3cGxrZGd3d2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTUyMTAsImV4cCI6MjA3ODk3MTIxMH0.mNAn3qo48y46FDkDOqUVt1xwN2smFMZL1lBNbT0OkTA';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZocnZka2FxbHJ3cGxrZGd3d2tsIiwicm9sZSI6ImFub24iOjE3NjMzOTUyMTAsImV4cCI6MjA3ODk3MTIxMH0.mNAn3qo48y46FDkDOqUVt1xwN2smFMZL1lBNbT0OkTA';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const translations = {
@@ -13,48 +13,21 @@ const translations = {
         nav_home: "الرئيسية", nav_category: "الفئات", nav_trend: "الرائج", nav_about: "من نحن", nav_contact: "اتصل بنا",
         hero_title: "اكتشف مجموعتنا الجديدة", hero_subtitle: "تصميم عصري بجودة عالية",
         products_title: "منتجاتنا", category_all: "الكل",
-        about_title: "عن ICOSIUM",
-        about_history_text: "في عام 140 قبل الميلاد، أسس الفينيقيون 'إيكوزيم' على ساحل شمال إفريقيا — القلب القديم لما يعرف اليوم بالجزائر العاصمة. مرت قرون، وقامت إمبراطوريات وسقطت. ومع ذلك، فإن روح إيكوزيم لا تزال حية. من تلك الطاقة الخالدة، ولدت ICOSIUM كعلامة تجارية جزائرية عصرية تمزج بين التراث والأناقة المعاصرة. نحن نجلب روح الماضي إلى عالم اليوم — ونصمم ملابس تعبر عن الهوية والإبداع والهدف. مهمتنا هي إعادة تعريف الموضة المحلية لجيل جديد يقدر الأصالة والشجاعة. ICOSIUM ليست مجرد علامة تجارية، إنها حركة وجسر بين الروح القديمة والحياة العصرية.",
-        about_why_title: "لماذا تختار ICOSIUM؟",
-        about_why_text: "لأن ما ترتديه يجب أن يحمل معنى. في ICOSIUM، كل قطعة تحكي قصة — قصة أرض وثقافة وجيل لا يخشى التميز. نحن لا نصنع الملابس فحسب؛ بل نخلق صلة بين روح الجزائر العريقة والروح الحديثة لشبابها. تصاميمنا أصيلة، ومصممة بعناية لتدوم — صُنعت لأولئك الذين يقدرون الهوية على الموضة العابرة، والمعنى على الإنتاج الضخم. عندما ترتدي ICOSIUM، فأنت ترتدي التراث والإبداع والثقة — لأن الأناقة الحقيقية تبدأ من الداخل.",
-        reviews_title: "آراء الزبائن", btn_write_review: "أكتب رأيك", review_form_title: "شاركنا تجربتك",
-        contact_title: "تواصل معنا", contact_message_title: "راسلنا مباشرة", contact_send: "إرسال",
-        cart_title: "السلة", cart_total: "الإجمالي", checkout_title: "إتمام الطلب", 
-        form_name: "الاسم", form_phone: "الهاتف", form_address: "العنوان", delivery_fee: "التوصيل", form_confirm: "تأكيد",
-        alert_color: "اختر اللون", alert_size: "اختر المقاس", alert_added: "تمت الإضافة للسلة", alert_order_success: "تم الطلب بنجاح!",
-        colors: "الألوان:", sizes: "المقاسات:", search_placeholder: "ابحث عن منتج..."
+        alert_color: "اختر اللون", alert_size: "اختر المقاس", alert_added: "تمت الإضافة للسلة", alert_order_success: "تم الطلب بنجاح!"
     },
     fr: {
         out_of_stock: "Rupture de stock",
         nav_home: "Accueil", nav_category: "Catégorie", nav_trend: "Tendance", nav_about: "À Propos", nav_contact: "Contact",
         hero_title: "Découvrez notre nouvelle collection", hero_subtitle: "Design moderne, qualité supérieure",
         products_title: "Nos Produits", category_all: "Tout",
-        about_title: "À propos d'ICOSIUM",
-        about_history_text: "En 140 av. J.-C., les Phéniciens fondèrent Ikosim sur la côte nord-africaine — le cœur antique de l'actuelle Alger. Des siècles ont passé, des empires se sont élevés et effondrés. Pourtant, l'esprit d'Ikosim perdure. Née de cette énergie intemporelle, ICOSIUM est une marque algérienne moderne qui allie héritage et style contemporain. Nous transportons l'âme du passé dans le monde d'aujourd'hui, créant des vêtements qui expriment identité et créativité. ICOSIUM est plus qu'une marque. C'est un mouvement — un pont entre l'esprit ancien et la vie moderne.",
-        about_why_title: "Pourquoi choisir ICOSIUM",
-        about_why_text: "Parce que ce que vous portez doit avoir du sens. Chez ICOSIUM, chaque pièce raconte une histoire — celle d'une terre, d'une culture et d'une génération qui n'a pas peur de se démarquer. Nous créons un lien entre l'âme ancienne de l'Algérie et l'esprit moderne de sa jeunesse. Nos designs sont authentiques, pensés avec soin et faits pour durer — pour ceux qui privilégient l'identité sur la tendance et le sens sur la production de masse. Porter ICOSIUM, c'est porter l'héritage, la créativité et la confiance — car le vrai style vient de l'intérieur.",
-        reviews_title: "Avis Clients", btn_write_review: "Écrire un avis", review_form_title: "Partagez votre avis",
-        contact_title: "Contact", contact_message_title: "Contactez-nous directement", contact_send: "Envoyer",
-        cart_title: "Votre Panier", cart_total: "Total", checkout_title: "Commander", 
-        form_name: "Nom", form_phone: "Tél", form_address: "Adresse", delivery_fee: "Livraison", form_confirm: "Confirmer",
-        alert_color: "Choisir une couleur", alert_size: "Choisir une taille", alert_added: "Ajouté au panier", alert_order_success: "Commande envoyée!",
-        colors: "Couleurs:", sizes: "Tailles:", search_placeholder: "Rechercher..."
+        alert_color: "Choisir une couleur", alert_size: "Choisir une taille", alert_added: "Ajouté au panier", alert_order_success: "Commande envoyée!"
     },
     en: {
         out_of_stock: "Out of Stock",
         nav_home: "Home", nav_category: "Category", nav_trend: "Trend", nav_about: "About", nav_contact: "Contact",
         hero_title: "Discover our new collection", hero_subtitle: "Modern design, premium quality",
         products_title: "Our Products", category_all: "All",
-        about_title: "About ICOSIUM",
-        about_history_text: "In 140 B.C.E., the Phoenicians founded Ikosim on the North African coast — the ancient heart of what is today Algiers. Centuries have passed. Empires have risen and fallen. Yet, the spirit of Ikosim still lives on. Born from that timeless energy, ICOSIUM is a modern Algerian casualwear brand that blends heritage with contemporary style. We bring the soul of the past into today’s world — crafting clothing that expresses identity, creativity, and purpose. ICOSIUM is more than a brand. It’s a movement — a bridge between ancient spirit and modern life.",
-        about_why_title: "Why Choose ICOSIUM",
-        about_why_text: "Because what you wear should mean something. At ICOSIUM, every piece tells a story — the story of a land, a culture, and a generation unafraid to stand out. We don’t just make clothes; we create a connection between the old soul of Algeria and the modern spirit of its youth. Our designs are authentic, thoughtfully crafted, and made to last — built for those who value identity over trend and meaning over mass production. When you wear ICOSIUM, you wear heritage, creativity, and confidence — because true style starts from within.",
-        reviews_title: "Customer Reviews", btn_write_review: "Write Review", review_form_title: "Share your experience",
-        contact_title: "Contact", contact_message_title: "Contact us directly", contact_send: "Send",
-        cart_title: "Your Cart", cart_total: "Total", checkout_title: "Checkout", 
-        form_name: "Name", form_phone: "Phone", form_address: "Address", delivery_fee: "Delivery", form_confirm: "Confirm",
-        alert_color: "Select color", alert_size: "Select size", alert_added: "Added to cart", alert_order_success: "Order placed!",
-        colors: "Colors:", sizes: "Sizes:", search_placeholder: "Search..."
+        alert_color: "Select color", alert_size: "Select size", alert_added: "Added to cart", alert_order_success: "Order placed!"
     }
 };
 
@@ -85,6 +58,7 @@ const wilayasData = [
     { id: 58, name: "In Guezzam", price: 1600 }
 ];
 
+// --- إدارة السلة وتخزينها محلياً ---
 function loadCartFromStorage() {
     const savedCart = localStorage.getItem('icosium_cart');
     if (savedCart) {
@@ -101,6 +75,8 @@ function saveCartToStorage() {
 function updateCartCountHeader() {
     const countEl = document.getElementById('cart-count');
     if(countEl) countEl.textContent = cart.length;
+    const countElPage = document.getElementById('cart-count-page');
+    if(countElPage) countElPage.textContent = cart.length;
 }
 
 function addToCart(item) {
@@ -112,56 +88,91 @@ function addToCart(item) {
 function removeFromCart(index) {
     cart.splice(index, 1);
     saveCartToStorage();
-    if (window.location.pathname.includes('cart.html')) renderCartPage();
+    if (window.location.pathname.includes('cart.html')) {
+        renderCartPage();
+    }
 }
 
+// --- التحقق من حالة Coming Soon ---
 function checkIsComingSoon(product) {
     if (!product.is_coming_soon) return false;
     if (!product.available_at) return true;
-
     const now = new Date();
     const target = new Date(product.available_at);
     return target > now; 
 }
 
-async function loadInitialData() {
-    await getCategories();
-    await getProducts();
-    await getReviews(); 
-    setLanguage(currentLanguage);
-    
-    const savedTheme = localStorage.getItem('icosium_theme') || 'dark';
-    applyTheme(savedTheme);
+// --- تعبئة قائمة الولايات في صفحة السلة ---
+function populateWilayas() {
+    const wilayaSelect = document.getElementById('checkout-wilaya');
+    if(!wilayaSelect) return;
+
+    wilayaSelect.innerHTML = '<option value="" disabled selected>Choisir Wilaya</option>';
+
+    wilayasData.forEach(wilaya => {
+        const option = document.createElement('option');
+        option.value = wilaya.price; 
+        option.textContent = `${wilaya.id} - ${wilaya.name} (+${wilaya.price} DA)`;
+        wilayaSelect.appendChild(option);
+    });
+
+    wilayaSelect.addEventListener('change', (e) => {
+        const deliveryPrice = parseFloat(e.target.value) || 0;
+        const feeDisplay = document.getElementById('delivery-fee-display');
+        if(feeDisplay) feeDisplay.textContent = deliveryPrice;
+        calcFinalTotalPage();
+    });
 }
 
-async function getCategories() {
-    let { data: categories } = await supabaseClient.from('categories').select('*');
-    if (!categories) return;
-
-    const filterContainer = document.getElementById('categories-filter');
-    const navDropdown = document.querySelector('.dropdown-content');
+// --- عرض محتويات صفحة cart.html ---
+function renderCartPage() {
+    const container = document.getElementById('cart-items-container-page');
+    const totalEl = document.getElementById('cart-total-price-page');
     
-    if(filterContainer) filterContainer.innerHTML = `<button class="category-btn active" data-id="all">${translations[currentLanguage].category_all}</button>`;
-    if(navDropdown) navDropdown.innerHTML = '';
+    if (!container) return; 
 
-    if(filterContainer && filterContainer.querySelector('[data-id="all"]')) {
-        filterContainer.querySelector('[data-id="all"]').addEventListener('click', () => filterProducts('all'));
+    container.innerHTML = '';
+    let total = 0;
+
+    if (cart.length === 0) {
+        container.innerHTML = '<p style="text-align:center; padding:20px;">Votre panier est vide.</p>';
+    } else {
+        cart.forEach((item, i) => {
+            total += Number(item.price) || 0;
+            container.innerHTML += `
+                <div class="cart-item-row" style="display:flex; justify-content:space-between; align-items:center; padding:15px 0; border-bottom:1px solid #eee;">
+                    <div class="cart-item-info">
+                        <h4 style="margin:0;">${item.name}</h4>
+                        <small style="color:#666;">Couleur: ${item.color || '-'} | Taille: ${item.size || '-'} | Qty: ${item.qty || 1}</small>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <span style="font-weight:bold; color:var(--color-primary);">${item.price} DZD</span>
+                        <i class="fas fa-trash" style="color:red; cursor:pointer;" onclick="removeFromCart(${i})"></i>
+                    </div>
+                </div>`;
+        });
     }
 
-    categories.forEach(cat => {
-        const name = cat[`name_${currentLanguage}`] || cat.name_fr || cat.name;
-        if (filterContainer) {
-            const btn = document.createElement('button');
-            btn.className = 'category-btn';
-            btn.textContent = name;
-            btn.addEventListener('click', () => {
-                filterProducts(cat.id);
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-            filterContainer.appendChild(btn);
-        }
-    });
+    if(totalEl) totalEl.textContent = total;
+    calcFinalTotalPage();
+}
+
+function calcFinalTotalPage() {
+    const totalEl = document.getElementById('cart-total-price-page');
+    const feeDisplay = document.getElementById('delivery-fee-display');
+    const finalDisplay = document.getElementById('final-total-price');
+
+    if(!totalEl || !feeDisplay || !finalDisplay) return;
+
+    const cartTotal = parseFloat(totalEl.textContent) || 0;
+    const deliveryFee = parseFloat(feeDisplay.textContent) || 0;
+
+    finalDisplay.textContent = cartTotal + deliveryFee;
+}
+
+// --- جلب المنتجات في index.html ---
+async function loadInitialData() {
+    await getProducts();
 }
 
 async function getProducts() {
@@ -180,60 +191,41 @@ async function getProducts() {
     renderProducts(allProducts);
 }
 
-async function getReviews() {
-    if (!document.querySelector('.reviews-container')) return;
-    let { data: reviews } = await supabaseClient.from('reviews').select('*').eq('is_approved', true).order('created_at', {ascending: false});
-    if (reviews && reviews.length > 0) renderReviews(reviews);
-}
-
 function renderProducts(products) {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
     if (!products || !products.length) {
-        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-muted);">Aucun produit disponible pour le moment.</p>';
+        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-muted);">Aucun produit disponible.</p>';
         return;
     }
 
     products.forEach(p => {
         const isOutOfStock = p.stock <= 0;
         const isComingSoon = checkIsComingSoon(p);
-        const outOfStockText = translations[currentLanguage].out_of_stock;
         
         const card = document.createElement('div');
         card.className = `product-card ${isOutOfStock ? 'out-of-stock' : ''} ${isComingSoon ? 'is-coming-soon' : ''}`;
         
         card.innerHTML = `
-            ${isComingSoon ? '<span class="card-cs-tag">COMING SOON</span>' : (isOutOfStock ? `<div class="out-of-stock-badge">${outOfStockText}</div>` : '')}
+            ${isComingSoon ? '<span class="card-cs-tag">COMING SOON</span>' : ''}
             <img src="${p.image_url || 'images/logo3.png'}" class="${isComingSoon ? 'is-coming-soon-blur' : ''}" alt="${p.name}">
             <div class="product-details">
                 <h3 class="product-name">${p.name}</h3>
                 <p class="product-price">${isComingSoon ? 'Bientôt disponible' : p.price + ' DZD'}</p>
                 <div class="product-actions">
                     <button class="details-btn">Détails</button>
-                    <button class="add-to-cart-btn" ${isOutOfStock || isComingSoon ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
-                        ${isComingSoon ? 'Bientôt' : (isOutOfStock ? outOfStockText : 'Ajouter')}
-                    </button>
                 </div>
             </div>
         `;
         
         card.querySelector('.details-btn').addEventListener('click', () => openDetails(p));
-        
-        const addBtn = card.querySelector('.add-to-cart-btn');
-        if (!isComingSoon && !isOutOfStock) {
-            addBtn.addEventListener('click', () => openDetails(p));
-        }
-
         grid.appendChild(card);
     });
 }
 
-function filterProducts(catId) {
-    renderProducts(catId === 'all' ? allProducts : allProducts.filter(p => p.category_id == catId));
-}
-
+// --- تفاصيل المنتج (Modal) ---
 let countdownInterval = null;
 
 function openDetails(p) {
@@ -277,11 +269,8 @@ function openDetails(p) {
 
                 countdownEl.textContent = `Disponible dans: ${days}j ${hours}h ${mins}m ${secs}s`;
             };
-
             updateTimer();
             countdownInterval = setInterval(updateTimer, 1000);
-        } else if (countdownEl) {
-            countdownEl.style.display = 'none';
         }
     } else {
         if (imageContainer) imageContainer.classList.remove('is-coming-soon-blur');
@@ -315,12 +304,12 @@ function openDetails(p) {
 
         let html = '';
         if (availableColors.length > 0) {
-            html += `<div class="modal-opts-group"><label>${translations[currentLanguage].colors || 'Couleurs'}</label><div class="product-colors" style="display:flex; gap:8px; flex-wrap:wrap;">` 
+            html += `<div class="modal-opts-group"><label>Couleurs</label><div class="product-colors" style="display:flex; gap:8px; flex-wrap:wrap;">` 
                 + availableColors.map(c => `<span class="color-box" data-val="${c}" style="border:1.5px solid var(--color-border); padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:600;">${c}</span>`).join('')
                 + '</div></div>';
         }
         if (availableSizes.length > 0) {
-            html += `<div class="modal-opts-group" style="margin-top:12px;"><label>${translations[currentLanguage].sizes || 'Tailles'}</label><div class="product-sizes" style="display:flex; gap:8px; flex-wrap:wrap;">`
+            html += `<div class="modal-opts-group" style="margin-top:12px;"><label>Tailles</label><div class="product-sizes" style="display:flex; gap:8px; flex-wrap:wrap;">`
                 + availableSizes.map(s => `<span class="size-box" data-val="${s}" style="border:1.5px solid var(--color-border); padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:600;">${s}</span>`).join('')
                 + '</div></div>';
         }
@@ -335,7 +324,6 @@ function openDetails(p) {
                 </div>
             </div>
         `;
-
         opts.innerHTML = html;
 
         let selColor = availableColors.length > 0 ? null : 'Standard';
@@ -377,11 +365,10 @@ function openDetails(p) {
             newCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Ajouter au panier';
             
             newCartBtn.addEventListener('click', () => {
-                if (availableColors.length > 0 && !selColor) return alert(translations[currentLanguage].alert_color || "Veuillez choisir une couleur");
-                if (availableSizes.length > 0 && !selSize) return alert(translations[currentLanguage].alert_size || "Veuillez choisir une taille");
+                if (availableColors.length > 0 && !selColor) return alert("Veuillez choisir une couleur");
+                if (availableSizes.length > 0 && !selSize) return alert("Veuillez choisir une taille");
                 
                 const quantity = parseInt(qtyInput?.value, 10) || 1;
-
                 addToCart({ 
                     id: `${p.id}-${selColor}-${selSize}`, 
                     ...p, 
@@ -398,57 +385,58 @@ function openDetails(p) {
     modal.style.display = 'block';
 }
 
-function setLanguage(lang) {
-    currentLanguage = lang;
-    localStorage.setItem('icosium_lang', lang);
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    
-    document.querySelectorAll('[data-key]').forEach(el => {
-        const k = el.getAttribute('data-key');
-        if(k && translations[lang][k]) el.textContent = translations[lang][k];
-    });
-
-    const langSelect = document.getElementById('language-switcher');
-    if (langSelect) langSelect.value = lang;
-}
-
-function applyTheme(theme) {
-    const icon = document.querySelector('#dark-mode-toggle i');
-    if (theme === 'dark') {
-        document.body.classList.add('dark-mode');
-        if(icon) { icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); }
-    } else {
-        document.body.classList.remove('dark-mode');
-        if(icon) { icon.classList.remove('fa-sun'); icon.classList.add('fa-moon'); }
-    }
-}
-
-function toggleTheme() {
-    const isDark = document.body.classList.toggle('dark-mode');
-    const newTheme = isDark ? 'dark' : 'light';
-    localStorage.setItem('icosium_theme', newTheme);
-    applyTheme(newTheme);
-}
-
+// --- التهيئة عند تحميل أي من الصفحات ---
 document.addEventListener('DOMContentLoaded', () => {
-    loadInitialData();
     loadCartFromStorage();
-
-    document.getElementById('dark-mode-toggle')?.addEventListener('click', toggleTheme);
-    document.getElementById('language-switcher')?.addEventListener('change', e => setLanguage(e.target.value));
     
-    document.querySelectorAll('.close-btn').forEach(b => b.addEventListener('click', e => e.target.closest('.modal').style.display = 'none'));
-    window.onclick = e => { if(e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+    if (window.location.pathname.includes('cart.html')) {
+        populateWilayas();
+        renderCartPage();
 
-    const nav = document.getElementById('main-nav');
-    const overlay = document.getElementById('nav-overlay');
-    document.getElementById('burger-menu-btn')?.addEventListener('click', () => { nav.classList.add('nav-active'); overlay.classList.add('overlay-active'); });
-    const closeMenu = () => { nav?.classList.remove('nav-active'); overlay?.classList.remove('overlay-active'); };
-    document.getElementById('close-nav-btn')?.addEventListener('click', closeMenu);
-    overlay?.addEventListener('click', closeMenu);
+        // إرسال الطلب إلى جدول orders في Supabase
+        const checkoutForm = document.getElementById('checkout-form-page');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (cart.length === 0) return alert('Votre panier est vide !');
 
-    // ✅ تفعيل زر السلة العلوي لينقلك إلى cart.html فوراً
+                const submitBtn = document.getElementById('checkout-submit-btn');
+                submitBtn.textContent = "Envoi en cours...";
+                submitBtn.disabled = true;
+
+                const wilayaSelect = document.getElementById('checkout-wilaya');
+                const wilayaName = wilayaSelect.options[wilayaSelect.selectedIndex].text.split(' (+')[0];
+
+                const orderData = {
+                    customer_name: document.getElementById('checkout-name').value,
+                    customer_phone: document.getElementById('checkout-phone').value,
+                    customer_address: `${wilayaName} - ${document.getElementById('checkout-address').value}`,
+                    items: cart,
+                    total_price: parseFloat(document.getElementById('final-total-price').textContent),
+                    delivery_fee: parseFloat(document.getElementById('delivery-fee-display').textContent) || 0,
+                    status: 'Pending'
+                };
+
+                const { error } = await supabaseClient.from('orders').insert(orderData);
+
+                if (error) {
+                    console.error(error);
+                    alert("Erreur lors de la commande.");
+                    submitBtn.textContent = "Confirmer la commande";
+                    submitBtn.disabled = false;
+                } else {
+                    alert("Commande réussie ! Merci.");
+                    cart = []; 
+                    saveCartToStorage(); 
+                    window.location.href = 'index.html'; 
+                }
+            });
+        }
+    } else {
+        loadInitialData();
+    }
+
+    // تفعيل زر السلة العلوي في الهيدر ليوجه لصفحة cart.html
     const cartButton = document.getElementById('cart-button');
     if (cartButton) {
         cartButton.addEventListener('click', (e) => {
@@ -456,4 +444,8 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'cart.html';
         });
     }
+
+    // إغلاق المودالز
+    document.querySelectorAll('.close-btn').forEach(b => b.addEventListener('click', e => e.target.closest('.modal').style.display = 'none'));
+    window.onclick = e => { if(e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 });
