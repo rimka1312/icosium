@@ -1,14 +1,12 @@
 // ---------------------------------------------------
-// ملف script.js المصحح بالكامل
+// ملف script_2.js المصحح بالكامل (يعمل بكفاءة عالية)
 // ---------------------------------------------------
 
-// --- 0. إعداد Supabase ---
 const { createClient } = supabase;
 const SUPABASE_URL = 'https://vhrvdkaqlrwplkdgwwkl.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZocnZka2FxbHJ3cGxrZGd3d2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTUyMTAsImV4cCI6MjA3ODk3MTIxMH0.mNAn3qo48y46FDkDOqUVt1xwN2smFMZL1lBNbT0OkTA';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// --- 1. الترجمة الكاملة ---
 const translations = {
     ar: {
         out_of_stock: "نفاذ الكمية",
@@ -16,9 +14,9 @@ const translations = {
         hero_title: "اكتشف مجموعتنا الجديدة", hero_subtitle: "تصميم عصري بجودة عالية",
         products_title: "منتجاتنا", category_all: "الكل",
         about_title: "عن ICOSIUM",
-        about_history_text: "في عام 140 قبل الميلاد، أسس الفينيقيون 'إيكوزيم' على ساحل شمال إفريقيا...",
+        about_history_text: "في عام 140 قبل الميلاد، أسس الفينيقيون 'إيكوزيم' على ساحل شمال إفريقيا — القلب القديم لما يعرف اليوم بالجزائر العاصمة. مرت قرون، وقامت إمبراطوريات وسقطت. ومع ذلك، فإن روح إيكوزيم لا تزال حية. من تلك الطاقة الخالدة، ولدت ICOSIUM كعلامة تجارية جزائرية عصرية تمزج بين التراث والأناقة المعاصرة. نحن نجلب روح الماضي إلى عالم اليوم — ونصمم ملابس تعبر عن الهوية والإبداع والهدف. مهمتنا هي إعادة تعريف الموضة المحلية لجيل جديد يقدر الأصالة والشجاعة. ICOSIUM ليست مجرد علامة تجارية، إنها حركة وجسر بين الروح القديمة والحياة العصرية.",
         about_why_title: "لماذا تختار ICOSIUM؟",
-        about_why_text: "لأن ما ترتديه يجب أن يحمل معنى...",
+        about_why_text: "لأن ما ترتديه يجب أن يحمل معنى. في ICOSIUM، كل قطعة تحكي قصة — قصة أرض وثقافة وجيل لا يخشى التميز. نحن لا نصنع الملابس فحسب؛ بل نخلق صلة بين روح الجزائر العريقة والروح الحديثة لشبابها. تصاميمنا أصيلة، ومصممة بعناية لتدوم — صُنعت لأولئك الذين يقدرون الهوية على الموضة العابرة، والمعنى على الإنتاج الضخم. عندما ترتدي ICOSIUM، فأنت ترتدي التراث والإبداع والثقة — لأن الأناقة الحقيقية تبدأ من الداخل.",
         reviews_title: "آراء الزبائن", btn_write_review: "أكتب رأيك", review_form_title: "شاركنا تجربتك",
         contact_title: "تواصل معنا", contact_message_title: "راسلنا مباشرة", contact_send: "إرسال",
         cart_title: "السلة", cart_total: "الإجمالي", checkout_title: "إتمام الطلب", 
@@ -32,9 +30,9 @@ const translations = {
         hero_title: "Découvrez notre nouvelle collection", hero_subtitle: "Design moderne, qualité supérieure",
         products_title: "Nos Produits", category_all: "Tout",
         about_title: "À propos d'ICOSIUM",
-        about_history_text: "En 140 av. J.-C., les Phéniciens fondèrent Ikosim...",
+        about_history_text: "En 140 av. J.-C., les Phéniciens fondèrent Ikosim sur la côte nord-africaine — le cœur antique de l'actuelle Alger. Des siècles ont passé, des empires se sont élevés et effondrés. Pourtant, l'esprit d'Ikosim perdure. Née de cette énergie intemporelle, ICOSIUM est une marque algérienne moderne qui allie héritage et style contemporain. Nous transportons l'âme du passé dans le monde d'aujourd'hui, créant des vêtements qui expriment identité et créativité. ICOSIUM est plus qu'une marque. C'est un mouvement — un pont entre l'esprit ancien et la vie moderne.",
         about_why_title: "Pourquoi choisir ICOSIUM",
-        about_why_text: "Parce que ce que vous portez doit avoir du sens...",
+        about_why_text: "Parce que ce que vous portez doit avoir du sens. Chez ICOSIUM, chaque pièce raconte une histoire — celle d'une terre, d'une culture et d'une génération qui n'a pas peur de se démarquer. Nous créons un lien entre l'âme ancienne de l'Algérie et l'esprit moderne de sa jeunesse. Nos designs sont authentiques, pensés avec soin et faits pour durer — pour ceux qui privilégient l'identité sur la tendance et le sens sur la production de masse. Porter ICOSIUM, c'est porter l'héritage, la créativité et la confiance — car le vrai style vient de l'intérieur.",
         reviews_title: "Avis Clients", btn_write_review: "Écrire un avis", review_form_title: "Partagez votre avis",
         contact_title: "Contact", contact_message_title: "Contactez-nous directement", contact_send: "Envoyer",
         cart_title: "Votre Panier", cart_total: "Total", checkout_title: "Commander", 
@@ -48,9 +46,9 @@ const translations = {
         hero_title: "Discover our new collection", hero_subtitle: "Modern design, premium quality",
         products_title: "Our Products", category_all: "All",
         about_title: "About ICOSIUM",
-        about_history_text: "In 140 B.C.E., the Phoenicians founded Ikosim...",
+        about_history_text: "In 140 B.C.E., the Phoenicians founded Ikosim on the North African coast — the ancient heart of what is today Algiers. Centuries have passed. Empires have risen and fallen. Yet, the spirit of Ikosim still lives on. Born from that timeless energy, ICOSIUM is a modern Algerian casualwear brand that blends heritage with contemporary style. We bring the soul of the past into today’s world — crafting clothing that expresses identity, creativity, and purpose. ICOSIUM is more than a brand. It’s a movement — a bridge between ancient spirit and modern life.",
         about_why_title: "Why Choose ICOSIUM",
-        about_why_text: "Because what you wear should mean something...",
+        about_why_text: "Because what you wear should mean something. At ICOSIUM, every piece tells a story — the story of a land, a culture, and a generation unafraid to stand out. We don’t just make clothes; we create a connection between the old soul of Algeria and the modern spirit of its youth. Our designs are authentic, thoughtfully crafted, and made to last — built for those who value identity over trend and meaning over mass production. When you wear ICOSIUM, you wear heritage, creativity, and confidence — because true style starts from within.",
         reviews_title: "Customer Reviews", btn_write_review: "Write Review", review_form_title: "Share your experience",
         contact_title: "Contact", contact_message_title: "Contact us directly", contact_send: "Send",
         cart_title: "Your Cart", cart_total: "Total", checkout_title: "Checkout", 
@@ -87,7 +85,6 @@ const wilayasData = [
     { id: 58, name: "In Guezzam", price: 1600 }
 ];
 
-// --- 2. دوال السلة ---
 function loadCartFromStorage() {
     const savedCart = localStorage.getItem('icosium_cart');
     if (savedCart) {
@@ -118,17 +115,16 @@ function removeFromCart(index) {
     if (window.location.pathname.includes('cart.html')) renderCartPage();
 }
 
-// --- 3. فحص خاصية Coming Soon التلقائي ---
+// دالة التحقق الدقيق لحالة Coming Soon بناءً على التاريخ الحالي
 function checkIsComingSoon(product) {
     if (!product.is_coming_soon) return false;
-    if (!product.available_at) return true;
+    if (!product.available_at) return true; // إذا مفعيل بدون تاريخ محدد يظل قريباً دائماً
 
     const now = new Date();
     const target = new Date(product.available_at);
-    return target > now; // إذا لم يحن الوقت بعد، تظل مفعلة
+    return target > now; 
 }
 
-// --- 4. جلب وعرض البيانات ---
 async function loadInitialData() {
     await getCategories();
     await getProducts();
@@ -170,7 +166,6 @@ async function getCategories() {
 }
 
 async function getProducts() {
-    // جلب المنتجات غير المحذوفة
     let { data: products, error } = await supabaseClient
         .from('products')
         .select('*')
@@ -240,7 +235,6 @@ function filterProducts(catId) {
     renderProducts(catId === 'all' ? allProducts : allProducts.filter(p => p.category_id == catId));
 }
 
-// --- 6. فتح تفاصيل المنتج (Modal) مع تطبيق الضبابية التامة والحجب لـ Coming Soon ---
 let countdownInterval = null;
 
 function openDetails(p) {
@@ -257,12 +251,10 @@ function openDetails(p) {
     const isComingSoon = checkIsComingSoon(p);
 
     if (isComingSoon) {
-        // حجب تام وضبابية كما طلبت
         if (imageContainer) imageContainer.classList.add('is-coming-soon-blur');
         if (infoContainer) infoContainer.classList.add('is-coming-soon-blur');
         if (overlay) overlay.style.display = 'flex';
 
-        // العد التنازلي التلقائي حتى موعد البيع
         if (p.available_at && countdownEl) {
             countdownEl.style.display = 'block';
             const targetTime = new Date(p.available_at).getTime();
@@ -272,7 +264,6 @@ function openDetails(p) {
                 const diff = targetTime - now;
 
                 if (diff <= 0) {
-                    // انتهى الوقت: إزالة الحجب فوراً وتنشيط الشراء تلقائياً!
                     clearInterval(countdownInterval);
                     if (overlay) overlay.style.display = 'none';
                     if (imageContainer) imageContainer.classList.remove('is-coming-soon-blur');
@@ -294,22 +285,18 @@ function openDetails(p) {
             countdownEl.style.display = 'none';
         }
     } else {
-        // متاح للبيع بشكل طبيعي
         if (imageContainer) imageContainer.classList.remove('is-coming-soon-blur');
         if (infoContainer) infoContainer.classList.remove('is-coming-soon-blur');
         if (overlay) overlay.style.display = 'none';
     }
 
-    // تجهيز الصور (الرئيسية + الإضافية)
     const mainImg = document.getElementById('modal-product-image');
     if (mainImg) mainImg.src = p.image_url || 'images/logo3.png';
 
-    // نصوص ومقاسات
     document.getElementById('modal-product-name').textContent = p.name;
     document.getElementById('modal-product-desc').textContent = p.description || '';
     document.getElementById('modal-product-price').textContent = p.price + ' DZD';
 
-    // استخراج المقاسات والألوان الفريدة
     const opts = document.getElementById('modal-product-options');
     opts.innerHTML = '';
     let parsedSizes = [];
@@ -351,7 +338,6 @@ function openDetails(p) {
         selSize = e.target.dataset.val;
     }));
 
-    // زر الإضافة للسلة
     const cartBtn = document.getElementById('modal-add-to-cart-btn');
     const newCartBtn = cartBtn.cloneNode(true);
     cartBtn.parentNode.replaceChild(newCartBtn, cartBtn);
@@ -373,7 +359,6 @@ function openDetails(p) {
     modal.style.display = 'block';
 }
 
-// --- 7. إعدادات الثيم واللغة والتشغيل ---
 function setLanguage(lang) {
     currentLanguage = lang;
     localStorage.setItem('icosium_lang', lang);
@@ -414,11 +399,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('dark-mode-toggle')?.addEventListener('click', toggleTheme);
     document.getElementById('language-switcher')?.addEventListener('change', e => setLanguage(e.target.value));
     
-    // إغلاق المودال
     document.querySelectorAll('.close-btn').forEach(b => b.addEventListener('click', e => e.target.closest('.modal').style.display = 'none'));
     window.onclick = e => { if(e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 
-    // القائمة الجانبية (الهاتف)
     const nav = document.getElementById('main-nav');
     const overlay = document.getElementById('nav-overlay');
     document.getElementById('burger-menu-btn')?.addEventListener('click', () => { nav.classList.add('nav-active'); overlay.classList.add('overlay-active'); });
