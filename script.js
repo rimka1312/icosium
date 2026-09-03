@@ -454,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay?.addEventListener('click', closeMenu);
     // --- تفعيل زر السلة العلوي لعرض المحتوى أو التوجيه ---
     const cartButton = document.getElementById('cart-button');
-    const cartModal = document.getElementById('cart-modal');
+   
     
     if (cartButton) {
         cartButton.addEventListener('click', (e) => {
