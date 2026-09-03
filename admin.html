@@ -785,6 +785,9 @@ a { text-decoration: none; }
 /* ══════════════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE ADDITIONS & MODAL FIXES
+══════════════════════════════════════════════════════ */
 @media (max-width: 1100px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .dash-grid { grid-template-columns: 1fr; }
@@ -799,12 +802,53 @@ a { text-decoration: none; }
   .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
   .content { padding: 18px; }
   .header { padding: 0 18px; }
+
+  /* 💡 إصلاح النوافذ المنبثقة (Modals) للهواتف 💡 */
+  .modal-box {
+    margin: 10px;
+    width: calc(100% - 20px);
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-body {
+    overflow-y: auto; /* السماح بالتمرير داخل المحتوى فقط */
+    flex: 1;
+    padding: 15px;
+  }
+  .modal-foot {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface);
+    padding: 15px;
+    z-index: 10;
+  }
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end; /* لكي تظهر النافذة من الأسفل */
+  }
+  
+  /* إصلاح أسطر المقاسات */
+  .size-row {
+    flex-wrap: wrap;
+    background: var(--bg4);
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .size-row input {
+    flex: 1 1 45% !important;
+    min-width: 100px;
+  }
+  .size-row button {
+    flex: 1 1 100% !important;
+    margin-top: 5px;
+  }
 }
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr; }
   .login-card { padding: 36px 24px; }
 }
-.menu-toggle { display: none; }
 
 /* ══════════════════════════════════════════════════════
    NEW FEATURES: NOTIFICATIONS PANEL
