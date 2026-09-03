@@ -2864,7 +2864,7 @@ async function saveProduct() {
   const price = parseFloat(document.getElementById('prd-price').value)||0;
   if(!name||price<1) { toast('Nom et prix sont requis.','err'); return; }
 
-  // حساب الكمية الكلية وجمع المقاسات
+ // حساب الكمية الكلية وجمع المقاسات
   const sizeRows = document.querySelectorAll('#sizes-container > div');
   let sizesArray = [];
   let totalStock = 0;
@@ -2883,7 +2883,8 @@ async function saveProduct() {
     price, 
     compare_price: parseFloat(document.getElementById('prd-compare').value)||null,
     stock: totalStock, // تم حسابه آلياً
-    sizes: sizesArray, // سيتم حفظه كملف JSON في قاعدة البيانات
+    // نقوم بتحويل المصفوفة إلى نص JSON قبل إرسالها لتجنب أخطاء قاعدة البيانات
+    sizes: JSON.stringify(sizesArray), 
     category_id: document.getElementById('prd-cat').value||null,
     image_url: document.getElementById('prd-img-base64').value || null,
     description: document.getElementById('prd-desc').value.trim()||null,
@@ -2900,10 +2901,10 @@ async function saveProduct() {
     closeModal('modal-product'); 
     await loadAll();
   } else {
-    toast('Erreur DB: Vérifiez que la colonne "sizes" existe (type JSON).','err');
+    console.error("Supabase Save Error:", error);
+    toast('Erreur DB: Vérifiez la configuration de la colonne "sizes".','err');
   }
-}
-async function deleteProduct(id) {
+}async function deleteProduct(id) {
   if(!confirm('Supprimer ce produit ?')) return;
   await dbFrom('products').update({is_deleted:true}).eq('id',id);
   const p = allProducts.find(x=>x.id===id);
