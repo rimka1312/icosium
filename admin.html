@@ -3226,38 +3226,68 @@ function searchProducts(q) {
 }
 
 /* ─── Product Modal & Images Handling ─── */
-function renderImagePreview(src, index) {
+// دالة رسم المعاينة مع زر الحذف وإمكانية التراكم
+function renderAllImages() {
   const container = document.getElementById('image-preview-container');
   if (!container) return;
-  const wrapper = document.createElement('div');
-  wrapper.style.position = 'relative';
-  wrapper.style.flexShrink = '0';
+  container.innerHTML = '';
 
-  const img = document.createElement('img');
-  img.src = src;
-  img.style.width = '60px';
-  img.style.height = '60px';
-  img.style.objectFit = 'cover';
-  img.style.borderRadius = '8px';
-  img.style.border = index === 0 ? '2px solid var(--accent)' : '1px solid var(--border)';
-  wrapper.appendChild(img);
+  uploadedImages.forEach((src, index) => {
+    const wrapper = document.createElement('div');
+    wrapper.style.position = 'relative';
+    wrapper.style.flexShrink = '0';
 
-  if (index === 0) {
-    const badge = document.createElement('span');
-    badge.textContent = 'Principale';
-    badge.style.position = 'absolute';
-    badge.style.top = '-5px';
-    badge.style.right = '-5px';
-    badge.style.background = 'var(--accent)';
-    badge.style.color = '#fff';
-    badge.style.fontSize = '0.6rem';
-    badge.style.padding = '2px 6px';
-    badge.style.borderRadius = '10px';
-    badge.style.fontWeight = 'bold';
-    wrapper.appendChild(badge);
-  }
+    const img = document.createElement('img');
+    img.src = src;
+    img.style.width = '65px';
+    img.style.height = '65px';
+    img.style.objectFit = 'cover';
+    img.style.borderRadius = '8px';
+    img.style.border = index === 0 ? '2px solid var(--accent)' : '1px solid var(--border)';
+    wrapper.appendChild(img);
 
-  container.appendChild(wrapper);
+    // وسم الصورة الرئيسية لأول صورة دائماً
+    if (index === 0) {
+      const badge = document.createElement('span');
+      badge.textContent = 'Principale';
+      badge.style.position = 'absolute';
+      badge.style.top = '-5px';
+      badge.style.left = '-2px';
+      badge.style.background = 'var(--accent)';
+      badge.style.color = '#fff';
+      badge.style.fontSize = '0.6rem';
+      badge.style.padding = '2px 6px';
+      badge.style.borderRadius = '6px';
+      badge.style.fontWeight = 'bold';
+      wrapper.appendChild(badge);
+    }
+
+    // زر حذف الصورة (x) لحذف صورة معينة دون حذف الباقي
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.innerHTML = '&times;';
+    delBtn.style.position = 'absolute';
+    delBtn.style.top = '-6px';
+    delBtn.style.right = '-6px';
+    delBtn.style.width = '18px';
+    delBtn.style.height = '18px';
+    delBtn.style.borderRadius = '50%';
+    delBtn.style.background = '#ef4444';
+    delBtn.style.color = '#fff';
+    delBtn.style.border = 'none';
+    delBtn.style.cursor = 'pointer';
+    delBtn.style.fontSize = '12px';
+    delBtn.style.display = 'flex';
+    delBtn.style.alignItems = 'center';
+    delBtn.style.justifyContent = 'center';
+    delBtn.onclick = function () {
+      uploadedImages.splice(index, 1);
+      renderAllImages();
+    };
+    wrapper.appendChild(delBtn);
+
+    container.appendChild(wrapper);
+  });
 }
 
 function readFileAsDataURL(file) {
@@ -3269,27 +3299,24 @@ function readFileAsDataURL(file) {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const prdFileInput = document.getElementById('prd-img-file');
-  if (prdFileInput) {
-    prdFileInput.addEventListener('change', async function(e) {
-      const files = Array.from(e.target.files);
-      if (!files.length) return;
+// قراءة وعرض الصور مع إضافتها للصور السابقة
+document.getElementById('prd-img-file')?.addEventListener('change', async function(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
 
-      const previewContainer = document.getElementById('image-preview-container');
-      if (previewContainer) previewContainer.innerHTML = '';
-      uploadedImages = [];
-
-      try {
-        uploadedImages = await Promise.all(files.map(file => readFileAsDataURL(file)));
-        uploadedImages.forEach((src, idx) => renderImagePreview(src, idx));
-        toast(files.length + ' image(s) ajoutée(s) !', 'ok');
-      } catch (err) {
-        console.error("Error reading files:", err);
-        toast('Erreur lors du chargement des images.', 'err');
-      }
-    });
+  try {
+    const newImages = await Promise.all(files.map(file => readFileAsDataURL(file)));
+    // دمج الصور الجديدة مع القديمة دون حذفها
+    uploadedImages = uploadedImages.concat(newImages);
+    renderAllImages();
+    toast(files.length + ' image(s) ajoutée(s) !', 'ok');
+  } catch (err) {
+    console.error("Error reading files:", err);
+    toast('Erreur lors du chargement des images.', 'err');
   }
+
+  // تصفير مدخل الملفات ليسمح لك باختيار صور أخرى بعد ذلك
+  e.target.value = '';
 });
 
 function addSizeRow(size = '', color = '', qty = '') {
@@ -3328,13 +3355,14 @@ function openProductModal(p = null) {
   if (previewContainer) previewContainer.innerHTML = '';
   uploadedImages = [];
 
-  if (p) {
+ if (p) {
     if (p.image_url) uploadedImages.push(p.image_url);
     if (Array.isArray(p.extra_images)) {
       uploadedImages = uploadedImages.concat(p.extra_images);
     }
-    uploadedImages.forEach((src, idx) => renderImagePreview(src, idx));
   }
+  // رسم جميع الصور الموجودة
+  renderAllImages();
 
   const sizesContainer = document.getElementById('sizes-container');
   if (sizesContainer) {
