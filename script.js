@@ -460,11 +460,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cartButton.addEventListener('click', (e) => {
             e.preventDefault();
             // إذا كان لديك نافذة منبثقة للسلة (Modal):
-            if (cartModal) {
-                cartModal.style.display = 'block';
-                if (typeof renderCartModal === 'function') {
-                    renderCartModal(); // دالة عرض محتويات السلة داخل الـ Modal إن وجدت
-                }
+              window.location.href = 'cart.html';
             } else {
                 // وإذا كنت تريد توجيهه مباشرة إلى صفحة السلة المستقلة (cart.html):
                 window.location.href = 'cart.html';
