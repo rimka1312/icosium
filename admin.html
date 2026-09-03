@@ -1115,6 +1115,43 @@ a { text-decoration: none; }
   .notif-panel { width:calc(100vw - 24px); right:12px; }
   .kpi-mini-row { grid-template-columns:1fr; }
 }
+   /* ══════════════════════════════════════════════════════
+   MOBILE FIXES FOR PRODUCT MODAL
+══════════════════════════════════════════════════════ */
+.size-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.img-preview-wrapper {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.img-preview-wrapper img {
+  width: 60px; height: 60px; object-fit: cover; border-radius: 8px;
+}
+.img-preview-wrapper .primary-badge {
+  position: absolute; top: -5px; right: -5px; background: var(--accent); color: #fff;
+  font-size: 0.6rem; padding: 2px 6px; border-radius: 10px; font-weight: bold;
+}
+@media (max-width: 768px) {
+  .size-row {
+    flex-wrap: wrap; /* السماح للحقول بالنزول للسطر التالي */
+    background: var(--bg4);
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .size-row input {
+    flex: 1 1 40% !important; /* الحقول تأخذ نصف الشاشة */
+    min-width: 100px;
+  }
+  .size-row button {
+    flex: 1 1 100% !important; /* زر الحذف يأخذ سطراً كاملاً في الهاتف */
+    margin-top: 5px;
+  }
+}
 </style>
 </head>
 <body>
@@ -1890,14 +1927,12 @@ a { text-decoration: none; }
       </div>
      <div class="form-row form-row-2">
         <div class="fg"><label>Catégorie</label><select id="prd-cat"><option value="">— Aucune —</option></select></div>
-        <div class="fg">
-          <label>Image(s) du Produit</label>
-          <!-- إضافة خاصية multiple للسماح بتحديد صور متعددة -->
-          <input type="file" id="prd-img-file" accept="image/*" multiple style="background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:8px; color:var(--text); width:100%;">
-          <input type="hidden" id="prd-img-base64">
-          <!-- حاوية لعرض الصور المصغرة المرفوعة -->
-          <div id="image-preview-container" style="display:flex; gap:8px; margin-top:8px; overflow-x:auto;"></div>
-        </div>
+      <div class="fg">
+  <label>Image(s) du Produit (Sélectionnez plusieurs)</label>
+  <input type="file" id="prd-img-file" accept="image/*" multiple style="background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:8px; color:var(--text); width:100%;">
+  <!-- حاوية الصور المرفوعة -->
+  <div id="image-preview-container" style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:5px;"></div>
+</div>
       </div>
 
       <div class="fg" style="background: var(--bg3); padding: 15px; border-radius: 12px; margin-top: 10px;">
@@ -2816,56 +2851,64 @@ function searchProducts(q) {
   renderProducts(base.filter(p=>p.name?.toLowerCase().includes(q.toLowerCase())||p.sku?.toLowerCase().includes(q.toLowerCase())));
 }
   // 6. الجافاسكريبت لمعالجة الصور المتعددة
-// 1. معالجة الصور المتعددة (Base64)
-let uploadedExtraImages = [];
+// 1. مصفوفة عالمية لتخزين جميع الصور المرفوعة
+let uploadedImages = []; 
+
+// 2. معالجة الصور المتعددة عند اختيارها من الكاميرا/المعرض
 document.getElementById('prd-img-file').addEventListener('change', function(e) {
   const files = e.target.files;
   if(!files.length) return;
   
   const previewContainer = document.getElementById('image-preview-container');
   previewContainer.innerHTML = ''; 
-  uploadedExtraImages = [];
+  uploadedImages = []; // تصفير المصفوفة للصور الجديدة
 
   Array.from(files).forEach((file, index) => {
     const reader = new FileReader();
     reader.onload = function(event) {
       const base64String = event.target.result;
-      
-      // الصورة الأولى نضعها كصورة رئيسية
-      if (index === 0) {
-        document.getElementById('prd-img-base64').value = base64String;
-      } else {
-        // باقي الصور نضعها في مصفوفة الصور الإضافية
-        uploadedExtraImages.push(base64String);
-      }
+      uploadedImages.push(base64String);
 
-      // عرض الصور للمعاينة
+      // بناء معاينة الصورة
+      const wrapper = document.createElement('div');
+      wrapper.className = 'img-preview-wrapper';
+      
       const img = document.createElement('img');
       img.src = base64String;
-      img.style.width = '45px'; img.style.height = '45px'; img.style.objectFit = 'cover'; img.style.borderRadius = '5px';
-      previewContainer.appendChild(img);
+      img.style.border = index === 0 ? '2px solid var(--accent)' : '1px solid var(--border)';
+      
+      wrapper.appendChild(img);
+      
+      // علامة لتمييز الصورة الرئيسية (الأولى)
+      if (index === 0) {
+        const badge = document.createElement('span');
+        badge.className = 'primary-badge';
+        badge.textContent = 'Principale';
+        wrapper.appendChild(badge);
+      }
+      
+      previewContainer.appendChild(wrapper);
     };
     reader.readAsDataURL(file);
   });
-  toast('Images chargées !', 'ok');
+  toast(files.length + ' image(s) ajoutée(s) !', 'ok');
 });
 
-// 2. إضافة سطر (مقاس - لون - كمية)
+// 3. دالة إضافة سطر المقاس واللون المتجاوب مع الهاتف
 function addSizeRow(size = '', color = '', qty = '') {
   const container = document.getElementById('sizes-container');
   const row = document.createElement('div');
-  row.style.display = 'flex';
-  row.style.gap = '10px';
+  row.className = 'size-row'; // استخدام الكلاس الجديد
   row.innerHTML = `
-    <input type="text" placeholder="Taille (S, M, L)" value="${size}" class="size-name" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
-    <input type="text" placeholder="Couleur (Noir, Blanc)" value="${color}" class="size-color" style="flex: 1.5; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
-    <input type="number" placeholder="Qté" value="${qty}" class="size-qty" style="width: 80px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="text" placeholder="Taille (S, M, 42)" value="${size}" class="size-name" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="text" placeholder="Couleur (Noir, Bleu)" value="${color}" class="size-color" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="number" placeholder="Qté" value="${qty}" class="size-qty" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
     <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="padding: 10px;"><i class="fas fa-trash"></i></button>
   `;
   container.appendChild(row);
 }
 
-// 3. فتح نافذة المنتج للتعديل أو الإضافة
+// 4. دالة فتح نافذة المنتج للتعديل
 function openProductModal(p) {
   currentProductId = p?.id||null;
   document.getElementById('prod-modal-title').textContent = p ? 'Modifier Produit' : 'Nouveau Produit';
@@ -2877,13 +2920,35 @@ function openProductModal(p) {
   document.getElementById('prd-desc').value=p?.description||'';
   document.getElementById('prd-featured').checked=p?.is_featured||false;
   
-  // تصفير الصور
+  // تصفير الصور في النافذة
   document.getElementById('prd-img-file').value = '';
-  document.getElementById('prd-img-base64').value = p?.image_url || '';
   document.getElementById('image-preview-container').innerHTML = '';
-  uploadedExtraImages = p?.extra_images || [];
+  uploadedImages = [];
 
-  // ملء المقاسات والألوان إن وجدت
+  if (p) {
+    if (p.image_url) uploadedImages.push(p.image_url);
+    if (p.extra_images && Array.isArray(p.extra_images)) {
+        uploadedImages = uploadedImages.concat(p.extra_images);
+    }
+    // عرض الصور الموجودة مسبقاً
+    uploadedImages.forEach((src, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'img-preview-wrapper';
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.border = idx === 0 ? '2px solid var(--accent)' : '1px solid var(--border)';
+        wrapper.appendChild(img);
+        if (idx === 0) {
+            const badge = document.createElement('span');
+            badge.className = 'primary-badge';
+            badge.textContent = 'Principale';
+            wrapper.appendChild(badge);
+        }
+        document.getElementById('image-preview-container').appendChild(wrapper);
+    });
+  }
+
+  // تحميل المقاسات
   document.getElementById('sizes-container').innerHTML = '';
   if(p && p.sizes && p.sizes.length > 0) {
     let sizesObj = typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes;
@@ -2895,19 +2960,19 @@ function openProductModal(p) {
   openModal('modal-product');
 }
 
-// 4. حفظ المنتج
+// 5. دالة حفظ المنتج (الصور والمقاسات)
 async function saveProduct() {
   const name = document.getElementById('prd-name').value.trim();
   const price = parseFloat(document.getElementById('prd-price').value)||0;
   if(!name||price<1) { toast('Nom et prix sont requis.','err'); return; }
 
-  // جمع معلومات المقاسات والألوان والكميات
+  // 1. استخراج المقاسات
   const sizeRows = document.querySelectorAll('#sizes-container > div');
   let sizesArray = [];
   let totalStock = 0;
   sizeRows.forEach(row => {
     const sName = row.querySelector('.size-name').value.trim();
-    const sColor = row.querySelector('.size-color').value.trim(); // سحب اللون
+    const sColor = row.querySelector('.size-color').value.trim();
     const sQty = parseInt(row.querySelector('.size-qty').value) || 0;
     if (sName && sQty > 0) {
       sizesArray.push({ size: sName, color: sColor, qty: sQty });
@@ -2915,16 +2980,20 @@ async function saveProduct() {
     }
   });
 
+  // 2. تقسيم الصور (الصورة الأولى للرئيسية، والباقي للصور الإضافية)
+  const mainImage = uploadedImages.length > 0 ? uploadedImages[0] : null;
+  const extraImagesArray = uploadedImages.length > 1 ? uploadedImages.slice(1) : [];
+
   const b = {
     name, 
     sku: document.getElementById('prd-sku').value.trim()||null,
     price, 
     compare_at_price: parseFloat(document.getElementById('prd-compare').value)||null,
-    stock: totalStock, // الحساب الآلي للكمية
-    sizes: sizesArray, // المزيج (مقاس/لون/كمية)
+    stock: totalStock,
+    sizes: sizesArray, 
     category_id: document.getElementById('prd-cat').value||null,
-    image_url: document.getElementById('prd-img-base64').value || null,
-    extra_images: uploadedExtraImages, // حفظ الصور الإضافية
+    image_url: mainImage, 
+    extra_images: extraImagesArray, // 👈 إرسال الصور الإضافية لقاعدة البيانات
     description: document.getElementById('prd-desc').value.trim()||null,
     is_featured: document.getElementById('prd-featured').checked,
     is_deleted: false
@@ -2939,7 +3008,7 @@ async function saveProduct() {
     closeModal('modal-product'); 
     await loadAll();
   } else {
-    console.error("Erreur DB:", error);
+    console.error("Supabase Save Error:", error);
     toast('Erreur DB: ' + error.message, 'err');
   }
 }
