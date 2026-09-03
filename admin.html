@@ -2904,7 +2904,7 @@ async function saveProduct() {
     console.error("Supabase Save Error:", error);
     toast('Erreur DB: ' + error.message, 'err');
   }
-}
+
 }async function deleteProduct(id) {
   if(!confirm('Supprimer ce produit ?')) return;
   await dbFrom('products').update({is_deleted:true}).eq('id',id);
