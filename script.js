@@ -452,4 +452,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeMenu = () => { nav?.classList.remove('nav-active'); overlay?.classList.remove('overlay-active'); };
     document.getElementById('close-nav-btn')?.addEventListener('click', closeMenu);
     overlay?.addEventListener('click', closeMenu);
+    // --- تفعيل زر السلة العلوي لعرض المحتوى أو التوجيه ---
+    const cartButton = document.getElementById('cart-button');
+    const cartModal = document.getElementById('cart-modal');
+    
+    if (cartButton) {
+        cartButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            // إذا كان لديك نافذة منبثقة للسلة (Modal):
+            if (cartModal) {
+                cartModal.style.display = 'block';
+                if (typeof renderCartModal === 'function') {
+                    renderCartModal(); // دالة عرض محتويات السلة داخل الـ Modal إن وجدت
+                }
+            } else {
+                // وإذا كنت تريد توجيهه مباشرة إلى صفحة السلة المستقلة (cart.html):
+                window.location.href = 'cart.html';
+            }
+        });
+    }
 });
