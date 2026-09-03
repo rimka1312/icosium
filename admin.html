@@ -803,58 +803,73 @@ a { text-decoration: none; }
   .dash-grid { grid-template-columns: 1fr; }
   .dash-bottom { grid-template-columns: 1fr; }
 }
+
 @media (max-width: 768px) {
   .sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 200; transform: translateX(-100%); transition: transform .28s ease, background .3s; }
   .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
   .menu-toggle { display: flex !important; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
   .order-detail-grid { grid-template-columns: 1fr; }
-  .form-row-2, .form-row-3 { grid-template-columns: 1fr; }
+  
+  /* جعل جميع الحقول المزدوجة تظهر تحت بعضها في الهاتف */
+  .form-row-2, .form-row-3 { grid-template-columns: 1fr !important; }
+  
   .content { padding: 18px; }
   .header { padding: 0 18px; }
 
-  /* 💡 إصلاح النوافذ المنبثقة (Modals) للهواتف 💡 */
+  /* 💡 الإصلاح الجذري للنافذة المنبثقة (Modal) في الهاتف 💡 */
+  .modal-overlay {
+    padding: 10px;
+    align-items: center; /* توسيط النافذة */
+  }
   .modal-box {
-    margin: 10px;
-    width: calc(100% - 20px);
-    max-height: 95vh;
+    margin: 0; /* إزالة الهوامش التي كانت تسبب الانضغاط */
+    width: 100% !important; /* أخذ العرض الكامل المتاح */
+    max-width: none !important;
+    height: auto;
+    max-height: 90vh; /* تحديد ارتفاع أقصى */
     display: flex;
     flex-direction: column;
+    border-radius: 16px;
   }
   .modal-body {
-    overflow-y: auto; /* السماح بالتمرير داخل المحتوى فقط */
+    overflow-y: auto; /* السماح بالتمرير داخل النافذة */
     flex: 1;
+    padding: 20px 15px;
+  }
+  .modal-hdr {
     padding: 15px;
   }
   .modal-foot {
+    padding: 15px;
     position: sticky;
     bottom: 0;
     background: var(--surface);
-    padding: 15px;
+    border-top: 1px solid var(--border);
     z-index: 10;
   }
-  .modal-overlay {
-    padding: 0;
-    align-items: flex-end; /* لكي تظهر النافذة من الأسفل */
-  }
-  
-  /* إصلاح أسطر المقاسات */
+
+  /* 💡 إصلاح حقول المقاسات والألوان (Size & Color) 💡 */
   .size-row {
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* السماح للحقول بالنزول للسطر التالي */
     background: var(--bg4);
-    padding: 12px;
+    padding: 15px;
     border-radius: 10px;
     border: 1px solid var(--border);
+    margin-bottom: 10px;
   }
   .size-row input {
-    flex: 1 1 45% !important;
-    min-width: 100px;
+    flex: 1 1 100% !important; /* كل حقل (مقاس، لون، كمية) يأخذ سطراً مستقلاً */
+    margin-bottom: 8px;
+    width: 100%;
   }
   .size-row button {
-    flex: 1 1 100% !important;
+    flex: 1 1 100% !important; /* زر الحذف يأخذ سطراً مستقلاً */
     margin-top: 5px;
+    width: 100%;
   }
 }
+
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr; }
   .login-card { padding: 36px 24px; }
@@ -1981,10 +1996,9 @@ a { text-decoration: none; }
       </div>
      <div class="form-row form-row-2">
         <div class="fg"><label>Catégorie</label><select id="prd-cat"><option value="">— Aucune —</option></select></div>
-    <div class="fg">
+  <div class="fg">
   <label>Image(s) du Produit (Sélectionnez plusieurs)</label>
   <input type="file" id="prd-img-file" accept="image/*" multiple style="background:var(--input-bg); border:1px solid var(--border); border-radius:12px; padding:8px; color:var(--text); width:100%;">
-  <!-- حاوية الصور المرفوعة -->
   <div id="image-preview-container" style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:5px;"></div>
 </div>
       </div>
@@ -3025,27 +3039,27 @@ function openProductModal(p) {
   openModal('modal-product');
 }
 
-// حفظ المنتج (الصور والمقاسات)
+// 5. حفظ المنتج (الصور والمقاسات)
 async function saveProduct() {
   const name = document.getElementById('prd-name').value.trim();
   const price = parseFloat(document.getElementById('prd-price').value)||0;
   if(!name||price<1) { toast('Nom et prix sont requis.','err'); return; }
 
-  // 1. استخراج المقاسات
-  const sizeRows = document.querySelectorAll('#sizes-container > div');
+  // 1. استخراج المقاسات والألوان والكميات
+  const sizeRows = document.querySelectorAll('#sizes-container .size-row'); // تم التصحيح هنا
   let sizesArray = [];
   let totalStock = 0;
   sizeRows.forEach(row => {
     const sName = row.querySelector('.size-name').value.trim();
     const sColor = row.querySelector('.size-color').value.trim();
     const sQty = parseInt(row.querySelector('.size-qty').value) || 0;
-    if (sName && sQty > 0) {
+    if (sName && sQty > 0) { // تأكدنا من إدخال اسم المقاس وكمية أكبر من صفر
       sizesArray.push({ size: sName, color: sColor, qty: sQty });
       totalStock += sQty; // تحديث المخزون الكلي تلقائياً
     }
   });
 
-  // 2. تقسيم الصور (الصورة الأولى للرئيسية، والباقي للصور الإضافية)
+  // 2. تقسيم الصور (الرئيسية والإضافية)
   const mainImage = uploadedImages.length > 0 ? uploadedImages[0] : null;
   const extraImagesArray = uploadedImages.length > 1 ? uploadedImages.slice(1) : [];
 
@@ -3055,10 +3069,10 @@ async function saveProduct() {
     price, 
     compare_at_price: parseFloat(document.getElementById('prd-compare').value)||null,
     stock: totalStock, // الكمية الإجمالية
-    sizes: sizesArray, // المصفوفة ترسل مباشرة لعمود jsonb
+    sizes: sizesArray, // المصفوفة (مقاس، لون، كمية)
     category_id: document.getElementById('prd-cat').value||null,
     image_url: mainImage, 
-    extra_images: extraImagesArray, // 👈 تأكد من إنشاء هذا العمود (jsonb) في Supabase
+    extra_images: extraImagesArray, // الصور الإضافية
     description: document.getElementById('prd-desc').value.trim()||null,
     is_featured: document.getElementById('prd-featured').checked,
     is_deleted: false
