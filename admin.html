@@ -3715,171 +3715,187 @@ function searchProducts(q) {
 }
   // 6. الجافاسكريبت لمعالجة الصور المتعددة
 // مصفوفة عالمية لتخزين جميع الصور المرفوعة
-let uploadedImages = []; 
+let uploadedImages = [];
 
-// معالجة الصور المتعددة عند الاختيار
-document.getElementById('prd-img-file').addEventListener('change', function(e) {
-  const files = e.target.files;
-  if(!files.length) return;
-  
-  const previewContainer = document.getElementById('image-preview-container');
-  previewContainer.innerHTML = ''; 
-  uploadedImages = []; 
+// دالة مساعدة موحدة لرسم بطاقة المعاينة
+function renderImagePreview(src, index) {
+  const container = document.getElementById('image-preview-container');
+  const wrapper = document.createElement('div');
+  wrapper.style.position = 'relative';
+  wrapper.style.flexShrink = '0';
 
-  Array.from(files).forEach((file, index) => {
+  const img = document.createElement('img');
+  img.src = src;
+  img.style.width = '60px';
+  img.style.height = '60px';
+  img.style.objectFit = 'cover';
+  img.style.borderRadius = '8px';
+  img.style.border = index === 0 ? '2px solid var(--accent)' : '1px solid var(--border)';
+  wrapper.appendChild(img);
+
+  if (index === 0) {
+    const badge = document.createElement('span');
+    badge.textContent = 'Principale';
+    badge.style.position = 'absolute';
+    badge.style.top = '-5px';
+    badge.style.right = '-5px';
+    badge.style.background = 'var(--accent)';
+    badge.style.color = '#fff';
+    badge.style.fontSize = '0.6rem';
+    badge.style.padding = '2px 6px';
+    badge.style.borderRadius = '10px';
+    badge.style.fontWeight = 'bold';
+    wrapper.appendChild(badge);
+  }
+
+  container.appendChild(wrapper);
+}
+
+// قراءة الملف بصيغة Base64 باستخدام Promise لضمان الترتيب
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = function(event) {
-      const base64String = event.target.result;
-      uploadedImages.push(base64String);
-
-      // بناء معاينة الصورة
-      const wrapper = document.createElement('div');
-      wrapper.style.position = 'relative';
-      wrapper.style.flexShrink = '0';
-      
-      const img = document.createElement('img');
-      img.src = base64String;
-      img.style.width = '60px'; img.style.height = '60px'; 
-      img.style.objectFit = 'cover'; img.style.borderRadius = '8px';
-      img.style.border = index === 0 ? '2px solid var(--accent)' : '1px solid var(--border)';
-      
-      wrapper.appendChild(img);
-      
-      // علامة لتمييز الصورة الرئيسية
-      if (index === 0) {
-        const badge = document.createElement('span');
-        badge.textContent = 'Principale';
-        badge.style.position = 'absolute'; badge.style.top = '-5px'; badge.style.right = '-5px';
-        badge.style.background = 'var(--accent)'; badge.style.color = '#fff';
-        badge.style.fontSize = '0.6rem'; badge.style.padding = '2px 6px';
-        badge.style.borderRadius = '10px'; badge.style.fontWeight = 'bold';
-        wrapper.appendChild(badge);
-      }
-      
-      previewContainer.appendChild(wrapper);
-    };
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
     reader.readAsDataURL(file);
   });
-  toast(files.length + ' image(s) ajoutée(s) !', 'ok');
+}
+
+// معالجة الصور المتعددة عند الاختيار
+document.getElementById('prd-img-file').addEventListener('change', async function(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+
+  const previewContainer = document.getElementById('image-preview-container');
+  previewContainer.innerHTML = '';
+  uploadedImages = [];
+
+  try {
+    // قراءة كل الصور بالتوازي مع الحفاظ على الترتيب الدقيق
+    uploadedImages = await Promise.all(files.map(file => readFileAsDataURL(file)));
+    uploadedImages.forEach((src, idx) => renderImagePreview(src, idx));
+    toast(files.length + ' image(s) ajoutée(s) !', 'ok');
+  } catch (err) {
+    console.error("Error reading files:", err);
+    toast('Erreur lors du chargement des images.', 'err');
+  }
 });
 
 // دالة إضافة سطر المقاس واللون
 function addSizeRow(size = '', color = '', qty = '') {
   const container = document.getElementById('sizes-container');
   const row = document.createElement('div');
-  row.className = 'size-row'; // الكلاس الذي أصلحناه في الـ CSS
+  row.className = 'size-row';
   row.style.display = 'flex';
   row.style.gap = '10px';
   row.innerHTML = `
     <input type="text" placeholder="Taille (ex: M, L)" value="${size}" class="size-name" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
     <input type="text" placeholder="Couleur (ex: Noir)" value="${color}" class="size-color" style="flex: 1.5; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
-    <input type="number" placeholder="Qté" value="${qty}" class="size-qty" style="width: 80px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
+    <input type="number" placeholder="Qté" min="1" value="${qty}" class="size-qty" style="width: 80px; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text);">
     <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()" style="padding: 10px;"><i class="fas fa-trash"></i></button>
   `;
   container.appendChild(row);
 }
 
-// فتح نافذة المنتج للتعديل
-function openProductModal(p) {
-  currentProductId = p?.id||null;
+// فتح نافذة المنتج للتعديل أو الإنشاء
+function openProductModal(p = null) {
+  currentProductId = p?.id || null;
   document.getElementById('prod-modal-title').textContent = p ? 'Modifier Produit' : 'Nouveau Produit';
-  document.getElementById('prd-name').value=p?.name||'';
-  document.getElementById('prd-sku').value=p?.sku||'';
-  document.getElementById('prd-price').value=p?.price||'';
-  document.getElementById('prd-compare').value=p?.compare_at_price||''; 
-  document.getElementById('prd-cat').value=p?.category_id||'';
-  document.getElementById('prd-desc').value=p?.description||'';
-  document.getElementById('prd-featured').checked=p?.is_featured||false;
-  
-  // تصفير الصور في النافذة
+  document.getElementById('prd-name').value = p?.name || '';
+  document.getElementById('prd-sku').value = p?.sku || '';
+  document.getElementById('prd-price').value = p?.price || '';
+  document.getElementById('prd-compare').value = p?.compare_at_price || '';
+  document.getElementById('prd-cat').value = p?.category_id || '';
+  document.getElementById('prd-desc').value = p?.description || '';
+  document.getElementById('prd-featured').checked = p?.is_featured || false;
+
+  // تصفير الصور
   document.getElementById('prd-img-file').value = '';
   document.getElementById('image-preview-container').innerHTML = '';
   uploadedImages = [];
 
   if (p) {
     if (p.image_url) uploadedImages.push(p.image_url);
-    if (p.extra_images && Array.isArray(p.extra_images)) {
-        uploadedImages = uploadedImages.concat(p.extra_images);
+    if (Array.isArray(p.extra_images)) {
+      uploadedImages = uploadedImages.concat(p.extra_images);
     }
-    // عرض الصور الموجودة مسبقاً
-    uploadedImages.forEach((src, idx) => {
-        const wrapper = document.createElement('div');
-        wrapper.style.position = 'relative'; wrapper.style.flexShrink = '0';
-        const img = document.createElement('img');
-        img.src = src;
-        img.style.width = '60px'; img.style.height = '60px'; img.style.objectFit = 'cover'; img.style.borderRadius = '8px';
-        img.style.border = idx === 0 ? '2px solid var(--accent)' : '1px solid var(--border)';
-        wrapper.appendChild(img);
-        if (idx === 0) {
-            const badge = document.createElement('span');
-            badge.textContent = 'Principale';
-            badge.style.position = 'absolute'; badge.style.top = '-5px'; badge.style.right = '-5px';
-            badge.style.background = 'var(--accent)'; badge.style.color = '#fff';
-            badge.style.fontSize = '0.6rem'; badge.style.padding = '2px 6px'; badge.style.borderRadius = '10px';
-            wrapper.appendChild(badge);
-        }
-        document.getElementById('image-preview-container').appendChild(wrapper);
-    });
+    uploadedImages.forEach((src, idx) => renderImagePreview(src, idx));
   }
 
-  // تحميل المقاسات
-  document.getElementById('sizes-container').innerHTML = '';
-  if(p && p.sizes && p.sizes.length > 0) {
-    let sizesObj = typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes;
-    sizesObj.forEach(s => addSizeRow(s.size, s.color, s.qty));
+  // معالجة المقاسات
+  const sizesContainer = document.getElementById('sizes-container');
+  sizesContainer.innerHTML = '';
+
+  let parsedSizes = [];
+  if (p && p.sizes) {
+    try {
+      parsedSizes = typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes;
+    } catch (e) {
+      console.error("Error parsing sizes:", e);
+      parsedSizes = [];
+    }
+  }
+
+  if (Array.isArray(parsedSizes) && parsedSizes.length > 0) {
+    parsedSizes.forEach(s => addSizeRow(s.size, s.color, s.qty));
   } else {
     addSizeRow();
   }
-  
+
   openModal('modal-product');
 }
 
-// 5. حفظ المنتج (الصور والمقاسات)
+// حفظ المنتج
 async function saveProduct() {
   const name = document.getElementById('prd-name').value.trim();
-  const price = parseFloat(document.getElementById('prd-price').value)||0;
-  if(!name||price<1) { toast('Nom et prix sont requis.','err'); return; }
+  const price = parseFloat(document.getElementById('prd-price').value) || 0;
+  if (!name || price < 1) { 
+    toast('Nom et prix sont requis.', 'err'); 
+    return; 
+  }
 
-  // 1. استخراج المقاسات والألوان والكميات
-  const sizeRows = document.querySelectorAll('#sizes-container .size-row'); // تم التصحيح هنا
-  let sizesArray = [];
+  // استخراج المقاسات وحساب المخزون
+  const sizeRows = document.querySelectorAll('#sizes-container .size-row');
+  const sizesArray = [];
   let totalStock = 0;
+
   sizeRows.forEach(row => {
     const sName = row.querySelector('.size-name').value.trim();
     const sColor = row.querySelector('.size-color').value.trim();
-    const sQty = parseInt(row.querySelector('.size-qty').value) || 0;
-    if (sName && sQty > 0) { // تأكدنا من إدخال اسم المقاس وكمية أكبر من صفر
+    const sQty = parseInt(row.querySelector('.size-qty').value, 10) || 0;
+    
+    if (sName && sQty > 0) {
       sizesArray.push({ size: sName, color: sColor, qty: sQty });
-      totalStock += sQty; // تحديث المخزون الكلي تلقائياً
+      totalStock += sQty;
     }
   });
 
-  // 2. تقسيم الصور (الرئيسية والإضافية)
+  // تقسيم الصور
   const mainImage = uploadedImages.length > 0 ? uploadedImages[0] : null;
   const extraImagesArray = uploadedImages.length > 1 ? uploadedImages.slice(1) : [];
 
-  const b = {
-    name, 
-    sku: document.getElementById('prd-sku').value.trim()||null,
-    price, 
-    compare_at_price: parseFloat(document.getElementById('prd-compare').value)||null,
-    stock: totalStock, // الكمية الإجمالية
-    sizes: sizesArray, // المصفوفة (مقاس، لون، كمية)
-    category_id: document.getElementById('prd-cat').value||null,
-    image_url: mainImage, 
-    extra_images: extraImagesArray, // الصور الإضافية
-    description: document.getElementById('prd-desc').value.trim()||null,
+  const payload = {
+    name,
+    sku: document.getElementById('prd-sku').value.trim() || null,
+    price,
+    compare_at_price: parseFloat(document.getElementById('prd-compare').value) || null,
+    stock: totalStock,
+    sizes: sizesArray,
+    category_id: document.getElementById('prd-cat').value || null,
+    image_url: mainImage,
+    extra_images: extraImagesArray,
+    description: document.getElementById('prd-desc').value.trim() || null,
     is_featured: document.getElementById('prd-featured').checked,
     is_deleted: false
   };
 
-  const { error } = currentProductId 
-    ? await dbFrom('products').update(b).eq('id',currentProductId) 
-    : await dbFrom('products').insert([b]);
-    
-  if(!error) {
-    toast(currentProductId?'Produit modifié !':'Produit créé !');
-    closeModal('modal-product'); 
+  const { error } = currentProductId
+    ? await dbFrom('products').update(payload).eq('id', currentProductId)
+    : await dbFrom('products').insert([payload]);
+
+  if (!error) {
+    toast(currentProductId ? 'Produit modifié !' : 'Produit créé !');
+    closeModal('modal-product');
     await loadAll();
   } else {
     console.error("Supabase Save Error:", error);
@@ -3887,23 +3903,23 @@ async function saveProduct() {
   }
 }
 
-// الحذف النهائي (بدون سلة مهملات)
+// الحذف النهائي
 async function deleteProduct(id) {
-  if(!confirm('Voulez-vous DÉFINITIVEMENT supprimer ce produit ? Cette action est irréversible.')) return;
-  
-  // الحذف النهائي بدلاً من التحديث (Update)
+  if (!confirm('Voulez-vous DÉFINITIVEMENT supprimer ce produit ? Cette action est irréversible.')) return;
+
   const { error } = await dbFrom('products').delete().eq('id', id);
-  
-  if(!error) {
-    const p = allProducts.find(x=>x.id===id);
-    logAudit('product', `Produit supprimé définitivement: ${p?.name||id}`, 'product');
-    toast('Produit supprimé définitivement.'); 
+
+  if (!error) {
+    const p = typeof allProducts !== 'undefined' ? allProducts.find(x => x.id === id) : null;
+    if (typeof logAudit === 'function') {
+      logAudit('product', `Produit supprimé définitivement: ${p?.name || id}`, 'product');
+    }
+    toast('Produit supprimé définitivement.');
     await loadAll();
   } else {
     toast('Erreur lors de la suppression.', 'err');
   }
-}
-/* ─── CATEGORIES ─── */
+}/* ─── CATEGORIES ─── */
 function renderCategories(cats) {
   const el = document.getElementById('cats-body');
   if(!cats.length) { el.innerHTML='<tr><td colspan="6"><div class="empty-st"><i class="fas fa-tags"></i><p>Aucune catégorie</p></div></td></tr>'; return; }
