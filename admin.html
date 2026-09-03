@@ -2007,7 +2007,7 @@ a { text-decoration: none; }
           <input type="number" id="prd-compare" placeholder="3500">
         </div>
         <div class="fg">
-          <label for="prd-stock">Stock</label>
+          <label for="prd-stock">Stock total</label>
           <input type="number" id="prd-stock" placeholder="100">
         </div>
       </div>
@@ -2020,11 +2020,11 @@ a { text-decoration: none; }
           </select>
         </div>
 
-     <div class="fg">
-  <label>Image(s) du Produit (Sélectionnez une ou plusieurs)</label>
-  <input type="file" id="prd-img-file" accept="image/*" multiple style="background:var(--input-bg); border:1.5px solid var(--border); border-radius:12px; padding:10px 14px; color:var(--text); width:100%; cursor:pointer;">
-  <div id="image-preview-container" style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:5px;"></div>
-</div>
+        <div class="fg">
+          <label>Image(s) du Produit (Sélectionnez une ou plusieurs)</label>
+          <input type="file" id="prd-img-file" accept="image/*" multiple style="background:var(--input-bg); border:1.5px solid var(--border); border-radius:12px; padding:10px 14px; color:var(--text); width:100%; cursor:pointer;">
+          <div id="image-preview-container" style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:5px;"></div>
+        </div>
       </div>
 
       <!-- قسم المقاسات والألوان -->
@@ -3346,121 +3346,132 @@ function addSizeRow(size = '', color = '', qty = '') {
 }
 
 function openProductModal(p = null) {
-  currentProductId = p?.id || null;
-  const titleEl = document.getElementById('prod-modal-title');
-  if (titleEl) titleEl.textContent = p ? 'Modifier Produit' : 'Nouveau Produit';
+  try {
+    currentProductId = p?.id || null;
+    const titleEl = document.getElementById('prod-modal-title');
+    if (titleEl) titleEl.textContent = p ? 'Modifier Produit' : 'Nouveau Produit';
 
-  const setVal = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.value = val;
-  };
+    const setVal = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    };
 
-  setVal('prd-name', p?.name || '');
-  setVal('prd-sku', p?.sku || '');
-  setVal('prd-price', p?.price || '');
-  setVal('prd-compare', p?.compare_at_price || p?.compare_price || '');
-  setVal('prd-cat', p?.category_id || '');
-  setVal('prd-desc', p?.description || '');
-  
-  const featEl = document.getElementById('prd-featured');
-  if (featEl) featEl.checked = p?.is_featured || false;
+    setVal('prd-name', p?.name || '');
+    setVal('prd-sku', p?.sku || '');
+    setVal('prd-price', p?.price || '');
+    setVal('prd-compare', p?.compare_at_price || p?.compare_price || '');
+    setVal('prd-stock', p?.stock || '');
+    setVal('prd-cat', p?.category_id || '');
+    setVal('prd-desc', p?.description || '');
+    
+    const featEl = document.getElementById('prd-featured');
+    if (featEl) featEl.checked = p?.is_featured || false;
 
-  const fileInp = document.getElementById('prd-img-file');
-  if (fileInp) fileInp.value = '';
-  uploadedImages = [];
+    const fileInp = document.getElementById('prd-img-file');
+    if (fileInp) fileInp.value = '';
+    uploadedImages = [];
 
-  // جلب الصور القديمة بأمان ودعم كل صيغ البيانات
-  if (p) {
-    if (p.image_url) uploadedImages.push(p.image_url);
-    if (p.extra_images) {
-      let extras = p.extra_images;
-      if (typeof extras === 'string') {
-        try { extras = JSON.parse(extras); } catch (e) { extras = []; }
-      }
-      if (Array.isArray(extras)) {
-        uploadedImages = uploadedImages.concat(extras);
+    if (p) {
+      if (p.image_url) uploadedImages.push(p.image_url);
+      if (p.extra_images) {
+        let extras = p.extra_images;
+        if (typeof extras === 'string') {
+          try { extras = JSON.parse(extras); } catch (e) { extras = []; }
+        }
+        if (Array.isArray(extras)) {
+          uploadedImages = uploadedImages.concat(extras);
+        }
       }
     }
+    
+    renderAllImages();
+
+    const sizesContainer = document.getElementById('sizes-container');
+    if (sizesContainer) {
+      sizesContainer.innerHTML = '';
+      let parsedSizes = [];
+      if (p && p.sizes) {
+        try {
+          parsedSizes = typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes;
+        } catch (e) {
+          parsedSizes = [];
+        }
+      }
+      if (Array.isArray(parsedSizes) && parsedSizes.length > 0) {
+        parsedSizes.forEach(s => addSizeRow(s.size, s.color, s.qty));
+      } else {
+        addSizeRow();
+      }
+    }
+
+    openModal('modal-product');
+  } catch (err) {
+    console.error("Erreur lors de l'ouverture du modal:", err);
+    toast("Impossible d'ouvrir la fenêtre produit", "err");
   }
-  
-  // رسم المعاينة
-  renderAllImages();
-
-  // معالجة المقاسات والألوان
-  const sizesContainer = document.getElementById('sizes-container');
-  if (sizesContainer) {
-    sizesContainer.innerHTML = '';
-    let parsedSizes = [];
-    if (p && p.sizes) {
-      try {
-        parsedSizes = typeof p.sizes === 'string' ? JSON.parse(p.sizes) : p.sizes;
-      } catch (e) {
-        parsedSizes = [];
-      }
-    }
-    if (Array.isArray(parsedSizes) && parsedSizes.length > 0) {
-      parsedSizes.forEach(s => addSizeRow(s.size, s.color, s.qty));
-    } else {
-      addSizeRow();
-    }
-  }
-
-  openModal('modal-product');
 }
 
 async function saveProduct() {
-  const name = document.getElementById('prd-name')?.value.trim();
-  const price = parseFloat(document.getElementById('prd-price')?.value) || 0;
-  if (!name || price < 1) { 
-    toast('Nom et prix sont requis.', 'err'); 
-    return; 
-  }
-
-  const sizeRows = document.querySelectorAll('#sizes-container .size-row');
-  const sizesArray = [];
-  let totalStock = 0;
-
-  sizeRows.forEach(row => {
-    const sName = row.querySelector('.size-name')?.value.trim();
-    const sColor = row.querySelector('.size-color')?.value.trim();
-    const sQty = parseInt(row.querySelector('.size-qty')?.value, 10) || 0;
-    
-    if (sName && sQty > 0) {
-      sizesArray.push({ size: sName, color: sColor, qty: sQty });
-      totalStock += sQty;
+  try {
+    const name = document.getElementById('prd-name')?.value.trim();
+    const price = parseFloat(document.getElementById('prd-price')?.value) || 0;
+    if (!name || price < 1) { 
+      toast('Nom et prix sont requis.', 'err'); 
+      return; 
     }
-  });
 
-  // تعيين أول صورة كرئيسية، وباقي الصور كإضافية
-  const mainImage = uploadedImages.length > 0 ? uploadedImages[0] : null;
-  const extraImagesArray = uploadedImages.length > 1 ? uploadedImages.slice(1) : [];
+    const sizeRows = document.querySelectorAll('#sizes-container .size-row');
+    const sizesArray = [];
+    let calculatedStock = 0;
 
-  const payload = {
-    name,
-    sku: document.getElementById('prd-sku')?.value.trim() || null,
-    price,
-    compare_at_price: parseFloat(document.getElementById('prd-compare')?.value) || null,
-    stock: totalStock,
-    sizes: sizesArray,
-    category_id: document.getElementById('prd-cat')?.value || null,
-    image_url: mainImage,
-    extra_images: extraImagesArray,
-    description: document.getElementById('prd-desc')?.value.trim() || null,
-    is_featured: document.getElementById('prd-featured')?.checked || false,
-    is_deleted: false
-  };
+    sizeRows.forEach(row => {
+      const sName = row.querySelector('.size-name')?.value.trim();
+      const sColor = row.querySelector('.size-color')?.value.trim();
+      const sQty = parseInt(row.querySelector('.size-qty')?.value, 10) || 0;
+      
+      if (sName && sQty > 0) {
+        sizesArray.push({ size: sName, color: sColor, qty: sQty });
+        calculatedStock += sQty;
+      }
+    });
 
-  const { error } = currentProductId
-    ? await dbFrom('products').update(payload).eq('id', currentProductId)
-    : await dbFrom('products').insert([payload]);
+    // استخدام كمية المقاسات إن وُجدت، أو القيمة المكتوبة في خانة Stock
+    const manualStock = parseInt(document.getElementById('prd-stock')?.value, 10) || 0;
+    const finalStock = calculatedStock > 0 ? calculatedStock : manualStock;
 
-  if (!error) {
-    toast(currentProductId ? 'Produit modifié !' : 'Produit créé !');
-    closeModal('modal-product');
-    await loadAll();
-  } else {
-    console.error("Supabase Save Error:", error);
-    toast('Erreur DB: ' + error.message, 'err');
+    const mainImage = uploadedImages.length > 0 ? uploadedImages[0] : null;
+    const extraImagesArray = uploadedImages.length > 1 ? uploadedImages.slice(1) : [];
+
+    const payload = {
+      name,
+      sku: document.getElementById('prd-sku')?.value.trim() || null,
+      price,
+      compare_at_price: parseFloat(document.getElementById('prd-compare')?.value) || null,
+      stock: finalStock,
+      sizes: sizesArray,
+      category_id: document.getElementById('prd-cat')?.value || null,
+      image_url: mainImage,
+      extra_images: extraImagesArray,
+      description: document.getElementById('prd-desc')?.value.trim() || null,
+      is_featured: document.getElementById('prd-featured')?.checked || false,
+      is_deleted: false
+    };
+
+    const { error } = currentProductId
+      ? await dbFrom('products').update(payload).eq('id', currentProductId)
+      : await dbFrom('products').insert([payload]);
+
+    if (!error) {
+      toast(currentProductId ? 'Produit modifié !' : 'Produit créé !');
+      closeModal('modal-product');
+      await loadAll();
+    } else {
+      console.error("Supabase Save Error:", error);
+      toast('Erreur DB: ' + error.message, 'err');
+    }
+  } catch (err) {
+    console.error("Save error:", err);
+    toast("Erreur lors de l'enregistrement", "err");
   }
 }
 
