@@ -2048,7 +2048,16 @@ a { text-decoration: none; }
         <label for="prd-featured">⭐ Produit en vedette</label>
       </div>
     </div>
+<div class="flex items-center gap-3 mb-4">
+  <input type="checkbox" id="is_coming_soon" name="is_coming_soon" class="w-5 h-5 rounded text-blue-600 focus:ring-blue-500">
+  <label for="is_coming_soon" class="font-medium text-gray-700">تفعيل خيار "قريباً" (Coming Soon)</label>
+</div>
 
+<!-- حقل تاريخ ووقت الإتاحة للبيع -->
+<div id="date_picker_container" class="space-y-1 hidden">
+  <label for="available_at" class="block text-sm font-medium text-gray-600">تاريخ بدء البيع التلقائي:</label>
+  <input type="datetime-local" id="available_at" name="available_at" class="border border-gray-300 rounded-lg p-2.5 w-full focus:outline-none focus:border-blue-500">
+</div>
     <!-- أسفل النافذة -->
     <div class="modal-foot">
       <button type="button" class="btn btn-ghost" onclick="closeModal('modal-product')">Annuler</button>
@@ -4232,6 +4241,16 @@ function renderGallery() {
     previewList.appendChild(card);
   });
 }
+   const toggleCheckbox = document.getElementById('is_coming_soon');
+  const datePicker = document.getElementById('date_picker_container');
+
+  toggleCheckbox.addEventListener('change', () => {
+    if (toggleCheckbox.checked) {
+      datePicker.classList.remove('hidden');
+    } else {
+      datePicker.classList.add('hidden');
+    }
+  });
 </script>
 </body>
 
