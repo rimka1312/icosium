@@ -3854,30 +3854,35 @@ async function deleteCoupon(id) {
   await loadAll(); 
 }
 
-/* ─── REVIEWS ─── */
+/* ─── REVIEWS (مصححة بالكامل مع الحذف والتأكيد) ─── */
 function renderReviews(reviews) {
   const el = document.getElementById('reviews-list');
   if (!el) return;
+  
   let filtered = reviews;
   if (currentReviewFilter === 'pending')  filtered = reviews.filter(r => !r.is_approved);
   if (currentReviewFilter === 'approved') filtered = reviews.filter(r => r.is_approved);
   
   if (!filtered.length) { 
-    el.innerHTML = '<div class="empty-st"><i class="fas fa-star"></i><p>Aucun avis</p></div>'; 
+    el.innerHTML = '<div class="empty-st"><i class="fas fa-star"></i><p>Aucun avis trouvé</p></div>'; 
     return; 
   }
+  
   el.innerHTML = filtered.map(r => `
     <div class="rcard">
       <div class="rcard-top">
         <div>
-          <div class="rcard-author">${r.reviewer_name}${!r.is_approved ? '<span style="font-size:.72rem;color:#fbbf24;margin-left:8px">⏳ En attente</span>' : ''}</div>
-          <div class="rcard-loc">${r.reviewer_location || ''} — ${fmtDate(r.created_at)}</div>
+          <div class="rcard-author">
+            ${r.reviewer_name}
+            ${!r.is_approved ? '<span style="font-size:.72rem; color:#fbbf24; background:rgba(251,191,36,.1); padding:2px 8px; border-radius:6px; margin-left:8px; border:1px solid rgba(251,191,36,.2);">⏳ En attente</span>' : '<span style="font-size:.72rem; color:#34d399; background:rgba(52,211,153,.1); padding:2px 8px; border-radius:6px; margin-left:8px; border:1px solid rgba(52,211,153,.2);">✓ Approuvé</span>'}
+          </div>
+          <div class="rcard-loc">${r.reviewer_location || 'Non précisé'} — ${fmtDate(r.created_at)}</div>
         </div>
-        <div>
-          <div class="stars">${'★'.repeat(r.rating || 0)}${'☆'.repeat(5 - (r.rating || 0))}</div>
-          <div style="display:flex;gap:7px;margin-top:8px;justify-content:flex-end">
-            ${!r.is_approved ? `<button class="btn btn-accent btn-sm" onclick="approveReview(${r.id})"><i class="fas fa-check"></i> Approuver</button>` : ''}
-            <button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})"><i class="fas fa-trash"></i></button>
+        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+          <div class="stars">${'★'.repeat(r.rating || 0)}${'☆'.repeat(Math.max(0, 5 - (r.rating || 0)))}</div>
+          <div style="display:flex; gap:7px; margin-top:10px;">
+            ${!r.is_approved ? `<button type="button" class="btn btn-accent btn-sm" onclick="approveReview(${r.id})"><i class="fas fa-check"></i> Approuver</button>` : ''}
+            <button type="button" class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})" title="Supprimer cet avis"><i class="fas fa-trash"></i></button>
           </div>
         </div>
       </div>
@@ -3887,22 +3892,12 @@ function renderReviews(reviews) {
 }
 
 function searchReviews(q) {
-  const filtered = allReviews.filter(r => r.reviewer_name?.toLowerCase().includes(q.toLowerCase()) || r.review_text?.toLowerCase().includes(q.toLowerCase()));
-  const el = document.getElementById('reviews-list');
-  currentReviewFilter = 'all';
-  document.querySelectorAll('#sec-reviews .filter-pill').forEach(b => b.classList.remove('on'));
-  document.querySelectorAll('#sec-reviews .filter-pill')[0]?.classList.add('on');
-  if (el) {
-    el.innerHTML = filtered.length ? filtered.map(r => `
-      <div class="rcard">
-        <div class="rcard-top">
-          <div><div class="rcard-author">${r.reviewer_name}</div><div class="rcard-loc">${r.reviewer_location || ''}</div></div>
-          <div><div class="stars">${'★'.repeat(r.rating || 0)}${'☆'.repeat(5 - (r.rating || 0))}</div>
-          <div style="display:flex;gap:7px;margin-top:8px"><button class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})"><i class="fas fa-trash"></i></button></div></div>
-        </div>
-        <p class="rcard-text">${r.review_text || ''}</p>
-      </div>`).join('') : '<div class="empty-st"><i class="fas fa-search"></i><p>Aucun résultat</p></div>';
-  }
+  const filtered = allReviews.filter(r => 
+    (r.reviewer_name || '').toLowerCase().includes(q.toLowerCase()) || 
+    (r.review_text || '').toLowerCase().includes(q.toLowerCase()) ||
+    (r.reviewer_location || '').toLowerCase().includes(q.toLowerCase())
+  );
+  renderReviews(filtered);
 }
 
 function filterReviews(f, btn) {
@@ -3912,17 +3907,35 @@ function filterReviews(f, btn) {
   renderReviews(allReviews);
 }
 
-async function approveReview(id) { 
-  await dbFrom('reviews').update({ is_approved: true }).eq('id', id); 
-  toast('Avis approuvé !'); 
-  await loadAll(); 
+// دالة تأكيد ونشر الرأي
+async function approveReview(id) {
+  try {
+    const { error } = await dbFrom('reviews').update({ is_approved: true }).eq('id', id);
+    if (error) throw error;
+    
+    toast('Avis approuvé avec succès !', 'ok');
+    logAudit('system', `Avis #${id} approuvé`, 'system');
+    await loadAll();
+  } catch (err) {
+    console.error("Erreur approveReview:", err);
+    toast("Erreur lors de l'approbation: " + err.message, 'err');
+  }
 }
 
-async function deleteReview(id) { 
-  if (!confirm('Supprimer cet avis ?')) return; 
-  await dbFrom('reviews').delete().eq('id', id); 
-  toast('Avis supprimé.'); 
-  await loadAll(); 
+// دالة حذف الرأي نهائياً
+async function deleteReview(id) {
+  if (!confirm('Voulez-vous vraiment supprimer cet avis ?')) return;
+  try {
+    const { error } = await dbFrom('reviews').delete().eq('id', id);
+    if (error) throw error;
+    
+    toast('Avis supprimé !', 'ok');
+    logAudit('system', `Avis #${id} supprimé`, 'system');
+    await loadAll();
+  } catch (err) {
+    console.error("Erreur deleteReview:", err);
+    toast("Erreur lors de la suppression: " + err.message, 'err');
+  }
 }
 
 /* ─── STOCK ─── */
@@ -4356,11 +4369,7 @@ function renderGallery() {
     }
   });
 
-   async function approveReview(id) { 
-  await dbFrom('reviews').update({ is_approved: true }).eq('id', id); 
-  toast('Avis approuvé !'); 
-  await loadAll(); 
-}
+ 
 </script>
 </body>
 
