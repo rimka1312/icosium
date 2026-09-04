@@ -3853,8 +3853,7 @@ async function deleteCoupon(id) {
   toast('Coupon supprimé.'); 
   await loadAll(); 
 }
-
-/* ─── REVIEWS (مصححة بالكامل مع الحذف والتأكيد) ─── */
+/* ─── REVIEWS (مصححة ومفعلة بالكامل) ─── */
 function renderReviews(reviews) {
   const el = document.getElementById('reviews-list');
   if (!el) return;
