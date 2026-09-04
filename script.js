@@ -11,7 +11,7 @@ const translations = {
     ar: {
         out_of_stock: "نفاذ الكمية",
         nav_home: "الرئيسية", nav_category: "الفئات", nav_promos: "تخفيضات", nav_reviews: "الآراء", nav_about: "من نحن", nav_contact: "اتصل بنا",
-        trust_delivery: "توصيل سريع", trust_payment: "الدفع عند الاستلام", trust_return: "إرجاع 7 أيام", trust_support: "دعم العملاء 7j/7",
+        trust_delivery: "توصيل سريع", trust_secure: "الدفع عند الاستلام", trust_return: "إرجاع 7 أيام", trust_support: "دعم العملاء 7j/7",
         hero_badge: "✦ تشكيلة جديدة 2026", hero_title: "اكتشف مجموعتنا الجديدة", hero_subtitle: "تصميم عصري، جودة استثنائية", hero_buy: "اشتري الآن", hero_story: "قصتنا ←",
         products_title: "منتجاتنا", category_all: "الكل",
         about_title: "عن ICOSIUM",
@@ -33,7 +33,7 @@ about_history_text: "في عام 140 قبل الميلاد، أسس الفيني
     fr: {
         out_of_stock: "Rupture de stock",
         nav_home: "Accueil", nav_category: "Catégorie", nav_promos: "Promotions", nav_reviews: "Avis", nav_about: "À Propos", nav_contact: "Contact",
-        trust_delivery: "Livraison rapide", trust_payment: "Paiement à la livraison", trust_return: "Retour 7 jours", trust_support: "Support client 7j/7",
+        trust_delivery: "Livraison rapide", trust_secure: "Paiement à la livraison", trust_return: "Retour 7 jours", trust_support: "Support client 7j/7",
         hero_badge: "✦ Nouvelle Collection 2026", hero_title: "Découvrez notre nouvelle collection", hero_subtitle: "Design moderne, qualité supérieure", hero_buy: "Acheter maintenant", hero_story: "Notre histoire →",
         products_title: "Nos Produits", category_all: "Tout",
         about_title: "À propos d'ICOSIUM",
@@ -55,7 +55,7 @@ about_history_text: "En 140 av. J.-C., les Phéniciens fondèrent Ikosim en Afri
     en: {
         out_of_stock: "Out of Stock",
         nav_home: "Home", nav_category: "Category", nav_promos: "Promotions", nav_reviews: "Reviews", nav_about: "About", nav_contact: "Contact",
-        trust_delivery: "Fast delivery", trust_payment: "Cash on delivery", trust_return: "7-day return", trust_support: "24/7 customer support",
+        trust_delivery: "Fast delivery", trust_secure: "Cash on delivery", trust_return: "7-day return", trust_support: "24/7 customer support",
         hero_badge: "✦ New Collection 2026", hero_title: "Discover our new collection", hero_subtitle: "Modern design, premium quality", hero_buy: "Shop now", hero_story: "Our story →",
         products_title: "Our Products", category_all: "All",
         about_title: "About ICOSIUM",
