@@ -681,18 +681,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 return alert(translations[currentLanguage]?.alert_rating || 'Veuillez sélectionner une note.');
             }
 
+          // إرسال التقييم بحالة انتظار الموافقة (is_approved: false)
             const data = {
                 reviewer_name: document.getElementById('review-name').value.trim(),
                 reviewer_location: document.getElementById('review-location').value.trim(),
                 review_text: document.getElementById('review-text').value.trim(),
                 rating: parseInt(ratingVal, 10),
-                is_approved: true
+                is_approved: false // 💡 لن يظهر في المتجر حتى يوافق عليه المسؤول من لوحة التحكم
             };
 
             const { error } = await supabaseClient.from('reviews').insert([data]);
             if (!error) {
-                alert(translations[currentLanguage]?.alert_review_success || "Merci pour votre avis !");
+                // رسالة واضحة للزبون بأن رأيه قيد المراجعة
+                const successMsg = currentLanguage === 'ar' 
+                    ? "شكراً لك! تم إرسال تقييمك وسيظهر بعد مراجعته من الإدارة." 
+                    : (currentLanguage === 'en' 
+                        ? "Thank you! Your review has been submitted and will appear after moderation." 
+                        : "Merci ! Votre avis a été envoyé et apparaîtra après validation.");
+                
+                alert(successMsg);
                 reviewForm.reset();
+                
+                // إعادة تصفير النجوم
+                currentRating = 0;
+                const valInput = document.getElementById('rating-value');
+                if (valInput) valInput.value = '';
+                const ratingTxt = document.getElementById('rating-text');
+                if (ratingTxt) ratingTxt.textContent = '0/5';
+                stars.forEach(st => st.querySelector('i').className = 'far fa-star');
+
                 if (reviewModal) reviewModal.style.display = 'none';
                 getReviews();
             } else {
