@@ -1,62 +1,75 @@
 /* ═══════════════════════════════════════════════════════
-   ICOSIUM STORE — Complete & Fixed Storefront Script
+   ICOSIUM STORE — Complete Script with Full i18n & Reviews
 ═══════════════════════════════════════════════════════ */
 
-// ─── 0. إعداد SUPABASE ───
 const { createClient } = supabase;
 const SUPABASE_URL = 'https://vhrvdkaqlrwplkdgwwkl.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZocnZka2FxbHJ3cGxrZGd3d2tsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzOTUyMTAsImV4cCI6MjA3ODk3MTIxMH0.mNAn3qo48y46FDkDOqUVt1xwN2smFMZL1lBNbT0OkTA';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ─── 1. الترجمات ───
 const translations = {
     ar: {
         out_of_stock: "نفاذ الكمية",
-        nav_home: "الرئيسية", nav_category: "الفئات", nav_trend: "الرائج", nav_about: "من نحن", nav_contact: "اتصل بنا",
-        hero_title: "اكتشف مجموعتنا الجديدة", hero_subtitle: "تصميم عصري بجودة عالية",
+        nav_home: "الرئيسية", nav_category: "الفئات", nav_promos: "تخفيضات", nav_reviews: "آراء الزبائن", nav_about: "من نحن", nav_contact: "اتصل بنا",
+        trust_delivery: "توصيل سريع", trust_secure: "دفع آمن عند الاستلام", trust_return: "إرجاع واستبدال 7 أيام", trust_support: "دعم فني 7/7",
+        hero_badge: "✦ تشكيلة جديدة 2026", hero_title: "اكتشف مجموعتنا الجديدة", hero_subtitle: "تصميم عصري وجودة استثنائية", hero_btn_buy: "تسوق الآن", hero_btn_about: "قصتنا ←",
         products_title: "منتجاتنا", category_all: "الكل",
         about_title: "عن ICOSIUM",
-        about_history_text: "في عام 140 قبل الميلاد، أسس الفينيقيون مدينة إيكوسيم (Ikosim) في شمال أفريقيا. ومنذ ذلك الحين، تعاقبت العصور وتغير الناس وتبدلت حتى ملامح المكان، إلا أن روح المكان ظلت حاضرة. تُعد إيكوسيوم (ICOSIUM) علامة تجارية جزائرية جديدة للملابس العصرية المريحة (الكاجوال)، تسعى لإحداث ثورة في عالم الأزياء؛ فهي تستلهم جوهرها من التراث العريق وتمتزج برؤية معاصرة، لتعيد إحياء روح الماضي في عالم اليوم من خلال أفكار مبتكرة وتصاميم مميزة. تخاطب علامتنا التجارية مجتمعاً محدداً يشاركنا قيمنا وإبداعنا وطموحاتنا.",
+        about_history_text: "في عام 140 قبل الميلاد، أسس الفينيقيون مدينة إيكوسيم(Ikosim) في شمال أفريقيا. ومنذ ذلك الحين، تعاقبت العصور وتغير الناس وتبدلت حتى ملامح المكان، إلا أن روح المكان ظلت حاضرة. تُعد إيكوسيوم (ICOSIUM) علامة تجارية جزائرية جديدة للملابس العصرية المريحة (الكاجوال)، تسعى لإحداث ثورة في عالم الأزياء؛ فهي تستلهم جوهرها من التراث العريق وتمتزج برؤية معاصرة، لتعيد إحياء روح الماضي في عالم اليوم من خلال أفكار مبتكرة وتصاميم مميزة. تخاطب علامتنا التجارية مجتمعاً محدداً يشاركنا قيمنا وإبداعنا وطموحاتنا.",
         about_why_title: "لماذا تختار ICOSIUM؟",
         about_why_text: "لأن ما ترتديه يجب أن يحمل معنى. في ICOSIUM، كل قطعة تحكي قصة أرض وثقافة وجيل لا يخشى التميز.",
         reviews_title: "آراء الزبائن", btn_write_review: "أكتب رأيك", review_form_title: "شاركنا تجربتك",
-        contact_title: "تواصل معنا", contact_message_title: "راسلنا مباشرة", contact_send: "إرسال",
+        contact_title: "تواصل معنا", contact_message_title: "راسلنا مباشرة", contact_send: "إرسال", contact_connect_title: "ابقَ على تواصل",
         cart_title: "السلة", cart_total: "الإجمالي", checkout_title: "إتمام الطلب",
-        form_name: "الاسم", form_phone: "الهاتف", form_address: "العنوان", delivery_fee: "التوصيل", form_confirm: "تأكيد",
-        alert_color: "يرجى اختيار اللون", alert_size: "يرجى اختيار المقاس", alert_added: "تمت الإضافة للسلة بنجاح!", alert_order_success: "تم إرسال طلبك بنجاح! شكراً لثقتكم.",
-        colors: "الألوان:", sizes: "المقاسات:", search_placeholder: "ابحث عن منتج..."
+        form_name: "الاسم الكامل:", form_city: "المدينة:", form_review: "تقييمك:", form_phone: "الهاتف:", form_address: "العنوان:", delivery_fee: "التوصيل:", form_confirm: "تأكيد الطلب",
+        btn_details: "التفاصيل", btn_add_cart: "إضافة إلى السلة", btn_soon: "قريباً",
+        cs_title: "قريباً في المتجر", cs_desc: "هذا المنتج قيد التجهيز وسيكون متاحاً للطلب قريباً.",
+        modal_delivery: "توصيل 48 ساعة", modal_return: "إرجاع 7 أيام", modal_secure: "دفع آمن",
+        alert_color: "يرجى اختيار اللون", alert_size: "يرجى اختيار المقاس", alert_rating: "يرجى تقييم المنتج باختيار النجوم", alert_added: "تمت الإضافة للسلة بنجاح!", alert_order_success: "تم إرسال طلبك بنجاح! شكراً لثقتكم.", alert_review_success: "شكراً لمشاركتنا رأيك!",
+        colors: "الألوان:", sizes: "المقاسات:", quantity: "الكمية", search_placeholder: "ابحث عن منتج...",
+        footer_rights: "جميع الحقوق محفوظة."
     },
     fr: {
         out_of_stock: "Rupture de stock",
-        nav_home: "Accueil", nav_category: "Catégorie", nav_trend: "Tendance", nav_about: "À Propos", nav_contact: "Contact",
-        hero_title: "Découvrez notre nouvelle collection", hero_subtitle: "Design moderne, qualité supérieure",
+        nav_home: "Accueil", nav_category: "Catégorie", nav_promos: "Promotions", nav_reviews: "Avis", nav_about: "À Propos", nav_contact: "Contact",
+        trust_delivery: "Livraison rapide", trust_secure: "Paiement sécurisé", trust_return: "Retour 7 jours", trust_support: "Support client 7j/7",
+        hero_badge: "✦ Nouvelle Collection 2026", hero_title: "Découvrez notre nouvelle collection", hero_subtitle: "Design moderne, qualité supérieure", hero_btn_buy: "Acheter maintenant", hero_btn_about: "Notre histoire →",
         products_title: "Nos Produits", category_all: "Tout",
         about_title: "À propos d'ICOSIUM",
-        about_history_text: "En 140 av. J.-C., les Phéniciens fondaient Ikosim en Afrique du Nord. Depuis, le temps a passé, les gens ont changé et le paysage lui-même s'est transformé ; pourtant, l'esprit du lieu demeure. ICOSIUM est une nouvelle marque algérienne de prêt-à-porter décontracté qui aspire à révolutionner l'univers de l'habillement. Puisant son inspiration dans un héritage ancestral tout en s'inscrivant dans une vision moderne, elle insuffle cet esprit d'autrefois au monde d'aujourd'hui grâce à des idées originales et des créations uniques. Notre marque s'adresse à une communauté bien précise qui partage nos valeurs, notre créativité et nos ambitions.",
+        about_history_text: "En 140 av. J.-C., les Phéniciens fondèrent Ikosim en Afrique du Nord. Depuis, le temps a passé, les gens ont changé et le paysage lui-même s'est transformé ; pourtant, l'esprit du lieu demeure. ICOSIUM est une nouvelle marque algérienne de prêt-à-porter décontracté qui aspire à révolutionner l'univers de l'habillement. Puisant son inspiration dans un héritage ancestral tout en s'inscrivant dans une vision moderne, elle insuffle cet esprit d'autrefois au monde d'aujourd'hui grâce à des idées originales et des créations uniques. Notre marque s'adresse à une communauté bien précise qui partage nos valeurs, notre créativité et nos ambitions.",
         about_why_title: "Pourquoi choisir ICOSIUM",
         about_why_text: "Parce que ce que vous portez doit avoir du sens. Chez ICOSIUM, chaque pièce raconte une histoire — celle d'une terre, d'une culture et d'une génération qui n'a pas peur de se démarquer.",
         reviews_title: "Avis Clients", btn_write_review: "Écrire un avis", review_form_title: "Partagez votre avis",
-        contact_title: "Contact", contact_message_title: "Contactez-nous directement", contact_send: "Envoyer",
+        contact_title: "Contact", contact_message_title: "Contactez-nous directement", contact_send: "Envoyer", contact_connect_title: "Restons Connectés",
         cart_title: "Votre Panier", cart_total: "Total", checkout_title: "Commander",
-        form_name: "Nom", form_phone: "Tél", form_address: "Adresse", delivery_fee: "Livraison", form_confirm: "Confirmer",
-        alert_color: "Veuillez choisir une couleur", alert_size: "Veuillez choisir une taille", alert_added: "Ajouté au panier !", alert_order_success: "Commande envoyée avec succès !",
-        colors: "Couleurs:", sizes: "Tailles:", search_placeholder: "Rechercher..."
+        form_name: "Nom Complet:", form_city: "Ville:", form_review: "Avis:", form_phone: "Tél:", form_address: "Adresse:", delivery_fee: "Livraison:", form_confirm: "Confirmer la commande",
+        btn_details: "Détails", btn_add_cart: "Ajouter au panier", btn_soon: "Bientôt",
+        cs_title: "Bientôt Disponible", cs_desc: "Ce produit n'est pas encore disponible à la vente.",
+        modal_delivery: "Livraison 48h", modal_return: "Retour 7j", modal_secure: "Sécurisé",
+        alert_color: "Veuillez choisir une couleur", alert_size: "Veuillez choisir une taille", alert_rating: "Veuillez attribuer une note avec les étoiles", alert_added: "Ajouté au panier !", alert_order_success: "Commande envoyée avec succès !", alert_review_success: "Merci pour votre avis !",
+        colors: "Couleurs:", sizes: "Tailles:", quantity: "Quantité", search_placeholder: "Rechercher...",
+        footer_rights: "Tous droits réservés."
     },
     en: {
         out_of_stock: "Out of Stock",
-        nav_home: "Home", nav_category: "Category", nav_trend: "Trend", nav_about: "About", nav_contact: "Contact",
-        hero_title: "Discover our new collection", hero_subtitle: "Modern design, premium quality",
+        nav_home: "Home", nav_category: "Category", nav_promos: "Promotions", nav_reviews: "Reviews", nav_about: "About", nav_contact: "Contact",
+        trust_delivery: "Fast delivery", trust_secure: "Secure payment", trust_return: "7-day return", trust_support: "24/7 support",
+        hero_badge: "✦ New Collection 2026", hero_title: "Discover our new collection", hero_subtitle: "Modern design, premium quality", hero_btn_buy: "Shop now", hero_btn_about: "Our story →",
         products_title: "Our Products", category_all: "All",
         about_title: "About ICOSIUM",
         about_history_text: "In 140 B.C.E., the Phoenicians founded Ikosim in North Africa. Since then, time has passed, people have changed, and even the landscape has transformed — yet the spirit of the place remains.     ICOSIUM is a new Algerian casual-wear brand that seeks to revolutionize the world of clothing. Inspired by ancient heritage and infused with modern vision, it brings an old spirit into today’s world through original ideas and distinctive designs. Our brand speaks to a specific community that shares our values, creativity, and ambitions.",
         about_why_title: "Why Choose ICOSIUM",
         about_why_text: "Because what you wear should mean something. At ICOSIUM, every piece tells a story — built for those who value identity over trend.",
         reviews_title: "Customer Reviews", btn_write_review: "Write Review", review_form_title: "Share your experience",
-        contact_title: "Contact", contact_message_title: "Contact us directly", contact_send: "Send",
+        contact_title: "Contact", contact_message_title: "Contact us directly", contact_send: "Send", contact_connect_title: "Stay Connected",
         cart_title: "Your Cart", cart_total: "Total", checkout_title: "Checkout",
-        form_name: "Name", form_phone: "Phone", form_address: "Address", delivery_fee: "Delivery", form_confirm: "Confirm",
-        alert_color: "Please select a color", alert_size: "Please select a size", alert_added: "Added to cart!", alert_order_success: "Order placed successfully!",
-        colors: "Colors:", sizes: "Sizes:", search_placeholder: "Search..."
+        form_name: "Full Name:", form_city: "City:", form_review: "Review:", form_phone: "Phone:", form_address: "Address:", delivery_fee: "Delivery:", form_confirm: "Confirm Order",
+        btn_details: "Details", btn_add_cart: "Add to cart", btn_soon: "Coming Soon",
+        cs_title: "Coming Soon", cs_desc: "This product is not yet available for sale.",
+        modal_delivery: "48h Delivery", modal_return: "7-day Return", modal_secure: "Secured",
+        alert_color: "Please select a color", alert_size: "Please select a size", alert_rating: "Please select a star rating", alert_added: "Added to cart!", alert_order_success: "Order placed successfully!", alert_review_success: "Thank you for your review!",
+        colors: "Colors:", sizes: "Sizes:", quantity: "Quantity", search_placeholder: "Search...",
+        footer_rights: "All rights reserved."
     }
 };
 
@@ -87,7 +100,7 @@ const wilayasData = [
     { id: 58, name: "In Guezzam", price: 1600 }
 ];
 
-// ─── 2. إدارة وتخزين السلة (localStorage) ───
+// ─── إدارة السلة ───
 function loadCartFromStorage() {
     try {
         const saved = localStorage.getItem('icosium_cart');
@@ -113,7 +126,6 @@ function updateCartCountHeader() {
 
 function addToCart(item) {
     loadCartFromStorage();
-    // إذا كان نفس المنتج ونفس المقاس واللون موجودين مسبقاً، نزيد الكمية
     const existingIndex = cart.findIndex(c => c.id === item.id);
     if (existingIndex > -1) {
         cart[existingIndex].qty += item.qty;
@@ -133,16 +145,16 @@ function removeFromCart(index) {
     }
 }
 
-// ─── 3. فحص Coming Soon ───
+// ─── فحص Coming Soon ───
 function checkIsComingSoon(product) {
     if (!product.is_coming_soon) return false;
-    if (!product.available_at) return true; // مفعل وبدون تاريخ يبقى قريباً
+    if (!product.available_at) return true;
     const now = new Date();
     const target = new Date(product.available_at);
-    return target > now; // يصبح متاحاً إذا وصل التاريخ
+    return target > now;
 }
 
-// ─── 4. تحميل المنتجات والبيانات ───
+// ─── جلب البيانات ───
 async function loadInitialData() {
     await getCategories();
     await getProducts();
@@ -211,7 +223,10 @@ async function getReviews() {
     const container = document.querySelector('.reviews-container');
     if (!container) return;
     const { data: reviews } = await supabaseClient.from('reviews').select('*').eq('is_approved', true).order('created_at', { ascending: false });
-    if (!reviews || !reviews.length) return;
+    if (!reviews || !reviews.length) {
+        container.innerHTML = '<p style="text-align:center; grid-column:1/-1; color:var(--color-text-muted);">Aucun avis pour le moment.</p>';
+        return;
+    }
 
     container.innerHTML = reviews.map(r => {
         let stars = '';
@@ -228,35 +243,36 @@ async function getReviews() {
     }).join('');
 }
 
-// ─── 5. رسم كروت المنتجات ───
+// ─── رسم كروت المنتجات ───
 function renderProducts(products) {
     const grid = document.getElementById('products-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
     if (!products.length) {
-        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-muted);">Aucun produit disponible pour le moment.</p>';
+        grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--color-text-muted);">Aucun produit disponible.</p>';
         return;
     }
+
+    const t = translations[currentLanguage];
 
     products.forEach(p => {
         const isOutOfStock = p.stock <= 0;
         const isComingSoon = checkIsComingSoon(p);
-        const outOfStockText = translations[currentLanguage].out_of_stock;
 
         const card = document.createElement('div');
         card.className = `product-card ${isOutOfStock ? 'out-of-stock' : ''} ${isComingSoon ? 'is-coming-soon' : ''}`;
 
         card.innerHTML = `
-            ${isComingSoon ? '<span class="card-cs-tag">COMING SOON</span>' : (isOutOfStock ? `<div class="out-of-stock-badge">${outOfStockText}</div>` : '')}
+            ${isComingSoon ? '<span class="card-cs-tag">COMING SOON</span>' : (isOutOfStock ? `<div class="out-of-stock-badge">${t.out_of_stock}</div>` : '')}
             <img src="${p.image_url || 'images/logo3.png'}" class="${isComingSoon ? 'is-coming-soon-blur' : ''}" alt="${p.name}">
             <div class="product-details">
                 <h3 class="product-name">${p.name}</h3>
-                <p class="product-price">${isComingSoon ? 'Bientôt disponible' : p.price + ' DZD'}</p>
+                <p class="product-price">${isComingSoon ? (t.cs_title || 'Bientôt') : p.price + ' DZD'}</p>
                 <div class="product-actions">
-                    <button class="details-btn">Détails</button>
+                    <button class="details-btn">${t.btn_details}</button>
                     <button class="add-to-cart-btn" ${isOutOfStock || isComingSoon ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
-                        ${isComingSoon ? 'Bientôt' : (isOutOfStock ? outOfStockText : 'Ajouter')}
+                        ${isComingSoon ? t.btn_soon : (isOutOfStock ? t.out_of_stock : t.btn_add_cart)}
                     </button>
                 </div>
             </div>
@@ -276,7 +292,7 @@ function filterProducts(catId) {
     renderProducts(catId === 'all' ? allProducts : allProducts.filter(p => p.category_id == catId));
 }
 
-// ─── 6. تفاصيل المنتج المنبثقة (MODAL) ───
+// ─── نافذة التفاصيل (MODAL) ───
 let countdownInterval = null;
 
 function openDetails(p) {
@@ -287,6 +303,7 @@ function openDetails(p) {
     const imageContainer = modal.querySelector('.modal-image-container');
     const infoContainer = modal.querySelector('.modal-info-container');
     const countdownEl = document.getElementById('cs-countdown');
+    const t = translations[currentLanguage];
 
     if (countdownInterval) clearInterval(countdownInterval);
 
@@ -318,7 +335,7 @@ function openDetails(p) {
                 const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                 const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
-                countdownEl.textContent = `Disponible dans: ${days}j ${hours}h ${mins}m ${secs}s`;
+                countdownEl.textContent = `${days}j ${hours}h ${mins}m ${secs}s`;
             };
             updateTimer();
             countdownInterval = setInterval(updateTimer, 1000);
@@ -357,20 +374,19 @@ function openDetails(p) {
 
         let html = '';
         if (availableColors.length > 0) {
-            html += `<div class="modal-opts-group"><label>${translations[currentLanguage].colors}</label><div class="product-colors" style="display:flex; gap:8px; flex-wrap:wrap;">`
+            html += `<div class="modal-opts-group"><label>${t.colors}</label><div class="product-colors" style="display:flex; gap:8px; flex-wrap:wrap;">`
                 + availableColors.map(c => `<span class="color-box" data-val="${c}" style="border:1.5px solid var(--color-border); padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:600;">${c}</span>`).join('')
                 + '</div></div>';
         }
         if (availableSizes.length > 0) {
-            html += `<div class="modal-opts-group" style="margin-top:12px;"><label>${translations[currentLanguage].sizes}</label><div class="product-sizes" style="display:flex; gap:8px; flex-wrap:wrap;">`
+            html += `<div class="modal-opts-group" style="margin-top:12px;"><label>${t.sizes}</label><div class="product-sizes" style="display:flex; gap:8px; flex-wrap:wrap;">`
                 + availableSizes.map(s => `<span class="size-box" data-val="${s}" style="border:1.5px solid var(--color-border); padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:600;">${s}</span>`).join('')
                 + '</div></div>';
         }
 
-        // اختيار الكمية
         html += `
             <div class="modal-opts-group" style="margin-top:14px;">
-                <label>Quantité</label>
+                <label>${t.quantity}</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <button type="button" id="qty-minus" style="width:36px; height:36px; border:1px solid var(--color-border); background:var(--color-bg); border-radius:8px; cursor:pointer; font-weight:bold;">-</button>
                     <input type="number" id="modal-product-qty" value="1" min="1" max="50" style="width:60px; height:36px; text-align:center; border:1px solid var(--color-border); border-radius:8px; background:var(--color-bg); color:var(--color-text); font-weight:bold;">
@@ -412,14 +428,14 @@ function openDetails(p) {
         if (isComingSoon) {
             newCartBtn.disabled = true;
             newCartBtn.style.opacity = '0.5';
-            newCartBtn.textContent = "Bientôt disponible";
+            newCartBtn.textContent = t.btn_soon;
         } else {
             newCartBtn.disabled = false;
             newCartBtn.style.opacity = '1';
-            newCartBtn.innerHTML = '<i class="fas fa-shopping-cart"></i> Ajouter au panier';
+            newCartBtn.innerHTML = `<i class="fas fa-shopping-cart"></i> ${t.btn_add_cart}`;
             newCartBtn.addEventListener('click', () => {
-                if (availableColors.length > 0 && !selColor) return alert(translations[currentLanguage].alert_color);
-                if (availableSizes.length > 0 && !selSize) return alert(translations[currentLanguage].alert_size);
+                if (availableColors.length > 0 && !selColor) return alert(t.alert_color);
+                if (availableSizes.length > 0 && !selSize) return alert(t.alert_size);
 
                 const quantity = parseInt(qtyInput?.value, 10) || 1;
                 addToCart({
@@ -440,7 +456,7 @@ function openDetails(p) {
     modal.style.display = 'block';
 }
 
-// ─── 7. صفحة السلة (CART.HTML) والولايات ───
+// ─── صفحة السلة ───
 function populateWilayas() {
     const wilayaSelect = document.getElementById('checkout-wilaya');
     if (!wilayaSelect) return;
@@ -504,7 +520,7 @@ function calcFinalTotalPage() {
     finalDisplay.textContent = subtotal + fee;
 }
 
-// ─── 8. إعدادات الثيم واللغة والتشغيل عند التحميل ───
+// ─── إدارة اللغات والثيم ───
 function setLanguage(lang) {
     currentLanguage = lang;
     localStorage.setItem('icosium_lang', lang);
@@ -513,11 +529,22 @@ function setLanguage(lang) {
 
     document.querySelectorAll('[data-key]').forEach(el => {
         const k = el.getAttribute('data-key');
-        if (translations[lang][k]) el.textContent = translations[lang][k];
+        if (translations[lang] && translations[lang][k]) {
+            el.textContent = translations[lang][k];
+        }
     });
+
+    const searchInput = document.getElementById('search-input');
+    if (searchInput && translations[lang]?.search_placeholder) {
+        searchInput.placeholder = translations[lang].search_placeholder;
+    }
 
     const langSelect = document.getElementById('language-switcher');
     if (langSelect) langSelect.value = lang;
+
+    if (allProducts.length > 0) {
+        renderProducts(allProducts);
+    }
 }
 
 function applyTheme(theme) {
@@ -538,16 +565,14 @@ function toggleTheme() {
     applyTheme(newTheme);
 }
 
-// ─── 9. البدء والتنفيذ ───
+// ─── التهيئة عند تحميل الصفحة ───
 document.addEventListener('DOMContentLoaded', () => {
     loadCartFromStorage();
 
-    // فحص ما إذا كنا في صفحة cart.html أو index.html
     if (window.location.pathname.includes('cart.html')) {
         populateWilayas();
         renderCartPage();
 
-        // إرسال الطلب إلى قاعدة البيانات
         const form = document.getElementById('checkout-form-page');
         if (form) {
             form.addEventListener('submit', async (e) => {
@@ -590,7 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadInitialData();
     }
 
-    // زر السلة العلوي: توجيه مباشر دائماً إلى cart.html
+    // زر السلة العلوي
     const cartButton = document.getElementById('cart-button');
     if (cartButton) {
         cartButton.addEventListener('click', (e) => {
@@ -599,7 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // زر الثيم واللغة
+    // زر تبديل اللغة والثيم
     document.getElementById('dark-mode-toggle')?.addEventListener('click', toggleTheme);
     document.getElementById('language-switcher')?.addEventListener('change', e => setLanguage(e.target.value));
 
@@ -615,7 +640,63 @@ document.addEventListener('DOMContentLoaded', () => {
         searchBtn?.addEventListener('click', doSearch);
     }
 
-    // إغلاق النوافذ المنبثقة
+    // 💡 تفعيل زر آراء الزبائن (فتح المودال وتقييم النجوم وإرسال التقييم) 💡
+    const openReviewBtn = document.getElementById('open-review-modal-btn');
+    const reviewModal = document.getElementById('review-modal');
+    if (openReviewBtn && reviewModal) {
+        openReviewBtn.addEventListener('click', () => {
+            reviewModal.style.display = 'block';
+        });
+    }
+
+    // تقييم النجوم
+    const stars = document.querySelectorAll('.star-input');
+    let currentRating = 0;
+    if (stars.length > 0) {
+        stars.forEach(s => s.addEventListener('click', () => {
+            currentRating = parseInt(s.dataset.value, 10);
+            const valInput = document.getElementById('rating-value');
+            if (valInput) valInput.value = currentRating;
+            const ratingTxt = document.getElementById('rating-text');
+            if (ratingTxt) ratingTxt.textContent = `${currentRating}/5`;
+            stars.forEach(st => {
+                const val = parseInt(st.dataset.value, 10);
+                st.querySelector('i').className = val <= currentRating ? 'fas fa-star' : 'far fa-star';
+            });
+        }));
+    }
+
+    // إرسال التقييم
+    const reviewForm = document.getElementById('add-review-form');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const ratingVal = document.getElementById('rating-value')?.value;
+            if (!ratingVal || ratingVal === '0') {
+                return alert(translations[currentLanguage]?.alert_rating || 'Veuillez sélectionner une note.');
+            }
+
+            const data = {
+                reviewer_name: document.getElementById('review-name').value.trim(),
+                reviewer_location: document.getElementById('review-location').value.trim(),
+                review_text: document.getElementById('review-text').value.trim(),
+                rating: parseInt(ratingVal, 10),
+                is_approved: true
+            };
+
+            const { error } = await supabaseClient.from('reviews').insert([data]);
+            if (!error) {
+                alert(translations[currentLanguage]?.alert_review_success || "Merci pour votre avis !");
+                reviewForm.reset();
+                if (reviewModal) reviewModal.style.display = 'none';
+                getReviews();
+            } else {
+                alert("Erreur lors de l'envoi de l'avis.");
+            }
+        });
+    }
+
+    // إغلاق النوافذ
     document.querySelectorAll('.close-btn').forEach(b => b.addEventListener('click', e => e.target.closest('.modal').style.display = 'none'));
     window.onclick = e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
 
@@ -627,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('close-nav-btn')?.addEventListener('click', closeMenu);
     overlay?.addEventListener('click', closeMenu);
 
-    // زر Scroll to products
+    // زر النزول للمنتجات
     document.getElementById('scroll-to-products')?.addEventListener('click', () => {
         document.getElementById('products-section')?.scrollIntoView({ behavior: 'smooth' });
     });
