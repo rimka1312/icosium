@@ -3853,7 +3853,7 @@ async function deleteCoupon(id) {
   toast('Coupon supprimé.'); 
   await loadAll(); 
 }
-/* ─── REVIEWS (مصححة ومفعلة بالكامل) ─── */
+/* ─── REVIEWS ─── */
 function renderReviews(reviews) {
   const el = document.getElementById('reviews-list');
   if (!el) return;
@@ -3880,8 +3880,8 @@ function renderReviews(reviews) {
         <div style="display:flex; flex-direction:column; align-items:flex-end;">
           <div class="stars">${'★'.repeat(r.rating || 0)}${'☆'.repeat(Math.max(0, 5 - (r.rating || 0)))}</div>
           <div style="display:flex; gap:7px; margin-top:10px;">
-            ${!r.is_approved ? `<button type="button" class="btn btn-accent btn-sm" onclick="approveReview(${r.id})"><i class="fas fa-check"></i> Approuver</button>` : ''}
-            <button type="button" class="btn btn-danger btn-sm" onclick="deleteReview(${r.id})" title="Supprimer cet avis"><i class="fas fa-trash"></i></button>
+            ${!r.is_approved ? `<button type="button" class="btn btn-accent btn-sm" onclick="window.approveReview(${r.id})"><i class="fas fa-check"></i> Approuver</button>` : ''}
+            <button type="button" class="btn btn-danger btn-sm" onclick="window.deleteReview(${r.id})" title="Supprimer cet avis"><i class="fas fa-trash"></i></button>
           </div>
         </div>
       </div>
@@ -3906,36 +3906,43 @@ function filterReviews(f, btn) {
   renderReviews(allReviews);
 }
 
-// دالة تأكيد ونشر الرأي
-async function approveReview(id) {
+// 💡 دالة تأكيد الرأي (مربوطة بـ window ومحمية)
+window.approveReview = async function(id) {
   try {
-    const { error } = await dbFrom('reviews').update({ is_approved: true }).eq('id', id);
+    const { data, error } = await dbFrom('reviews')
+      .update({ is_approved: true })
+      .eq('id', id)
+      .select();
+
     if (error) throw error;
-    
+
     toast('Avis approuvé avec succès !', 'ok');
     logAudit('system', `Avis #${id} approuvé`, 'system');
     await loadAll();
   } catch (err) {
     console.error("Erreur approveReview:", err);
-    toast("Erreur lors de l'approbation: " + err.message, 'err');
+    toast("Erreur: " + (err.message || "Impossible d'approuver"), 'err');
   }
-}
+};
 
-// دالة حذف الرأي نهائياً
-async function deleteReview(id) {
+// 💡 دالة حذف الرأي نهائياً (مربوطة بـ window ومحمية)
+window.deleteReview = async function(id) {
   if (!confirm('Voulez-vous vraiment supprimer cet avis ?')) return;
   try {
-    const { error } = await dbFrom('reviews').delete().eq('id', id);
+    const { error } = await dbFrom('reviews')
+      .delete()
+      .eq('id', id);
+
     if (error) throw error;
-    
-    toast('Avis supprimé !', 'ok');
+
+    toast('Avis supprimé définitivement !', 'ok');
     logAudit('system', `Avis #${id} supprimé`, 'system');
     await loadAll();
   } catch (err) {
     console.error("Erreur deleteReview:", err);
-    toast("Erreur lors de la suppression: " + err.message, 'err');
+    toast("Erreur: " + (err.message || "Impossible de supprimer"), 'err');
   }
-}
+};
 
 /* ─── STOCK ─── */
 function renderStock(movements) {
