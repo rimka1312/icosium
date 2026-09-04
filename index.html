@@ -28,8 +28,8 @@
                     <button class="dropbtn" data-key="nav_category">Catégorie <i class="fas fa-chevron-down"></i></button>
                     <div class="dropdown-content"></div>
                 </div>
-                <a href="#promotions-section">Promotions</a>
-                <a href="#" data-key="nav_trend">Avis</a>
+                <a href="#promotions-section" data-key="nav_promos">Promotions</a>
+                <a href="#reviews-section" data-key="nav_reviews">Avis</a>
                 <a href="#about-section" data-key="nav_about">À Propos</a>
                 <a href="#contact-section" data-key="nav_contact">Contact</a>
             </nav>
@@ -39,7 +39,7 @@
                     <input type="text" id="search-input" placeholder="Rechercher...">
                     <button id="search-button"><i class="fas fa-search"></i></button>
                 </div>
-                <button href="cart.html" id="cart-button"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></button>
+                <button id="cart-button"><i class="fas fa-shopping-cart"></i> <span id="cart-count">0</span></button>
                 <button id="profile-button"><i class="fas fa-user"></i></button>
                 <button id="dark-mode-toggle"><i class="fas fa-moon"></i></button>
                 <select id="language-switcher">
@@ -56,19 +56,19 @@
         <div class="trust-bar-inner">
             <div class="trust-item">
                 <i class="fas fa-shipping-fast"></i>
-                <span>Livraison rapide</span>
+                <span data-key="trust_delivery">Livraison rapide</span>
             </div>
             <div class="trust-item">
                 <i class="fas fa-lock"></i>
-                <span>Paiement sécurisé</span>
+                <span data-key="trust_secure">Paiement à la livraison</span>
             </div>
             <div class="trust-item">
                 <i class="fas fa-undo-alt"></i>
-                <span>Retour 7 jours</span>
+                <span data-key="trust_return">Retour 7 jours</span>
             </div>
             <div class="trust-item">
                 <i class="fas fa-headset"></i>
-                <span>Support client 7j/7</span>
+                <span data-key="trust_support">Support client 7j/7</span>
             </div>
         </div>
     </div>
@@ -77,33 +77,28 @@
         <!-- HERO -->
         <section id="explore-section" class="hero-section">
             <div class="hero-content">
-                <span class="hero-badge">✦ Nouvelle Collection 2026</span>
+                <span class="hero-badge" data-key="hero_badge">✦ Nouvelle Collection 2026</span>
                 <h1 data-key="hero_title">Découvrez notre<br>nouvelle collection</h1>
                 <p data-key="hero_subtitle">Design moderne, qualité supérieure</p>
                 <div class="hero-actions">
-                    <button id="scroll-to-products" class="btn-primary-hero">Acheter maintenant</button>
-                    <a href="#about-section" class="btn-ghost-hero">Notre histoire →</a>
+                    <button id="scroll-to-products" class="btn-primary-hero" data-key="hero_btn_buy">Acheter maintenant</button>
+                    <a href="#about-section" class="btn-ghost-hero" data-key="hero_btn_about">Notre histoire →</a>
                 </div>
             </div>
-          
         </section>
-
-        <!-- PROMO BANNER SECTION -->
-           
 
         <!-- PRODUCTS -->
         <section id="products-section" class="container">
           <div class="section-header-row">
-    <h2 data-key="products_title" class="section-title">Nos Produits</h2>
-
-    <div class="cbn-sticker-side">
-        <div class="scotch-tape"></div>
-        <img src="casual-by-nature.png" alt="Casual" class="sticker-img">
-    </div>
-</div>
+            <h2 data-key="products_title" class="section-title">Nos Produits</h2>
+            <div class="cbn-sticker-side">
+                <div class="scotch-tape"></div>
+                <img src="casual-by-nature.png" alt="Casual" class="sticker-img">
+            </div>
+          </div>
             
-            <div id="categories-filter"></div>
-            <div id="products-grid"></div>
+          <div id="categories-filter"></div>
+          <div id="products-grid"></div>
         </section>
 
         <!-- ABOUT -->
@@ -125,7 +120,7 @@
         <section id="reviews-section" class="container">
             <div class="section-header-wrapper" style="text-align:center;margin-bottom:30px;">
                 <h2 data-key="reviews_title" class="section-title">Avis Clients</h2>
-                <button id="open-review-modal-btn" class="add-review-btn" data-key="btn_write_review">Écrire un avis</button>
+                <button id="open-review-modal-btn" class="add-review-btn" type="button" data-key="btn_write_review">Écrire un avis</button>
             </div>
             <div class="reviews-container"></div>
         </section>
@@ -154,116 +149,55 @@
                     </form>
                 </div>
                 <div class="contact-info-box">
-                    <h3>Restons Connectés</h3>
+                    <h3 data-key="contact_connect_title">Restons Connectés</h3>
                     <div class="direct-info">
                         <div class="info-row">
                             <span class="icon-box gmail-icon"><i class="fas fa-envelope"></i></span>
                             <p>icosiumcasual@gmail.com</p>
                         </div>
-                      
                     </div>
                     <div class="social-buttons-grid">
                         <a href="https://www.instagram.com/icosium.casual?igsh=bHhsaXo3eGhvc3F3&utm_source=qr" target="_blank" class="social-btn insta"><i class="fab fa-instagram"></i> <span>Instagram</span></a>
-<a href="https://wa.me/213780331979" target="_blank" class="social-btn whatsapp">
-    <i class="fab fa-whatsapp"></i> 
-    <span>WhatsApp</span>
-</a>                        <a href="https://www.facebook.com/share/1CUkYNfPxB/" target="_blank" class="social-btn facebook"><i class="fab fa-facebook-f"></i> <span>Facebook</span></a>
+                        <a href="https://wa.me/213780331979" target="_blank" class="social-btn whatsapp"><i class="fab fa-whatsapp"></i> <span>WhatsApp</span></a>
+                        <a href="https://www.facebook.com/share/1CUkYNfPxB/" target="_blank" class="social-btn facebook"><i class="fab fa-facebook-f"></i> <span>Facebook</span></a>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- CART MODAL -->
-    <div id="cart-modal" class="modal">
-        <div class="modal-content cart-modal-content">
-            <span class="close-btn" id="close-cart-modal">&times;</span>
-            <div class="cart-modal-header">
-                <h2 data-key="cart_title"><i class="fas fa-shopping-cart"></i> Votre Panier</h2>
-                <span class="cart-item-count-badge" id="cart-header-count">0 article(s)</span>
-            </div>
-            <div id="cart-items-container"></div>
-            <div class="cart-summary">
-                <div class="cart-total-row">
-                    <span data-key="cart_total">Sous-total:</span>
-                    <span><strong id="cart-total-price">0</strong> DZD</span>
-                </div>
-                <hr>
-                <h3 data-key="checkout_title">Commander</h3>
-                <form id="checkout-form">
-                    <label data-key="form_name">Nom:</label>
-                    <input type="text" id="checkout-name" required>
-                    <label data-key="form_phone">Téléphone:</label>
-                    <input type="tel" id="checkout-phone" required>
-                    <label>Wilaya:</label>
-                    <select id="checkout-wilaya" required>
-                        <option value="" disabled selected>Choisir Wilaya</option>
-                    </select>
-                    <label data-key="form_address">Adresse:</label>
-                    <input type="text" id="checkout-address" required>
-                    <div class="cart-fee-row"><span data-key="delivery_fee">Livraison:</span> <span id="delivery-fee-display">0</span> DZD</div>
-                    <div class="cart-final-row"><strong>Total Final: <span id="final-total-price">0</span> DZD</strong></div>
-                    <button type="submit" id="checkout-submit-btn" data-key="form_confirm"><i class="fas fa-check-circle"></i> Confirmer la commande</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- PROFILE MODAL -->
-    <div id="profile-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" id="close-profile-modal">&times;</span>
-            <h2 data-key="profile_login">Connexion</h2>
-            <p>Prochainement...</p>
-        </div>
-    </div>
-
-  <!-- PRODUCT DETAILS MODAL (upgraded) -->
+    <!-- PRODUCT DETAILS MODAL -->
     <div id="product-details-modal" class="modal">
         <div class="modal-content product-modal-content">
             <span class="close-btn" id="close-product-details">&times;</span>
             
             <div class="modal-body" style="position: relative;">
-                
-                <!-- 💡 طبقة حجب Coming Soon للنافذة 💡 -->
                 <div id="modal-coming-soon-overlay" class="coming-soon-overlay" style="display: none;">
                     <div class="cs-badge">COMING SOON</div>
-                    <h3 class="cs-title">Bientôt Disponible</h3>
-                    <p class="cs-desc">Ce produit n'est pas encore disponible à la vente.</p>
+                    <h3 class="cs-title" data-key="cs_title">Bientôt Disponible</h3>
+                    <p class="cs-desc" data-key="cs_desc">Ce produit n'est pas encore disponible à la vente.</p>
                     <div id="cs-countdown" class="cs-timer"></div>
                 </div>
 
                 <div class="modal-image-container">
                     <img id="modal-product-image" src="" alt="Product Image">
-                    <div id="modal-product-badge" class="modal-badge" style="display:none;"></div>
                 </div>
                 <div class="modal-info-container">
-                    <div class="modal-product-meta">
-                        <span id="modal-product-category" class="modal-category-tag"></span>
-                        <div id="modal-product-stars" class="modal-stars"></div>
-                    </div>
                     <h2 id="modal-product-name"></h2>
                     <div class="modal-price-row">
                         <h3 id="modal-product-price" class="modal-price"></h3>
-                        <span id="modal-product-old-price" class="modal-old-price" style="display:none;"></span>
-                        <span id="modal-discount-tag" class="modal-discount-tag" style="display:none;"></span>
                     </div>
                     <p id="modal-product-desc" class="product-desc-text"></p>
                     <div id="modal-product-options"></div>
-                    <div class="modal-product-specs" id="modal-specs-section" style="display:none;">
-                        <h4><i class="fas fa-list-ul"></i> Caractéristiques</h4>
-                        <div id="modal-specs-list"></div>
-                    </div>
                     <div class="modal-actions">
                         <button id="modal-add-to-cart-btn" class="add-to-cart-btn btn-cart-modal">
-                            <i class="fas fa-shopping-cart"></i> Ajouter au panier
+                            <i class="fas fa-shopping-cart"></i> <span data-key="btn_add_cart">Ajouter au panier</span>
                         </button>
-                        <button class="btn-wishlist" title="Favoris"><i class="far fa-heart"></i></button>
                     </div>
                     <div class="modal-trust-mini">
-                        <span><i class="fas fa-shipping-fast"></i> Livraison 48h</span>
-                        <span><i class="fas fa-undo-alt"></i> Retour 7j</span>
-                        <span><i class="fas fa-lock"></i> Sécurisé</span>
+                        <span><i class="fas fa-shipping-fast"></i> <span data-key="modal_delivery">Livraison 48h</span></span>
+                        <span><i class="fas fa-undo-alt"></i> <span data-key="modal_return">Retour 7j</span></span>
+                        <span><i class="fas fa-lock"></i> <span data-key="modal_secure">Sécurisé</span></span>
                     </div>
                 </div>
             </div>
@@ -285,12 +219,18 @@
                     <input type="hidden" id="rating-value" required> 
                 </div>
                 <p id="rating-text" style="text-align:center;color:#888;">0/5</p>
-                <label data-key="contact_name">Nom:</label>
-                <input type="text" id="review-name" required>
-                <label>Ville:</label>
-                <input type="text" id="review-location">
-                <label data-key="contact_message">Avis:</label>
-                <textarea id="review-text" rows="4" required></textarea>
+                <div class="input-group">
+                    <label data-key="form_name">Nom:</label>
+                    <input type="text" id="review-name" required placeholder="Votre Nom">
+                </div>
+                <div class="input-group">
+                    <label data-key="form_city">Ville:</label>
+                    <input type="text" id="review-location" placeholder="Alger, Oran...">
+                </div>
+                <div class="input-group">
+                    <label data-key="form_review">Avis:</label>
+                    <textarea id="review-text" rows="4" required placeholder="Votre commentaire..."></textarea>
+                </div>
                 <button type="submit" class="add-to-cart-btn" data-key="contact_send">Envoyer</button>
             </form>
         </div>
@@ -299,12 +239,12 @@
     <footer class="main-footer">
         <div class="footer-content">
             <div class="footer-trust">
-                <span><i class="fas fa-shipping-fast"></i> Livraison rapide</span>
-                <span><i class="fas fa-lock"></i> Paiement sécurisé</span>
-                <span><i class="fas fa-undo-alt"></i> Retour 7 jours</span>
-                <span><i class="fas fa-headset"></i> Support 7j/7</span>
+                <span><i class="fas fa-shipping-fast"></i> <span data-key="trust_delivery">Livraison rapide</span></span>
+                <span><i class="fas fa-lock"></i> <span data-key="trust_secure">Paiement à la livraison</span></span>
+                <span><i class="fas fa-undo-alt"></i> <span data-key="trust_return">Retour 7 jours</span></span>
+                <span><i class="fas fa-headset"></i> <span data-key="trust_support">Support 7j/7</span></span>
             </div>
-            <p>&copy; 2026 <strong>ICOSIUM STORE</strong>. Tous droits réservés.</p>
+            <p>&copy; 2026 <strong>ICOSIUM STORE</strong>. <span data-key="footer_rights">Tous droits réservés.</span></p>
         </div>
     </footer>
 
