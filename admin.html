@@ -4355,6 +4355,12 @@ function renderGallery() {
       datePicker.classList.add('hidden');
     }
   });
+
+   async function approveReview(id) { 
+  await dbFrom('reviews').update({ is_approved: true }).eq('id', id); 
+  toast('Avis approuvé !'); 
+  await loadAll(); 
+}
 </script>
 </body>
 
