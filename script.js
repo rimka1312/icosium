@@ -717,7 +717,57 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+// ─── تفعيل إرسال رسائل اتصل بنا إلى الإيميل عبر EmailJS ───
+    (function() {
+        // ضع هنا مفتاحك العام Public Key من EmailJS
+        emailjs.init("pYILGoTMyWH89qbUy");
+    })();
 
+    const contactForm = document.getElementById('contact-form');
+    const contactStatus = document.getElementById('contact-status');
+    const contactBtn = document.getElementById('contact-submit-btn');
+
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            contactBtn.disabled = true;
+            const originalBtnText = contactBtn.textContent;
+            contactBtn.textContent = currentLanguage === 'ar' ? "جاري الإرسال..." : "Envoi en cours...";
+
+            const templateParams = {
+                name: document.getElementById('contact-name').value.trim(),
+                email: document.getElementById('contact-email').value.trim(),
+                message: document.getElementById('contact-message').value.trim()
+            };
+
+            // استبدل YOUR_SERVICE_ID و YOUR_TEMPLATE_ID بالأكواد الخاصة بك
+            emailjs.send('service_o6b7q2h', 'template_wfrqo0p', templateParams)
+                .then(function(response) {
+                    const successMsg = currentLanguage === 'ar' 
+                        ? "تم إرسال رسالتك بنجاح! سنرد عليك قريباً." 
+                        : (currentLanguage === 'en' 
+                            ? "Your message has been sent successfully!" 
+                            : "Votre message a été envoyé avec succès !");
+
+                    contactStatus.style.color = "var(--color-primary, #00c896)";
+                    contactStatus.textContent = successMsg;
+                    contactForm.reset();
+                }, function(error) {
+                    console.error('FAILED...', error);
+                    const errorMsg = currentLanguage === 'ar' 
+                        ? "حدث خطأ أثناء الإرسال. يرجى المحاولة لاحقاً." 
+                        : "Une erreur est survenue lors de l'envoi.";
+
+                    contactStatus.style.color = "#f87171";
+                    contactStatus.textContent = errorMsg;
+                })
+                .finally(function() {
+                    contactBtn.disabled = false;
+                    contactBtn.textContent = originalBtnText;
+                });
+        });
+    }
     // إغلاق النوافذ
     document.querySelectorAll('.close-btn').forEach(b => {
         b.addEventListener('click', (e) => {
