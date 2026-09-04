@@ -10,21 +10,22 @@ const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const translations = {
     ar: {
         out_of_stock: "نفاذ الكمية",
-        nav_home: "الرئيسية", nav_category: "الفئات", nav_promos: "تخفيضات", nav_reviews: "آراء الزبائن", nav_about: "من نحن", nav_contact: "اتصل بنا",
-        trust_delivery: "توصيل سريع", trust_secure: "دفع آمن عند الاستلام", trust_return: "إرجاع واستبدال 7 أيام", trust_support: "دعم فني 7/7",
-        hero_badge: "✦ تشكيلة جديدة 2026", hero_title: "اكتشف مجموعتنا الجديدة", hero_subtitle: "تصميم عصري وجودة استثنائية", hero_btn_buy: "تسوق الآن", hero_btn_about: "قصتنا ←",
+        nav_home: "الرئيسية", nav_category: "الفئات", nav_promos: "تخفيضات", nav_reviews: "الآراء", nav_about: "من نحن", nav_contact: "اتصل بنا",
+        trust_delivery: "توصيل سريع", trust_payment: "الدفع عند الاستلام", trust_return: "إرجاع 7 أيام", trust_support: "دعم العملاء 7j/7",
+        hero_badge: "✦ تشكيلة جديدة 2026", hero_title: "اكتشف مجموعتنا الجديدة", hero_subtitle: "تصميم عصري، جودة استثنائية", hero_buy: "اشتري الآن", hero_story: "قصتنا ←",
         products_title: "منتجاتنا", category_all: "الكل",
         about_title: "عن ICOSIUM",
-        about_history_text: "في عام 140 قبل الميلاد، أسس الفينيقيون مدينة إيكوسيم(Ikosim) في شمال أفريقيا. ومنذ ذلك الحين، تعاقبت العصور وتغير الناس وتبدلت حتى ملامح المكان، إلا أن روح المكان ظلت حاضرة. تُعد إيكوسيوم (ICOSIUM) علامة تجارية جزائرية جديدة للملابس العصرية المريحة (الكاجوال)، تسعى لإحداث ثورة في عالم الأزياء؛ فهي تستلهم جوهرها من التراث العريق وتمتزج برؤية معاصرة، لتعيد إحياء روح الماضي في عالم اليوم من خلال أفكار مبتكرة وتصاميم مميزة. تخاطب علامتنا التجارية مجتمعاً محدداً يشاركنا قيمنا وإبداعنا وطموحاتنا.",
-        about_why_title: "لماذا تختار ICOSIUM؟",
+about_history_text: "في عام 140 قبل الميلاد، أسس الفينيقيون مدينة إيكوسيم (Ikosim) في شمال أفريقيا. ومنذ ذلك الحين، تعاقبت العصور وتغير الناس وتبدلت حتى ملامح المكان، إلا أن روح المكان ظلت حاضرة. تُعد إيكوسيوم (ICOSIUM) علامة تجارية جزائرية جديدة للملابس العصرية المريحة (الكاجوال)، تسعى لإحداث ثورة في عالم الأزياء؛ فهي تستلهم جوهرها من التراث العريق وتمتزج برؤية معاصرة، لتعيد إحياء روح الماضي في عالم اليوم من خلال أفكار مبتكرة وتصاميم مميزة. تخاطب علامتنا التجارية مجتمعاً محدداً يشاركنا قيمنا وإبداعنا وطموحاتنا.",
+       about_why_title: "لماذا تختار ICOSIUM؟",
         about_why_text: "لأن ما ترتديه يجب أن يحمل معنى. في ICOSIUM، كل قطعة تحكي قصة أرض وثقافة وجيل لا يخشى التميز.",
-        reviews_title: "آراء الزبائن", btn_write_review: "أكتب رأيك", review_form_title: "شاركنا تجربتك",
-        contact_title: "تواصل معنا", contact_message_title: "راسلنا مباشرة", contact_send: "إرسال", contact_connect_title: "ابقَ على تواصل",
-        cart_title: "السلة", cart_total: "الإجمالي", checkout_title: "إتمام الطلب",
-        form_name: "الاسم الكامل:", form_city: "المدينة:", form_review: "تقييمك:", form_phone: "الهاتف:", form_address: "العنوان:", delivery_fee: "التوصيل:", form_confirm: "تأكيد الطلب",
-        btn_details: "التفاصيل", btn_add_cart: "إضافة إلى السلة", btn_soon: "قريباً",
-        cs_title: "قريباً في المتجر", cs_desc: "هذا المنتج قيد التجهيز وسيكون متاحاً للطلب قريباً.",
-        modal_delivery: "توصيل 48 ساعة", modal_return: "إرجاع 7 أيام", modal_secure: "دفع آمن",
+        reviews_title: "آراء الزبائن", btn_write_review: "اكتب رأيك", review_form_title: "شاركنا تجربتك",
+        contact_title: "اتصل بنا", contact_message_title: "راسلنا مباشرة", contact_send: "إرسال", contact_connect: "ابقَ على تواصل",
+        cart_title: "سلتك", cart_total: "الإجمالي", checkout_title: "إتمام الطلب",
+        form_name: "الاسم:", form_city: "المدينة:", form_review: "الرأي:", form_phone: "الهاتف:", form_address: "العنوان:", delivery_fee: "التوصيل:", form_confirm: "تأكيد الطلب",
+        profile_login: "تسجيل الدخول", profile_soon: "قريباً...",
+        btn_details: "التفاصيل", btn_add_cart: "أضف إلى السلة", btn_soon: "قريباً",
+        cs_title: "قريباً في المتجر", cs_desc: "هذا المنتج غير متوفر للبيع حالياً.",
+        modal_delivery: "توصيل 48 ساعة", modal_secure: "دفع آمن",
         alert_color: "يرجى اختيار اللون", alert_size: "يرجى اختيار المقاس", alert_rating: "يرجى تقييم المنتج باختيار النجوم", alert_added: "تمت الإضافة للسلة بنجاح!", alert_order_success: "تم إرسال طلبك بنجاح! شكراً لثقتكم.", alert_review_success: "شكراً لمشاركتنا رأيك!",
         colors: "الألوان:", sizes: "المقاسات:", quantity: "الكمية", search_placeholder: "ابحث عن منتج...",
         footer_rights: "جميع الحقوق محفوظة."
@@ -32,20 +33,21 @@ const translations = {
     fr: {
         out_of_stock: "Rupture de stock",
         nav_home: "Accueil", nav_category: "Catégorie", nav_promos: "Promotions", nav_reviews: "Avis", nav_about: "À Propos", nav_contact: "Contact",
-        trust_delivery: "Livraison rapide", trust_secure: "Paiement sécurisé", trust_return: "Retour 7 jours", trust_support: "Support client 7j/7",
-        hero_badge: "✦ Nouvelle Collection 2026", hero_title: "Découvrez notre nouvelle collection", hero_subtitle: "Design moderne, qualité supérieure", hero_btn_buy: "Acheter maintenant", hero_btn_about: "Notre histoire →",
+        trust_delivery: "Livraison rapide", trust_payment: "Paiement à la livraison", trust_return: "Retour 7 jours", trust_support: "Support client 7j/7",
+        hero_badge: "✦ Nouvelle Collection 2026", hero_title: "Découvrez notre nouvelle collection", hero_subtitle: "Design moderne, qualité supérieure", hero_buy: "Acheter maintenant", hero_story: "Notre histoire →",
         products_title: "Nos Produits", category_all: "Tout",
         about_title: "À propos d'ICOSIUM",
-        about_history_text: "En 140 av. J.-C., les Phéniciens fondèrent Ikosim en Afrique du Nord. Depuis, le temps a passé, les gens ont changé et le paysage lui-même s'est transformé ; pourtant, l'esprit du lieu demeure. ICOSIUM est une nouvelle marque algérienne de prêt-à-porter décontracté qui aspire à révolutionner l'univers de l'habillement. Puisant son inspiration dans un héritage ancestral tout en s'inscrivant dans une vision moderne, elle insuffle cet esprit d'autrefois au monde d'aujourd'hui grâce à des idées originales et des créations uniques. Notre marque s'adresse à une communauté bien précise qui partage nos valeurs, notre créativité et nos ambitions.",
-        about_why_title: "Pourquoi choisir ICOSIUM",
+about_history_text: "En 140 av. J.-C., les Phéniciens fondèrent Ikosim en Afrique du Nord. Depuis, le temps a passé, les gens ont changé et le paysage lui-même s'est transformé ; pourtant, l'esprit du lieu demeure. ICOSIUM est une nouvelle marque algérienne de prêt-à-porter décontracté qui aspire à révolutionner l'univers de l'habillement. Puisant son inspiration dans un héritage ancestral tout en s'inscrivant dans une vision moderne, elle insuffle cet esprit d'autrefois au monde d'aujourd'hui grâce à des idées originales et des créations uniques. Notre marque s'adresse à une communauté bien précise qui partage nos valeurs, notre créativité et nos ambitions.",
+       about_why_title: "Pourquoi choisir ICOSIUM",
         about_why_text: "Parce que ce que vous portez doit avoir du sens. Chez ICOSIUM, chaque pièce raconte une histoire — celle d'une terre, d'une culture et d'une génération qui n'a pas peur de se démarquer.",
         reviews_title: "Avis Clients", btn_write_review: "Écrire un avis", review_form_title: "Partagez votre avis",
-        contact_title: "Contact", contact_message_title: "Contactez-nous directement", contact_send: "Envoyer", contact_connect_title: "Restons Connectés",
+        contact_title: "Contact", contact_message_title: "Contactez-nous directement", contact_send: "Envoyer", contact_connect: "Restons Connectés",
         cart_title: "Votre Panier", cart_total: "Total", checkout_title: "Commander",
-        form_name: "Nom Complet:", form_city: "Ville:", form_review: "Avis:", form_phone: "Tél:", form_address: "Adresse:", delivery_fee: "Livraison:", form_confirm: "Confirmer la commande",
+        form_name: "Nom:", form_city: "Ville:", form_review: "Avis:", form_phone: "Tél:", form_address: "Adresse:", delivery_fee: "Livraison:", form_confirm: "Confirmer la commande",
+        profile_login: "Connexion", profile_soon: "Prochainement...",
         btn_details: "Détails", btn_add_cart: "Ajouter au panier", btn_soon: "Bientôt",
         cs_title: "Bientôt Disponible", cs_desc: "Ce produit n'est pas encore disponible à la vente.",
-        modal_delivery: "Livraison 48h", modal_return: "Retour 7j", modal_secure: "Sécurisé",
+        modal_delivery: "Livraison 48h", modal_secure: "Sécurisé",
         alert_color: "Veuillez choisir une couleur", alert_size: "Veuillez choisir une taille", alert_rating: "Veuillez attribuer une note avec les étoiles", alert_added: "Ajouté au panier !", alert_order_success: "Commande envoyée avec succès !", alert_review_success: "Merci pour votre avis !",
         colors: "Couleurs:", sizes: "Tailles:", quantity: "Quantité", search_placeholder: "Rechercher...",
         footer_rights: "Tous droits réservés."
@@ -53,20 +55,21 @@ const translations = {
     en: {
         out_of_stock: "Out of Stock",
         nav_home: "Home", nav_category: "Category", nav_promos: "Promotions", nav_reviews: "Reviews", nav_about: "About", nav_contact: "Contact",
-        trust_delivery: "Fast delivery", trust_secure: "Secure payment", trust_return: "7-day return", trust_support: "24/7 support",
-        hero_badge: "✦ New Collection 2026", hero_title: "Discover our new collection", hero_subtitle: "Modern design, premium quality", hero_btn_buy: "Shop now", hero_btn_about: "Our story →",
+        trust_delivery: "Fast delivery", trust_payment: "Cash on delivery", trust_return: "7-day return", trust_support: "24/7 customer support",
+        hero_badge: "✦ New Collection 2026", hero_title: "Discover our new collection", hero_subtitle: "Modern design, premium quality", hero_buy: "Shop now", hero_story: "Our story →",
         products_title: "Our Products", category_all: "All",
         about_title: "About ICOSIUM",
-        about_history_text: "In 140 B.C.E., the Phoenicians founded Ikosim in North Africa. Since then, time has passed, people have changed, and even the landscape has transformed — yet the spirit of the place remains.     ICOSIUM is a new Algerian casual-wear brand that seeks to revolutionize the world of clothing. Inspired by ancient heritage and infused with modern vision, it brings an old spirit into today’s world through original ideas and distinctive designs. Our brand speaks to a specific community that shares our values, creativity, and ambitions.",
-        about_why_title: "Why Choose ICOSIUM",
+about_history_text: "In 140 B.C.E., the Phoenicians founded Ikosim in North Africa. Since then, time has passed, people have changed, and even the landscape has transformed — yet the spirit of the place remains. ICOSIUM is a new Algerian casual-wear brand that seeks to revolutionize the world of clothing. Inspired by ancient heritage and infused with modern vision, it brings an old spirit into today’s world through original ideas and distinctive designs. Our brand speaks to a specific community that shares our values, creativity, and ambitions.",
+   about_why_title: "Why Choose ICOSIUM",
         about_why_text: "Because what you wear should mean something. At ICOSIUM, every piece tells a story — built for those who value identity over trend.",
-        reviews_title: "Customer Reviews", btn_write_review: "Write Review", review_form_title: "Share your experience",
-        contact_title: "Contact", contact_message_title: "Contact us directly", contact_send: "Send", contact_connect_title: "Stay Connected",
+        reviews_title: "Customer Reviews", btn_write_review: "Write a review", review_form_title: "Share your experience",
+        contact_title: "Contact", contact_message_title: "Contact us directly", contact_send: "Send", contact_connect: "Stay Connected",
         cart_title: "Your Cart", cart_total: "Total", checkout_title: "Checkout",
-        form_name: "Full Name:", form_city: "City:", form_review: "Review:", form_phone: "Phone:", form_address: "Address:", delivery_fee: "Delivery:", form_confirm: "Confirm Order",
+        form_name: "Name:", form_city: "City:", form_review: "Review:", form_phone: "Phone:", form_address: "Address:", delivery_fee: "Delivery:", form_confirm: "Confirm Order",
+        profile_login: "Login", profile_soon: "Coming soon...",
         btn_details: "Details", btn_add_cart: "Add to cart", btn_soon: "Coming Soon",
         cs_title: "Coming Soon", cs_desc: "This product is not yet available for sale.",
-        modal_delivery: "48h Delivery", modal_return: "7-day Return", modal_secure: "Secured",
+        modal_delivery: "48h Delivery", modal_secure: "Secured",
         alert_color: "Please select a color", alert_size: "Please select a size", alert_rating: "Please select a star rating", alert_added: "Added to cart!", alert_order_success: "Order placed successfully!", alert_review_success: "Thank you for your review!",
         colors: "Colors:", sizes: "Sizes:", quantity: "Quantity", search_placeholder: "Search...",
         footer_rights: "All rights reserved."
@@ -268,7 +271,7 @@ function renderProducts(products) {
             <img src="${p.image_url || 'images/logo3.png'}" class="${isComingSoon ? 'is-coming-soon-blur' : ''}" alt="${p.name}">
             <div class="product-details">
                 <h3 class="product-name">${p.name}</h3>
-                <p class="product-price">${isComingSoon ? (t.cs_title || 'Bientôt') : p.price + ' DZD'}</p>
+                <p class="product-price">${isComingSoon ? (t.btn_soon || 'Bientôt') : p.price + ' DZD'}</p>
                 <div class="product-actions">
                     <button class="details-btn">${t.btn_details}</button>
                     <button class="add-to-cart-btn" ${isOutOfStock || isComingSoon ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
@@ -640,13 +643,15 @@ document.addEventListener('DOMContentLoaded', () => {
         searchBtn?.addEventListener('click', doSearch);
     }
 
-    // 💡 تفعيل زر آراء الزبائن (فتح المودال وتقييم النجوم وإرسال التقييم) 💡
+    // 💡 تفعيل زر آراء الزبائن بشكل مضمون وقوي 💡
     const openReviewBtn = document.getElementById('open-review-modal-btn');
     const reviewModal = document.getElementById('review-modal');
     if (openReviewBtn && reviewModal) {
-        openReviewBtn.addEventListener('click', () => {
+        openReviewBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             reviewModal.style.display = 'block';
-        });
+        };
     }
 
     // تقييم النجوم
@@ -697,8 +702,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // إغلاق النوافذ
-    document.querySelectorAll('.close-btn').forEach(b => b.addEventListener('click', e => e.target.closest('.modal').style.display = 'none'));
-    window.onclick = e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; };
+    document.querySelectorAll('.close-btn').forEach(b => {
+        b.addEventListener('click', (e) => {
+            const m = e.target.closest('.modal');
+            if (m) m.style.display = 'none';
+        });
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            e.target.style.display = 'none';
+        }
+    });
 
     // القائمة الجانبية في الهاتف
     const nav = document.getElementById('main-nav');
