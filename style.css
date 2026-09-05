@@ -1142,49 +1142,51 @@ html[dir="rtl"] .cbn-sticker-side {
     user-select: none;
 }
 
-/* شريط مربعات الصور المصغرة */
+/* شريط الصور المصغرة */
 .thumbnails-strip {
     display: flex;
     gap: 12px;
-    margin-top: 14px;
+    margin-top: 15px;
     overflow-x: auto;
-    padding: 4px 2px 8px;
+    padding: 6px 4px;
+    align-items: center;
 }
 
 .thumbnails-strip::-webkit-scrollbar {
-    height: 5px;
+    height: 4px;
 }
 
 .thumbnails-strip::-webkit-scrollbar-thumb {
-    background: var(--color-border);
+    background: rgba(0, 0, 0, 0.15);
     border-radius: 4px;
 }
 
-/* شكل مربع الصورة المصغرة الواضح والقابل للنقر */
+/* تصميم المربعات مثل الصورة المرفقة */
 .thumb-item {
-    width: 70px;
-    height: 70px;
-    border-radius: 10px;
-    object-fit: cover;
+    width: 68px;
+    height: 68px;
+    border-radius: 12px;           /* زوايا مستديرة مثل الصورة */
+    object-fit: cover;             /* ملء المربع بدون تشويه */
     cursor: pointer;
-    border: 2px solid var(--color-border);
-    background: var(--color-bg-card);
-    transition: all 0.2s ease;
+    background: #ffffff;           /* خلفية بيضاء تبرز تفاصيل المنتج */
+    border: 2px solid transparent; /* إطار افتراضي مخفي */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* ظل ناعم حول كل مربع */
     flex-shrink: 0;
-    opacity: 0.6;
+    opacity: 0.85;
+    transition: transform 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
 
+/* عند تمرير الفأرة */
 .thumb-item:hover {
-    opacity: 0.9;
-    border-color: var(--color-primary, #00c896);
+    opacity: 1;
     transform: translateY(-2px);
 }
 
+/* المربع النشط / المختار (إطار أخضر بارز تماماً مثل الصورة) */
 .thumb-item.active {
     opacity: 1;
-    border-color: var(--color-primary, #00c896);
-    box-shadow: 0 0 0 2px rgba(0, 200, 150, 0.25);
-    transform: scale(1.04);
+    border: 2.5px solid #00a87e;   /* لون الإطار الأخضر للعلامة */
+    box-shadow: 0 4px 12px rgba(0, 168, 126, 0.2);
 }/* شارة الخصم */
 .modal-discount-tag {
     position: absolute;
