@@ -1119,7 +1119,7 @@ html[dir="rtl"] .cbn-sticker-side {
     border-color: #ff0000;
     box-shadow: 0 4px 15px rgba(255, 0, 0, 0.25);
 }
-/* صندوق صورة المنتج مع خاصية التكبير التفاعلي (Interactive Zoom) */
+/* حاوية الصورة الرئيسية النظيفة (بدون مؤشر التكبير crosshair) */
 .main-image-zoom-box {
     position: relative;
     width: 100%;
@@ -1127,53 +1127,65 @@ html[dir="rtl"] .cbn-sticker-side {
     border-radius: 14px;
     overflow: hidden;
     background: var(--bg3, #111827);
-    cursor: crosshair;
+    cursor: default; /* تم إلغاء المؤشر المتقاطع */
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid var(--color-border);
 }
 
 .main-image-zoom-box img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.15s ease-out;
-    transform-origin: center center;
-    pointer-events: none;
+    display: block;
+    user-select: none;
 }
 
-/* شريط الصور المصغرة */
+/* شريط مربعات الصور المصغرة */
 .thumbnails-strip {
     display: flex;
-    gap: 10px;
-    margin-top: 12px;
+    gap: 12px;
+    margin-top: 14px;
     overflow-x: auto;
-    padding-bottom: 6px;
+    padding: 4px 2px 8px;
 }
 
 .thumbnails-strip::-webkit-scrollbar {
-    height: 4px;
+    height: 5px;
 }
 
+.thumbnails-strip::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+}
+
+/* شكل مربع الصورة المصغرة الواضح والقابل للنقر */
 .thumb-item {
-    width: 65px;
-    height: 65px;
-    border-radius: 8px;
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
     object-fit: cover;
     cursor: pointer;
-    border: 2px solid transparent;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg-card);
     transition: all 0.2s ease;
     flex-shrink: 0;
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
-.thumb-item:hover, .thumb-item.active {
-    opacity: 1;
+.thumb-item:hover {
+    opacity: 0.9;
     border-color: var(--color-primary, #00c896);
     transform: translateY(-2px);
 }
 
-/* شارة الخصم */
+.thumb-item.active {
+    opacity: 1;
+    border-color: var(--color-primary, #00c896);
+    box-shadow: 0 0 0 2px rgba(0, 200, 150, 0.25);
+    transform: scale(1.04);
+}/* شارة الخصم */
 .modal-discount-tag {
     position: absolute;
     top: 12px;
