@@ -304,7 +304,7 @@ function filterProducts(catId) {
     renderProducts(catId === 'all' ? allProducts : allProducts.filter(p => p.category_id == catId));
 }
 
-// ─── نافذة التفاصيل (MODAL) ───
+// ─── نافذة التفاصيل المتطورة (صور متعددة، زوم حر، أسعار مشطوبة) ───
 let countdownInterval = null;
 
 function openDetails(p) {
@@ -360,13 +360,79 @@ function openDetails(p) {
         if (overlay) overlay.style.display = 'none';
     }
 
+    // 1. تجميع وعرض كل الصور (الرئيسية + الإضافية)
     const mainImg = document.getElementById('modal-product-image');
-    if (mainImg) mainImg.src = p.image_url || 'images/logo3.png';
+    const thumbStrip = document.getElementById('modal-thumbnails-strip');
+    thumbStrip.innerHTML = '';
 
+    let gallery = [];
+    if (p.image_url) gallery.push(p.image_url);
+    if (p.extra_images) {
+        let extras = p.extra_images;
+        if (typeof extras === 'string') {
+            try { extras = JSON.parse(extras); } catch (e) { extras = []; }
+        }
+        if (Array.isArray(extras)) {
+            gallery = gallery.concat(extras);
+        }
+    }
+    if (gallery.length === 0) gallery.push('images/logo3.png');
+
+    mainImg.src = gallery[0];
+
+    // رسم الصور المصغرة إذا وجد أكثر من صورة واحدة
+    if (gallery.length > 1) {
+        gallery.forEach((imgSrc, idx) => {
+            const thumb = document.createElement('img');
+            thumb.src = imgSrc;
+            thumb.className = `thumb-item ${idx === 0 ? 'active' : ''}`;
+            thumb.onclick = () => {
+                mainImg.src = imgSrc;
+                thumbStrip.querySelectorAll('.thumb-item').forEach(el => el.classList.remove('active'));
+                thumb.classList.add('active');
+            };
+            thumbStrip.appendChild(thumb);
+        });
+    }
+
+    // 2. نظام التكبير التفاعلي الحر (Zoom Effect)
+    const zoomContainer = document.getElementById('zoom-container');
+    if (zoomContainer) {
+        zoomContainer.onmousemove = (e) => {
+            const rect = zoomContainer.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            mainImg.style.transformOrigin = `${x}% ${y}%`;
+            mainImg.style.transform = 'scale(2)';
+        };
+        zoomContainer.onmouseleave = () => {
+            mainImg.style.transform = 'scale(1)';
+            mainImg.style.transformOrigin = 'center center';
+        };
+    }
+
+    // 3. الأسعار وشارة الخصم
     document.getElementById('modal-product-name').textContent = p.name;
     document.getElementById('modal-product-desc').textContent = p.description || '';
     document.getElementById('modal-product-price').textContent = p.price + ' DZD';
 
+    const oldPriceEl = document.getElementById('modal-product-old-price');
+    const badgeEl = document.getElementById('modal-discount-badge');
+    const comparePrice = parseFloat(p.compare_at_price || p.compare_price);
+
+    if (comparePrice && comparePrice > p.price) {
+        oldPriceEl.textContent = comparePrice + ' DZD';
+        oldPriceEl.style.display = 'inline';
+
+        const discountPct = Math.round(((comparePrice - p.price) / comparePrice) * 100);
+        badgeEl.textContent = `-${discountPct}%`;
+        badgeEl.style.display = 'block';
+    } else {
+        oldPriceEl.style.display = 'none';
+        badgeEl.style.display = 'none';
+    }
+
+    // 4. خيارات المقاسات والألوان والكمية
     const opts = document.getElementById('modal-product-options');
     if (opts) {
         opts.innerHTML = '';
@@ -386,23 +452,23 @@ function openDetails(p) {
 
         let html = '';
         if (availableColors.length > 0) {
-            html += `<div class="modal-opts-group"><label>${t.colors}</label><div class="product-colors" style="display:flex; gap:8px; flex-wrap:wrap;">`
-                + availableColors.map(c => `<span class="color-box" data-val="${c}" style="border:1.5px solid var(--color-border); padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:600;">${c}</span>`).join('')
+            html += `<div class="modal-opts-group"><label style="font-weight:700; display:block; margin-bottom:6px;">${t.colors}</label><div class="product-colors" style="display:flex; gap:8px; flex-wrap:wrap;">`
+                + availableColors.map(c => `<span class="color-box" data-val="${c}" style="border:1.5px solid var(--border, #ccc); padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:600;">${c}</span>`).join('')
                 + '</div></div>';
         }
         if (availableSizes.length > 0) {
-            html += `<div class="modal-opts-group" style="margin-top:12px;"><label>${t.sizes}</label><div class="product-sizes" style="display:flex; gap:8px; flex-wrap:wrap;">`
-                + availableSizes.map(s => `<span class="size-box" data-val="${s}" style="border:1.5px solid var(--color-border); padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:600;">${s}</span>`).join('')
+            html += `<div class="modal-opts-group" style="margin-top:12px;"><label style="font-weight:700; display:block; margin-bottom:6px;">${t.sizes}</label><div class="product-sizes" style="display:flex; gap:8px; flex-wrap:wrap;">`
+                + availableSizes.map(s => `<span class="size-box" data-val="${s}" style="border:1.5px solid var(--border, #ccc); padding:6px 14px; border-radius:8px; cursor:pointer; font-weight:600;">${s}</span>`).join('')
                 + '</div></div>';
         }
 
         html += `
             <div class="modal-opts-group" style="margin-top:14px;">
-                <label>${t.quantity}</label>
+                <label style="font-weight:700; display:block; margin-bottom:6px;">${t.quantity}</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <button type="button" id="qty-minus" style="width:36px; height:36px; border:1px solid var(--color-border); background:var(--color-bg); border-radius:8px; cursor:pointer; font-weight:bold;">-</button>
-                    <input type="number" id="modal-product-qty" value="1" min="1" max="50" style="width:60px; height:36px; text-align:center; border:1px solid var(--color-border); border-radius:8px; background:var(--color-bg); color:var(--color-text); font-weight:bold;">
-                    <button type="button" id="qty-plus" style="width:36px; height:36px; border:1px solid var(--color-border); background:var(--color-bg); border-radius:8px; cursor:pointer; font-weight:bold;">+</button>
+                    <button type="button" id="qty-minus" style="width:36px; height:36px; border:1px solid var(--border, #ccc); background:var(--bg3, #f5f5f5); border-radius:8px; cursor:pointer; font-weight:bold;">-</button>
+                    <input type="number" id="modal-product-qty" value="1" min="1" max="50" style="width:60px; height:36px; text-align:center; border:1px solid var(--border, #ccc); border-radius:8px; background:var(--input-bg, #fff); color:var(--text, #000); font-weight:bold;">
+                    <button type="button" id="qty-plus" style="width:36px; height:36px; border:1px solid var(--border, #ccc); background:var(--bg3, #f5f5f5); border-radius:8px; cursor:pointer; font-weight:bold;">+</button>
                 </div>
             </div>
         `;
@@ -412,14 +478,14 @@ function openDetails(p) {
         let selSize = availableSizes.length > 0 ? null : 'Standard';
 
         opts.querySelectorAll('.color-box').forEach(b => b.addEventListener('click', e => {
-            opts.querySelectorAll('.color-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; x.style.color = 'var(--color-text)'; });
-            e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = '#fff';
+            opts.querySelectorAll('.color-box').forEach(x => { x.style.borderColor = 'var(--border, #ccc)'; x.style.backgroundColor = 'transparent'; x.style.color = 'inherit'; });
+            e.target.style.borderColor = 'var(--color-primary, #00c896)'; e.target.style.backgroundColor = 'var(--color-primary, #00c896)'; e.target.style.color = '#fff';
             selColor = e.target.dataset.val;
         }));
 
         opts.querySelectorAll('.size-box').forEach(b => b.addEventListener('click', e => {
-            opts.querySelectorAll('.size-box').forEach(x => { x.style.borderColor = 'var(--color-border)'; x.style.backgroundColor = 'transparent'; x.style.color = 'var(--color-text)'; });
-            e.target.style.borderColor = 'var(--color-primary)'; e.target.style.backgroundColor = 'var(--color-primary)'; e.target.style.color = '#fff';
+            opts.querySelectorAll('.size-box').forEach(x => { x.style.borderColor = 'var(--border, #ccc)'; x.style.backgroundColor = 'transparent'; x.style.color = 'inherit'; });
+            e.target.style.borderColor = 'var(--color-primary, #00c896)'; e.target.style.backgroundColor = 'var(--color-primary, #00c896)'; e.target.style.color = '#fff';
             selSize = e.target.dataset.val;
         }));
 
