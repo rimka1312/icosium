@@ -198,10 +198,18 @@
 
                 <!-- قسم الصور والتكبير الحر -->
                 <div class="modal-image-container">
-                    <div class="main-image-zoom-box" id="zoom-container">
-                        <img id="modal-product-image" src="" alt="Product Image">
-                        <span id="modal-discount-badge" class="modal-discount-tag" style="display:none;"></span>
-                    </div>
+                <div class="main-image-zoom-box" id="zoom-container">
+    <!-- أسهم التنقل بين الصور -->
+    <button type="button" class="modal-nav-arrow prev-arrow" id="modal-prev-img" aria-label="Précédent">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <button type="button" class="modal-nav-arrow next-arrow" id="modal-next-img" aria-label="Suivant">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+
+    <img id="modal-product-image" src="" alt="Product Image">
+    <span id="modal-discount-badge" class="modal-discount-tag" style="display:none;"></span>
+</div>
                     <!-- شريط مصغرات الصور الإضافية -->
                     <div id="modal-thumbnails-strip" class="thumbnails-strip"></div>
                 </div>
