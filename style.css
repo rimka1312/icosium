@@ -1194,3 +1194,37 @@ html[dir="rtl"] .cbn-sticker-side {
     align-items: center;
     gap: 3px;
 }
+/* أسهم التنقل داخل نافذة المنتج */
+.modal-nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    z-index: 10;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+
+.modal-nav-arrow:hover {
+    background: var(--color-primary, #00c896);
+    color: #ffffff;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.prev-arrow {
+    left: 12px;
+}
+
+.next-arrow {
+    right: 12px;
+}
