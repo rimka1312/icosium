@@ -3199,13 +3199,26 @@ function searchOrders(q) {
 function openOrderModal(o) {
   currentOrderId = o.id;
   const wilayaMap = Object.fromEntries(allWilayas.map(w => [w.id, w.name]));
+  const prodMap = Object.fromEntries(allProducts.map(p => [p.id, p]));
+
+  // استخراج الولاية سواء من wilaya_id أو تلقائياً من بداية العنوان
+  let wilayaDisplay = wilayaMap[o.wilaya_id] || '';
+  if (!wilayaDisplay && o.customer_address) {
+    const parts = o.customer_address.split('-');
+    if (parts.length > 1) {
+      wilayaDisplay = parts[1].trim(); // استخراج اسم الولاية من "16 - Alger - ..."
+    } else {
+      wilayaDisplay = parts[0].trim();
+    }
+  }
+
   document.getElementById('mod-ord-id').textContent = '#' + o.id;
-  document.getElementById('mod-client-name').textContent = o.customer_name;
-  document.getElementById('mod-client-phone').textContent = o.customer_phone;
-  document.getElementById('mod-client-addr').textContent = o.customer_address;
+  document.getElementById('mod-client-name').textContent = o.customer_name || '—';
+  document.getElementById('mod-client-phone').textContent = o.customer_phone || '—';
+  document.getElementById('mod-client-addr').textContent = o.customer_address || '—';
   document.getElementById('mod-total').textContent = fmtPrice(o.total_price);
   document.getElementById('mod-fee').textContent = fmtPrice(o.delivery_fee || 0);
-  document.getElementById('mod-wilaya').textContent = wilayaMap[o.wilaya_id] || '—';
+  document.getElementById('mod-wilaya').textContent = wilayaDisplay || '—';
   document.getElementById('mod-date').textContent = fmtDateTime(o.created_at);
   document.getElementById('mod-status-sel').value = o.status;
   document.getElementById('mod-livreur-sel').value = o.livreur_id || '';
@@ -3215,11 +3228,38 @@ function openOrderModal(o) {
   if (typeof items === 'string') {
     try { items = JSON.parse(items); } catch (e) { items = []; }
   }
+
   const tbl = document.getElementById('mod-items');
   if (tbl) {
     tbl.innerHTML = (Array.isArray(items) && items.length) 
-      ? items.map(i => `<tr><td>${i.qty || 1}× ${i.name}${i.color ? ` <span style="color:var(--text3)">(${i.color})</span>` : ''}</td><td>${fmtPrice(i.price)}</td></tr>`).join('') 
-      : '<tr><td style="color:var(--text3);text-align:center;padding:14px">Aucun article</td></tr>';
+      ? items.map(i => {
+          // جلب صورة المنتج سواء من بيانات السلة أو من جدول المنتجات
+          const matchedProd = prodMap[i.product_id];
+          const imgUrl = i.image_url || matchedProd?.image_url || 'images/logo3.png';
+
+          return `
+            <tr>
+              <td style="padding: 10px 0;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <img src="${imgUrl}" alt="${i.name}" style="width: 46px; height: 46px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0;" onerror="this.src='images/logo3.png'">
+                  <div>
+                    <strong style="display: block; font-size: 0.92rem; color: var(--text);">
+                      ${i.qty || 1}× ${i.name}
+                    </strong>
+                    <div style="display: flex; gap: 6px; margin-top: 4px; font-size: 0.78rem;">
+                      ${i.color && i.color !== 'Standard' ? `<span style="background: var(--bg4); border: 1px solid var(--border); padding: 1px 7px; border-radius: 6px; color: var(--text2);">اللون: <strong>${i.color}</strong></span>` : ''}
+                      ${i.size && i.size !== 'Standard' ? `<span style="background: var(--accent-dim); border: 1px solid rgba(0,200,150,.3); padding: 1px 7px; border-radius: 6px; color: var(--accent);">المقاس: <strong>${i.size}</strong></span>` : ''}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td style="text-align: right; font-weight: 700; color: var(--accent); white-space: nowrap;">
+                ${fmtPrice(i.price)}
+              </td>
+            </tr>
+          `;
+        }).join('') 
+      : '<tr><td colspan="2" style="color:var(--text3);text-align:center;padding:14px">Aucun article</td></tr>';
   }
   openModal('modal-order');
 }
