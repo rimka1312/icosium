@@ -304,7 +304,7 @@ function filterProducts(catId) {
     renderProducts(catId === 'all' ? allProducts : allProducts.filter(p => p.category_id == catId));
 }
 
-// ─── نافذة التفاصيل المتطورة (صور متعددة، زوم حر، أسعار مشطوبة) ───
+// ─── نافذة تفاصيل المنتج (تنقل بالأسهم + مربعات صور قابلة للنقر بدون زوم) ───
 let countdownInterval = null;
 
 function openDetails(p) {
@@ -344,7 +344,7 @@ function openDetails(p) {
 
                 const days = Math.floor(diff / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const mins = Math.floor((diff % (1000 * 60)) / (1000 * 60));
                 const secs = Math.floor((diff % (1000 * 60)) / 1000);
 
                 countdownEl.textContent = `${days}j ${hours}h ${mins}m ${secs}s`;
@@ -360,7 +360,7 @@ function openDetails(p) {
         if (overlay) overlay.style.display = 'none';
     }
 
-  // 1. تجميع وعرض الصور مع تفعيل الأسهم
+    // 1. تجميع الصور الرئيسية والإضافية
     const mainImg = document.getElementById('modal-product-image');
     const thumbStrip = document.getElementById('modal-thumbnails-strip');
     const prevBtn = document.getElementById('modal-prev-img');
@@ -382,11 +382,11 @@ function openDetails(p) {
 
     let currentImgIndex = 0;
 
+    // دالة تبديل الصورة وتحديث المربعات النشطة
     const updateActiveImage = (index) => {
         currentImgIndex = (index + gallery.length) % gallery.length;
         mainImg.src = gallery[currentImgIndex];
         
-        // تحديث إطار المصغرات
         thumbStrip.querySelectorAll('.thumb-item').forEach((el, idx) => {
             el.classList.toggle('active', idx === currentImgIndex);
         });
@@ -394,7 +394,7 @@ function openDetails(p) {
 
     updateActiveImage(0);
 
-    // إظهار أو إخفاء الأسهم حسب عدد الصور
+    // تفعيل الأسهم ومربعات الصور عند وجود أكثر من صورة
     if (gallery.length > 1) {
         if (prevBtn) {
             prevBtn.style.display = 'flex';
@@ -411,37 +411,28 @@ function openDetails(p) {
             };
         }
 
-        // رسم المصغرات
+        // رسم مربعات الصور مع حدث النقر المباشر
         gallery.forEach((imgSrc, idx) => {
             const thumb = document.createElement('img');
             thumb.src = imgSrc;
             thumb.className = `thumb-item ${idx === 0 ? 'active' : ''}`;
-            thumb.onclick = () => updateActiveImage(idx);
+            thumb.title = `Photo ${idx + 1}`;
+            thumb.onclick = (e) => {
+                e.stopPropagation();
+                updateActiveImage(idx);
+            };
             thumbStrip.appendChild(thumb);
         });
+        thumbStrip.style.display = 'flex';
     } else {
         if (prevBtn) prevBtn.style.display = 'none';
         if (nextBtn) nextBtn.style.display = 'none';
+        thumbStrip.style.display = 'none';
     }
 
-    // 2. نظام التكبير التفاعلي الحر (Zoom Effect) مع تجنب تأثير الأسهم
-    const zoomContainer = document.getElementById('zoom-container');
-    if (zoomContainer) {
-        zoomContainer.onmousemove = (e) => {
-            if (e.target.closest('.modal-nav-arrow')) return;
-            const rect = zoomContainer.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            mainImg.style.transformOrigin = `${x}% ${y}%`;
-            mainImg.style.transform = 'scale(2)';
-        };
-        zoomContainer.onmouseleave = () => {
-            mainImg.style.transform = 'scale(1)';
-            mainImg.style.transformOrigin = 'center center';
-        };
-    }
+    // تم حذف مستمعات أحداث الـ Zoom بالماوس (لا مزيد من التكبير المزعج)
 
-    // 3. الأسعار وشارة الخصم
+    // 2. الأسعار والخصومات
     document.getElementById('modal-product-name').textContent = p.name;
     document.getElementById('modal-product-desc').textContent = p.description || '';
     document.getElementById('modal-product-price').textContent = p.price + ' DZD';
@@ -462,7 +453,7 @@ function openDetails(p) {
         badgeEl.style.display = 'none';
     }
 
-    // 4. خيارات المقاسات والألوان والكمية
+    // 3. خيارات الألوان والمقاسات والكمية
     const opts = document.getElementById('modal-product-options');
     if (opts) {
         opts.innerHTML = '';
