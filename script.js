@@ -360,9 +360,11 @@ function openDetails(p) {
         if (overlay) overlay.style.display = 'none';
     }
 
-    // 1. تجميع وعرض كل الصور (الرئيسية + الإضافية)
+  // 1. تجميع وعرض الصور مع تفعيل الأسهم
     const mainImg = document.getElementById('modal-product-image');
     const thumbStrip = document.getElementById('modal-thumbnails-strip');
+    const prevBtn = document.getElementById('modal-prev-img');
+    const nextBtn = document.getElementById('modal-next-img');
     thumbStrip.innerHTML = '';
 
     let gallery = [];
@@ -378,27 +380,55 @@ function openDetails(p) {
     }
     if (gallery.length === 0) gallery.push('images/logo3.png');
 
-    mainImg.src = gallery[0];
+    let currentImgIndex = 0;
 
-    // رسم الصور المصغرة إذا وجد أكثر من صورة واحدة
+    const updateActiveImage = (index) => {
+        currentImgIndex = (index + gallery.length) % gallery.length;
+        mainImg.src = gallery[currentImgIndex];
+        
+        // تحديث إطار المصغرات
+        thumbStrip.querySelectorAll('.thumb-item').forEach((el, idx) => {
+            el.classList.toggle('active', idx === currentImgIndex);
+        });
+    };
+
+    updateActiveImage(0);
+
+    // إظهار أو إخفاء الأسهم حسب عدد الصور
     if (gallery.length > 1) {
+        if (prevBtn) {
+            prevBtn.style.display = 'flex';
+            prevBtn.onclick = (e) => {
+                e.stopPropagation();
+                updateActiveImage(currentImgIndex - 1);
+            };
+        }
+        if (nextBtn) {
+            nextBtn.style.display = 'flex';
+            nextBtn.onclick = (e) => {
+                e.stopPropagation();
+                updateActiveImage(currentImgIndex + 1);
+            };
+        }
+
+        // رسم المصغرات
         gallery.forEach((imgSrc, idx) => {
             const thumb = document.createElement('img');
             thumb.src = imgSrc;
             thumb.className = `thumb-item ${idx === 0 ? 'active' : ''}`;
-            thumb.onclick = () => {
-                mainImg.src = imgSrc;
-                thumbStrip.querySelectorAll('.thumb-item').forEach(el => el.classList.remove('active'));
-                thumb.classList.add('active');
-            };
+            thumb.onclick = () => updateActiveImage(idx);
             thumbStrip.appendChild(thumb);
         });
+    } else {
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
     }
 
-    // 2. نظام التكبير التفاعلي الحر (Zoom Effect)
+    // 2. نظام التكبير التفاعلي الحر (Zoom Effect) مع تجنب تأثير الأسهم
     const zoomContainer = document.getElementById('zoom-container');
     if (zoomContainer) {
         zoomContainer.onmousemove = (e) => {
+            if (e.target.closest('.modal-nav-arrow')) return;
             const rect = zoomContainer.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width) * 100;
             const y = ((e.clientY - rect.top) / rect.height) * 100;
